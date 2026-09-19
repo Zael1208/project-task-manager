@@ -79,3 +79,23 @@ independiente, sin dependencias de otros productos.
 - La suite de pruebas se trasladó intacta: 4 archivos, 18 pruebas.
 - **Pendiente de decisión**: la cabecera de la interfaz todavía muestra el nombre
   del producto de origen. Véase TM-R10 en `docs/known-risks.md`.
+
+### Limitaciones conocidas de esta entrega
+
+Se registran aquí porque afectan al uso, no porque sean defectos de la
+extracción. El detalle está en [`docs/known-risks.md`](docs/known-risks.md).
+
+- **Los diálogos no se cierran con Escape ni gestionan el foco** (TM-R11). Los
+  menús sí se cierran con Escape y el árbol de tareas tiene navegación por
+  teclado completa, pero el alta de tarea, el gestor de etiquetas y el selector
+  de etiquetas no. Afecta a quien navega con teclado.
+- **El servidor no tiene pruebas automatizadas** (TM-R8). Su verificación es
+  manual.
+- **La prioridad no está validada**: `tk` acepta valores de 4 y superiores, y la
+  interfaz solo representa de 0 a 3, así que se muestran como «Sin prioridad»
+  (RX-2). Pendiente de decisión.
+- **Al reabrir una tarea**, el motivo de cierre conserva su valor anterior y una
+  tarea abierta puede mostrar el motivo `done` (RX-3). Pendiente de decisión.
+- **El renombrado de etiquetas en cascada no es transaccional** (TM-R9): si falla
+  a mitad, se revierte, y las tareas que no se pudieron restaurar se indican en
+  el mensaje de error.

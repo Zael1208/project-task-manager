@@ -3,10 +3,10 @@
 | Campo | Valor |
 |---|---|
 | Producto | Gestor de tareas local (nombre de trabajo: **Task Manager**) |
-| Versión del documento | 1.4 |
+| Versión del documento | 1.5 |
 | Fecha | 19 de septiembre de 2026 |
 | Autor | Alfredo González Portero |
-| Estado | F1 a F7 y F9 ejecutadas y verificadas: hitos H1 y H2 alcanzados. Queda F8 (validación manual de paridad). |
+| Estado | F1 a F9 ejecutadas. Hitos H1 y H2 alcanzados y commit inicial creado. El recorrido funcional en navegador es correcto. Quedan decisiones abiertas (QA-2, QA-3, QA-5) y deuda registrada en `docs/known-risks.md`. |
 | Repositorio destino | `C:\PROJECT-TASK-MANAGER` |
 | Origen del código | `C:\PROJECT-CHAT-VOICE-AGENT` (`tk/`, `src/task-manager/`, `src/shared/tasks/`, `public/`, `tests/task-manager/`, `server.js`) |
 
@@ -531,7 +531,7 @@ Orden pensado para poder verificar en cada paso.
 | **F5. Pipeline** | ~~Traer los scripts de esbuild y Vitest; copiar `tests/task-manager/`.~~ **Hecho.** | Verificado: `npm run build` reproduce `app-vue.js` y `app-vue.css` con **hash idéntico** a los artefactos del origen (reproducibilidad byte a byte). `vitest run` pasa 4 archivos y 18 pruebas. |
 | **F6. Servidor** | ~~Extraer de `server.js` los 19 handlers, `runTk` / `runTkText`, `listTasksMerged`, `sendJson` / `readJson`, el servido de estáticos y la guarda de path traversal.~~ **Hecho.** Repartido en `server/index.js` (enrutado, estáticos), `tk.js` (frontera con el CLI), `tasks.js` (14 endpoints de tareas), `tags.js` (5 de etiquetas) y `http.js`. | Verificado: 19 endpoints ejercitados uno a uno contra datos reales. |
 | **F7. Etiquetas** | ~~Sustituir la dependencia de `chatvoiceagent.db` por `data/task-manager.db` con `node:sqlite`.~~ **Hecho.** | Verificado: CRUD completo, renombrado en cascada propagado a las tareas, borrado con retirada, y validaciones 400/409/404. |
-| **F8. Paridad** | Recorrer la matriz de validación de la sección 17. | Acta de validación con fecha y resultado. |
+| **F8. Paridad** | ~~Recorrer la matriz de validación de la sección 17.~~ **Hecho en su parte funcional.** Verificado por Alfredo en navegador el 19/09/2026: el recorrido funcional es correcto. La comprobación estática posterior ha encontrado tres carencias de accesibilidad en los diálogos, registradas como **TM-R11** en `docs/known-risks.md`. | Acta: recorrido funcional correcto. Quedan sin verificar de forma individualizada las anchuras 1440/1180/720/390 y el detalle de accesibilidad; véase TM-R11. |
 | **F9. Documentación** | ~~Adaptar `architecture.md`, `contracts.md`, `operations.md`, `known-risks.md`.~~ **Hecho.** Movidos a `docs/` y reescritos para el proyecto autónomo. `handoff.md` pasa a `docs/development.md`: el estado vivo se registra en el PRD y el CHANGELOG. Añadidos `CHANGELOG.md` y el contrato de flujo de Git. | Verificado: ninguna referencia al anfitrión salvo las tres registradas en CA-17; `src/task-manager/docs/` ya no existe. |
 
 ### 14.1 Decisión sobre los datos de tareas — RESUELTA
@@ -659,6 +659,17 @@ la extracción** (NO-7), pero deben seguir registrados y con su prueba de cierre
 | TM-R5 | Cualquier respuesta 404 con JSON inválido se interpreta como capacidad deshabilitada. | Problema de ruta o proxy enmascarado | Media |
 | TM-R6 | Las acciones desconocidas del inspector se ignoran: el `switch` no tiene rama `default`. | Control que no responde, difícil de diagnosticar | Baja |
 | TM-R7 | El diccionario `busy` conserva claves con valor `false`. | Crecimiento leve de memoria | Baja |
+
+**El registro vivo de riesgos está en [`docs/known-risks.md`](docs/known-risks.md)**,
+que es donde se añaden y se cierran. Además de los siete heredados, contiene
+cuatro surgidos durante la extracción y su desarrollo:
+
+| ID | Riesgo | Prioridad |
+|---|---|---|
+| TM-R8 | El servidor no tiene pruebas automatizadas | Media |
+| TM-R9 | El renombrado de etiquetas en cascada no es transaccional | Media |
+| TM-R10 | La marca visible sigue siendo la del producto de origen | Media |
+| TM-R11 | Los diálogos no se cierran con Escape ni gestionan el foco | Media |
 
 ### 16.2 Riesgos nuevos de la extracción
 

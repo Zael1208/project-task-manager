@@ -80,6 +80,13 @@ las 18 pruebas unitarias sigan pasando.
 en [operations.md](operations.md). Esa matriz es un criterio de recorrido, no
 evidencia persistida de que todos los casos se hayan ejecutado.
 
+**Estado parcial:** el 19/09/2026 Alfredo recorrió la aplicación en navegador y
+el comportamiento funcional resultó correcto. Eso cubre el camino visual
+principal, pero no sustituye a una prueba automatizada ni demuestra que se
+hayan revisado de forma individualizada las cuatro anchuras de referencia ni el
+detalle de accesibilidad. La inspección estática posterior encontró las
+carencias de TM-R11.
+
 **Resolución recomendada:** priorizar pruebas del sobre `action`, los cinco
 `v-model` del inspector y un recorrido de navegador desktop/móvil.
 
@@ -157,6 +164,42 @@ reproducibilidad byte a byte del build durante la extracción.
 [PRD](../PRD.md)), cambiarlo de una vez, regenerar el artefacto y registrar la
 nueva línea base de hashes.
 
+### TM-R11: los diálogos no se cierran con Escape ni gestionan el foco
+
+**Ubicación:** [`components/new-task-dialog.js`](../src/task-manager/components/new-task-dialog.js),
+[`components/tag-manager-drawer.js`](../src/task-manager/components/tag-manager-drawer.js)
+y [`state/ui.js`](../src/task-manager/state/ui.js), `handleEscape()`.
+
+Tres carencias confirmadas por inspección del código, no por deducción:
+
+1. **Escape no cierra los diálogos principales.** `handleEscape()` solo cierra
+   los menús (lista, tarea e inspector). `new-task-dialog.js` y
+   `tag-manager-drawer.js` no tienen ningún manejador de teclado: cero
+   coincidencias de `keydown`, `Escape` o `focus()`. El único diálogo que sí se
+   cierra con Escape es el selector de etiquetas, que registra su propio
+   listener.
+2. **No hay gestión de foco.** Los tres diálogos declaran `aria-modal="true"`,
+   pero nada mueve el foco al abrirse, lo mantiene dentro ni lo devuelve al
+   cerrarse. El único `tabindex` del módulo está en `task-row.js`.
+3. **La tarjeta de confirmación del gestor de etiquetas no tiene nombre
+   accesible:** declara `role="dialog" aria-modal="true"` sin `aria-label` ni
+   `aria-labelledby`.
+
+**Impacto:** quien navega con teclado puede quedar con el foco detrás del
+diálogo, y `aria-modal="true"` promete al lector de pantalla un comportamiento
+que el código no aplica. No rompe el uso con ratón.
+
+**Mitigación actual:** los diálogos tienen botón de cierre visible y nombre
+accesible (salvo la tarjeta de confirmación). El árbol de tareas sí tiene
+soporte de teclado completo: `role="tree"` y `role="treeitem"`, `tabindex="0"`,
+selección con Intro y Espacio, y el expansor es un `<button>` real con
+`aria-expanded` y `aria-label`. Los avisos van a una región
+`aria-live="polite"`.
+
+**Resolución recomendada:** añadir cierre por Escape y gestión de foco (entrar,
+atrapar y devolver) en los tres diálogos, poner nombre accesible a la tarjeta de
+confirmación, y cubrirlo con una prueba de navegador.
+
 ## Prioridad baja
 
 ### TM-R6: acciones desconocidas del inspector se ignoran
@@ -222,3 +265,4 @@ problema real; no es prioritario frente a los riesgos de concurrencia.
 | TM-R8 | Integración de servidor con base desechable |
 | TM-R9 | Fallo simulado a mitad del renombrado en cascada |
 | TM-R10 | Recorrido visual que compruebe la marca definitiva |
+| TM-R11 | Diálogo abierto: Escape lo cierra y el foco vuelve al control de origen |
