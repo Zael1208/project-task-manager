@@ -10,6 +10,7 @@ Sustituye al antiguo documento de relevo: el estado vivo está ahora en
 PRD.md                        Requisitos, alcance, plan y estado de ejecución
 CHANGELOG.md                  Cambios relevantes, en formato Keep a Changelog
 CONTRATO_FLUJO_GIT_VERSIONADO.md   Flujo de ramas, commits y versionado
+jsconfig.json                 Alcance del proyecto para el servidor de lenguaje
 README.md                     Punto de entrada: comandos, configuración, estructura
 server/                       Servidor Node: API y ficheros estáticos
   index.js                      Arranque, enrutado y estáticos
@@ -120,6 +121,12 @@ ni el CSS.
   recarga el estado confirmado.
 - **Pruebe sobre copias.** No hay comando de borrado en `tk`: una tarea de prueba
   creada contra los datos reales se queda ahí.
+- **Navegación asistida**: `jsconfig.json` delimita el proyecto a `src/`,
+  `server/` y `tests/`, de modo que el servidor de lenguaje encuentra referencias
+  en todo el repositorio y no solo en los ficheros abiertos. `module: esnext` con
+  `moduleResolution: bundler` responden a que `src/` y `tests/` son ESM; los
+  `require` de `server/` se resuelven igual. `checkJs` está desactivado a
+  propósito: el fichero da alcance, no comprueba tipos.
 
 ## Flujo de trabajo con Git
 

@@ -5,6 +5,15 @@ recomendaciones de *Keep a Changelog* y el versionado es semántico.
 
 Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PATCH`.
 
+## [Sin publicar]
+
+### Añadido
+
+- **Delimitación del proyecto para herramientas** (`jsconfig.json`): fija el
+  alcance en `src/`, `server/` y `tests/` para que el servidor de lenguaje
+  resuelva referencias en todo el repositorio y no solo en los ficheros abiertos.
+  No interviene en la ejecución, en el build ni en las pruebas.
+
 ## [0.1.0] - 2026-09-19
 
 Primera entrega funcional: el gestor de tareas extraído a un proyecto
