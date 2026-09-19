@@ -3,10 +3,10 @@
 | Campo | Valor |
 |---|---|
 | Producto | Gestor de tareas local (nombre de trabajo: **Task Manager**) |
-| Versión del documento | 2.1 |
+| Versión del documento | 2.2 |
 | Fecha | 19 de septiembre de 2026 |
 | Autor | Alfredo González Portero |
-| Estado | Proyecto entregado y **multiplataforma**: funciona en Windows y en WSL/Linux con el mismo repositorio. Extracción completa (F1 a F9), cuestiones de producto cerradas (QA-1 a QA-5), seis de los siete riesgos heredados resueltos y la capa de servidor cubierta con pruebas de integración. Queda abierto un único riesgo aceptado, TM-R9, y la cobertura de componentes Vue (TM-R4). |
+| Estado | Proyecto entregado, **multiplataforma** (Windows y WSL) y con el cableado de los componentes cubierto por pruebas. Extracción completa (F1 a F9), cuestiones de producto cerradas (QA-1 a QA-5), seis de los siete riesgos heredados resueltos, servidor con pruebas de integración y componentes montados con jsdom. Queda abierto un único riesgo aceptado, TM-R9, y la verificación en navegador de responsive y anchuras. |
 | Repositorio destino | `C:\PROJECT-TASK-MANAGER` |
 | Origen del código | `C:\PROJECT-CHAT-VOICE-AGENT` (`tk/`, `src/task-manager/`, `src/shared/tasks/`, `public/`, `tests/task-manager/`, `server.js`) |
 
@@ -237,7 +237,7 @@ C:\PROJECT-TASK-MANAGER\
 ├── public/
 │   ├── task-manager/         app-vue.html (a mano) + artefactos generados
 │   └── vendor/               vue.global.dev.js / .prod.js
-├── tests/task-manager/       36 pruebas de frontend (Vitest)
+├── tests/task-manager/       36 pruebas de lógica y 30 de componentes montados
 ├── tests/server/             11 pruebas de integración del servidor
 └── docs/                     architecture, contracts, operations, known-risks
 ```
@@ -264,6 +264,7 @@ C:\PROJECT-TASK-MANAGER\
 | D-16 | En `mutate()`, una recarga superada (`null`) **sí** muestra la confirmación | Resolución de TM-R2. `null` no es un fallo: otra recarga posterior ya ha publicado un estado que incluye este cambio. Se descartó serializar o agrupar recargas por ser más complejo sin aportar nada aquí. El caso `false` sigue siendo un fallo explícito. |
 | D-17 | Se incluyen los binarios de Windows y de Linux | El otro equipo de desarrollo trabaja en WSL, donde `tk.exe` no sirve. `server/tk.js` ya elegía por plataforma, así que bastaba con incorporar el binario de Linux (`x86_64-unknown-linux-musl`, verificado contra el `sha256` que publica el autor) y marcarlo ejecutable en el índice de git. Sin esto, en WSL el gestor arrancaba con la capacidad desactivada. |
 | D-18 | La base de tareas es independiente en cada máquina | No se versiona, así que en WSL arranca vacía. Para ver los datos de Windows desde WSL se apunta `TACKS_DB` a `/mnt/c`, **con una sola instancia a la vez**: SQLite no admite dos escritores simultáneos y serían dos sistemas operativos sobre una carpeta compartida. |
+| D-19 | Se añade **jsdom** como dependencia de desarrollo para probar los componentes | Decidido por Alfredo. Es la única forma de montar Vue en las pruebas, y hasta ahora el cableado de los componentes dependía de revisiones manuales en navegador que nada protegía de una regresión. Es de desarrollo: no viaja al producto, así que RNF-01 sigue cumpliéndose. Las pruebas cargan el **Vue vendorizado**, no una copia desde npm, para probar el runtime que se distribuye. |
 
 ---
 
@@ -376,7 +377,7 @@ Todas verificadas ejecutando `tk.exe` 0.2.4 sobre una base desechable.
 
 | ID | Requisito | Prioridad |
 |---|---|---|
-| RNF-01 | **Cero dependencias de runtime npm.** Solo `devDependencies`: `esbuild`, `vitest`. SQLite vía `node:sqlite`. | M |
+| RNF-01 | **Cero dependencias de runtime npm.** Solo `devDependencies`, fijadas a versiones exactas: `esbuild`, `vitest` y `jsdom`. SQLite vía `node:sqlite`. | M |
 | RNF-02 | Node.js ≥ 22.5 por `node:sqlite`; referencia probada: v24.18.0. | M |
 | RNF-03 | Tiempo de espera máximo de 5 segundos por invocación de `tk`. | M |
 | RNF-04 | Ninguna llamada de red saliente. Producto estrictamente local. | M |
@@ -565,7 +566,7 @@ comportamiento se puede cambiar sin tocar código.
 | Lectura end-to-end | Verificada | Desde `tk/`, `tk.exe --json list -a` devuelve 30 tareas (15 abiertas o en curso, 15 cerradas) |
 | Build del frontend | Verificado | `npm run build` → `app-vue.js` (74.258 B) y `app-vue.css` (44.103 B) con **hash idéntico** a los artefactos del origen |
 | Línea base vigente de artefactos | Registrada | `app-vue.js` (78.845 B) `AFDA142F…4524`; `app-vue.css` (44.103 B) `7A0D1A69…F38B7`, sin cambios porque no se ha tocado ningún estilo. Sustituye a la línea base de la extracción: el frontend ya ha divergido a propósito. |
-| Suite de pruebas | Verificada | `vitest run` → 8 archivos, 47 pruebas, todas en verde |
+| Suite de pruebas | Verificada | `vitest run` → 12 archivos, 77 pruebas, todas en verde |
 | Foco de los diálogos (TM-R11) | Verificado | Algoritmo cubierto por 10 pruebas; el cableado de Vue se verificó en navegador el 19/09/2026: el foco entra, el tabulador no se escapa y vuelve al control de origen. Sin prueba que lo proteja de una regresión (TM-R4). |
 | Validación de prioridad (QA-2, D-13) | Verificada | Rechazados con 400: 5, −1, 99, 4, «abc» y 1,5. Aceptados 0, 1, 2 y 3. `update` con 7, rechazado. |
 | Coherencia de `close_reason` (QA-3, D-14) | Verificada | Tarea cerrada y reabierta: la API devuelve `null` en la respuesta, en `show` y en `list`, mientras `tk` conserva `done` en la base. |
@@ -573,11 +574,12 @@ comportamiento se puede cambiar sin tocar código.
 | Sin regresión en el backlog real | Verificado | 30 tareas, 23 etiquetas y los mismos conteos por estado que antes de los cambios. |
 | TM-R1 y TM-R2 (QA-7) | Verificados | Una prueba por riesgo en `task-actions.test.js`. **Ambas se comprobó que fallan sin el arreglo**: con el código anterior, 2 fallos; con el arreglo, todas en verde. |
 | TM-R3, TM-R5, TM-R6 y TM-R7 | Verificados | Cinco pruebas nuevas. **Se comprobó que fallan sin los arreglos**: 5 fallos con el código anterior. |
-| TM-R8 | Verificado | 11 pruebas de integración que levantan el servidor real en un puerto libre y sobre una base desechable. La suite completa pasa: 8 archivos, 47 pruebas. |
+| TM-R8 | Verificado | 11 pruebas de integración que levantan el servidor real en un puerto libre y sobre una base desechable. La suite completa pasa: 12 archivos, 77 pruebas. |
 | Servidor (F6) | Verificado | 19 endpoints ejercitados: 8 de lectura de tareas, 6 de escritura, 5 de etiquetas. Incluye creación, edición con diff de etiquetas, comentario, dependencia, retirada de dependencia, reparentado, promoción a raíz, reclamación y cierre. |
 | Estado "blocked" cruzado (RF-11) | Verificado | Con un bloqueante abierto, `/api/tk/list` devuelve la tarea como `blocked` aunque `tk` la guarde como `open`; al retirarlo vuelve a su estado real. |
 | Guardián de cierre (RN-05) | Verificado | Cerrar una tarea con hijas abiertas devuelve el error de `tk` y **no** se reintenta con `--force`; la tarea permanece abierta. |
 | Renombrado de etiqueta en cascada | Verificado | El renombrado se propaga a las tareas que la usan; el borrado la retira. El color se actualiza. |
+| Componentes montados (TM-R4, D-19) | Verificados | 30 pruebas con jsdom y el Vue vendorizado: sobre `action`, los cinco `v-model`, eventos del gestor de etiquetas, contrato del selector y foco de los diálogos. **Se comprobó que la prueba de Escape por capas falla** al revertir la corrección. |
 | Modo degradado (RF-04, RF-06) | Verificado | Con la capacidad deshabilitada: 404 y el mensaje exacto que el cliente reconoce, y la interfaz se sigue sirviendo. |
 | Seguridad de rutas (RF-03) | Verificado | `/../package.json`, `/..%2fpackage.json`, `/task-manager/../../package.json` y `/%2e%2e/PRD.md` bloqueados (403/404). |
 | Separación de bases (D-5) | Verificada | `data/task-manager.db` (12 KB) creada aparte de `tk/.tacks/tacks.db`. |
@@ -639,7 +641,7 @@ sobre el proyecto antiguo, fuera del alcance de este PRD.
 ### 15.2 Técnicos
 
 - [ ] **CA-13** `package.json` no declara ninguna dependencia de runtime.
-- [ ] **CA-14** `npm test` pasa: 8 archivos, 47 pruebas.
+- [ ] **CA-14** `npm test` pasa: 12 archivos, 77 pruebas.
 - [ ] **CA-15** `npm run build` regenera los artefactos sin diferencias inesperadas.
 - [ ] **CA-16** No hay ningún `fetch(` fuera de `api/tk-client.js`.
 - [ ] **CA-17** El proyecto no tiene acoplamiento de ejecución con el anfitrión: ninguna variable de entorno, ruta ni módulo de ChatVoiceAgent participa en el arranque. Se verifican solo las menciones en código y comentarios; las de la documentación se resuelven en F9.
@@ -677,7 +679,7 @@ de prioridad alta.
 | TM-R1 | Un fallo tardío de detalle podía publicar un error sobre una selección más reciente. | Aviso de error engañoso | Alta | **Resuelto** (QA-7) |
 | TM-R2 | Dos mutaciones con claves distintas solapan recargas; la anterior devolvía `null` y se quedaba sin confirmación visible. | Escritura confirmada sin acuse | Alta | **Resuelto** (QA-7) |
 | TM-R3 | Un ciclo completo de padres puede ocultar tareas: el recorrido empieza solo en raíces. | Tareas invisibles sin error | Media | **Resuelto** |
-| TM-R4 | No hay pruebas de componentes ni de navegador: plantillas, `v-model`, foco, teclado y responsive sin cubrir. | Contrato visual puede romperse en verde | Media | Abierto |
+| TM-R4 | No hay pruebas de **navegador**: CSS, responsive, anchuras y teclado real sin cubrir. El cableado de los componentes ya se prueba montando Vue con jsdom. | Una regresión visual puede pasar en verde | Media | Abierto en su parte de navegador |
 | TM-R5 | Cualquier respuesta 404 con JSON inválido se interpreta como capacidad deshabilitada. | Problema de ruta o proxy enmascarado | Media | **Resuelto** |
 | TM-R6 | Las acciones desconocidas del inspector se ignoran: el `switch` no tiene rama `default`. | Control que no responde, difícil de diagnosticar | Baja | **Resuelto** |
 | TM-R7 | El diccionario `busy` conserva claves con valor `false`. | Crecimiento leve de memoria | Baja | **Resuelto** |

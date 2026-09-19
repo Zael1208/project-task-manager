@@ -53,6 +53,13 @@ independiente, sin dependencias de otros productos.
   ejecutable en el índice de git. El servidor elige el binario según la
   plataforma, así que el mismo repositorio funciona en Windows y en WSL sin ningún
   paso adicional. Antes, en WSL el gestor arrancaba con la capacidad desactivada.
+- **Pruebas de componentes con Vue montado de verdad** (jsdom, 30 pruebas):
+  comprueban el sobre `action` llegando a su destino, los cinco `v-model` del
+  inspector, los eventos de intención del gestor de etiquetas, el contrato del
+  selector de etiquetas y el foco de los diálogos. Hasta ahora esa parte del
+  cableado solo la cubrían revisiones manuales en el navegador, sin nada que las
+  protegiera de una regresión. jsdom es una dependencia **de desarrollo**: no
+  viaja al producto.
 
 ### Cambiado
 
@@ -141,7 +148,7 @@ independiente, sin dependencias de otros productos.
   funcional del frontend; desde entonces la línea base es la de este proyecto.
 - La suite de pruebas se trasladó intacta: 4 archivos, 18 pruebas. Después se
   añadieron el foco de diálogos, pruebas de estado e integración del servidor, así
-  que la suite vigente tiene 8 archivos y 47 pruebas.
+  que la suite vigente tiene 12 archivos y 77 pruebas.
 
 ### Limitaciones conocidas de esta entrega
 

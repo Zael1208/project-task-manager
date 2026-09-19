@@ -32,7 +32,8 @@ El gestor **ya es utilizable**: `npm run server` y abre
 - Windows **o** Linux/WSL. El proyecto incluye el binario de las dos plataformas
   y el servidor elige el que corresponde.
 
-No hay dependencias de runtime: `esbuild` y `vitest` son solo de desarrollo.
+No hay dependencias de runtime: `esbuild`, `vitest` y `jsdom` son solo de
+desarrollo, y están fijadas a versiones exactas.
 
 ## Instalación
 
@@ -166,7 +167,7 @@ git status --short
 
 El build produce `app-vue.js` y `app-vue.css` de forma reproducible. La suite
 cubre el cliente HTTP, el mapper, el árbol, las acciones de estado, el foco de los
-diálogos y la integración del servidor (8 archivos, 47 pruebas).
+diálogos y la integración del servidor (12 archivos, 77 pruebas).
 
 Las de servidor levantan una instancia real sobre una base desechable, así que no
 tocan tus datos. Al probar mutaciones a mano, usa también una copia: `tk` **no

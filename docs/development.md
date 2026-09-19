@@ -148,7 +148,7 @@ que recorrerlos a mano. Están en `tests/server/`, fuera del árbol del frontend
 
 ## Evidencia
 
-La suite automatizada contiene 8 archivos y 47 pruebas. El build reproduce los
+La suite automatizada contiene 12 archivos y 77 pruebas. El build reproduce los
 artefactos con hash idéntico a la línea base de la extracción.
 
 No hay log de CI, ni pruebas de navegador, ni cobertura automatizada del
