@@ -96,6 +96,19 @@ independiente, sin dependencias de otros productos.
   superada y no mostraba nada, de modo que la operación parecía no haberse
   realizado aunque estaba guardada. Ahora confirma igualmente, porque la recarga
   más reciente publica un estado que ya incluye ese cambio.
+- **El árbol ya no puede ocultar tareas por un ciclo de padres.** El listado
+  empezaba el recorrido solo en tareas raíz, y un ciclo de padres no produce
+  ninguna, así que esas tareas desaparecían sin ningún error. Ahora se recorren
+  también, con protección de ciclos.
+- **Un 404 sin cuerpo JSON ya no se confunde con la capacidad desactivada.** Se
+  presentaba como «capacidad no disponible» solo por el código de estado, lo que
+  ocultaba un problema de ruta o de proxy detrás de un aviso equivocado.
+- **Una acción de interfaz mal emitida avisa en vez de no hacer nada.** El
+  despachador de acciones del inspector no tenía rama por defecto, así que un
+  error tipográfico dejaba el control sin responder, sin ninguna pista.
+- **El registro de operaciones en curso ya no acumula claves.** Al terminar se
+  marcaban como inactivas en lugar de eliminarse, y como los identificadores
+  cambian en cada operación, el diccionario crecía durante una sesión larga.
 
 ### Seguridad
 
@@ -116,7 +129,7 @@ independiente, sin dependencias de otros productos.
   funcional del frontend; desde entonces la línea base es la de este proyecto.
 - La suite de pruebas se trasladó intacta: 4 archivos, 18 pruebas. Después se
   añadieron `dialog-focus.test.js` y dos pruebas de estado, así que la suite
-  vigente tiene 5 archivos y 30 pruebas.
+  vigente tiene 7 archivos y 36 pruebas.
 
 ### Limitaciones conocidas de esta entrega
 
