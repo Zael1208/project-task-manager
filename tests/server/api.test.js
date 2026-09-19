@@ -89,7 +89,7 @@ describe('servidor: arranque y estaticos', () => {
     expect(root.status).toBe(200);
     expect(root.body).toContain('Gestor de tareas');
 
-    const vendor = await request('/vendor/vue.global.dev.js');
+    const vendor = await request('/vendor/vue.global.prod.js');
     expect(vendor.status).toBe(200);
 
     const bundle = await request('/task-manager/app-vue.js');
