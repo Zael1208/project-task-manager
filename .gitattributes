@@ -9,9 +9,12 @@
 * text=auto eol=lf
 
 # Contenido de terceros: se conserva tal cual.
-# tk/tk.exe es un binario y no debe sufrir conversion de finales de linea;
-# la licencia y el README de tacks se dejan intactos para que su contenido
-# coincida byte a byte con el que publica el autor.
+# Los binarios de tk no deben sufrir conversion de finales de linea, y la
+# licencia y el README de tacks se dejan intactos para que su contenido coincida
+# byte a byte con el que publica el autor.
+# Se incluyen los dos: tk.exe para Windows y tk para Linux, que es lo que usa
+# WSL. El servidor elige uno u otro segun la plataforma (server/tk.js).
+tk/tk binary
 tk/tk.exe binary
 tk/LICENSE -text
 tk/README.md -text

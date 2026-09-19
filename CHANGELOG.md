@@ -48,6 +48,11 @@ independiente, sin dependencias de otros productos.
   ciclo completo de una tarea, el cruce del estado bloqueado, el guardián de
   cierre, la coherencia del motivo de cierre y la cascada del catálogo de
   etiquetas. No tocan ni el backlog ni el catálogo reales.
+- **Soporte para Linux y WSL**: se incorpora el binario de Linux del gestor de
+  tareas subyacente, verificado contra el `sha256` que publica su autor y marcado
+  ejecutable en el índice de git. El servidor elige el binario según la
+  plataforma, así que el mismo repositorio funciona en Windows y en WSL sin ningún
+  paso adicional. Antes, en WSL el gestor arrancaba con la capacidad desactivada.
 
 ### Cambiado
 
