@@ -74,7 +74,7 @@ argumentos reemitidos, nombres de `v-model`, foco, teclado, accesibilidad ni
 regresiones responsive.
 
 **Impacto:** un contrato documentado puede romperse en el cableado visual aunque
-las 18 pruebas unitarias sigan pasando.
+las pruebas unitarias sigan pasando.
 
 **Mitigación actual:** props y emits están declarados y existe una matriz manual
 en [operations.md](operations.md). Esa matriz es un criterio de recorrido, no
@@ -84,8 +84,11 @@ evidencia persistida de que todos los casos se hayan ejecutado.
 el comportamiento funcional resultó correcto. Eso cubre el camino visual
 principal, pero no sustituye a una prueba automatizada ni demuestra que se
 hayan revisado de forma individualizada las cuatro anchuras de referencia ni el
-detalle de accesibilidad. La inspección estática posterior encontró las
-carencias de TM-R11.
+detalle de accesibilidad.
+
+**Avance:** se ha añadido la primera prueba de componentes del módulo
+(`dialog-focus.test.js`, 10 pruebas), aunque sin montar DOM. El cableado de Vue
+y el comportamiento en navegador siguen sin cubrirse automáticamente.
 
 **Resolución recomendada:** priorizar pruebas del sobre `action`, los cinco
 `v-model` del inspector y un recorrido de navegador desktop/móvil.
@@ -164,42 +167,6 @@ reproducibilidad byte a byte del build durante la extracción.
 [PRD](../PRD.md)), cambiarlo de una vez, regenerar el artefacto y registrar la
 nueva línea base de hashes.
 
-### TM-R11: los diálogos no se cierran con Escape ni gestionan el foco
-
-**Ubicación:** [`components/new-task-dialog.js`](../src/task-manager/components/new-task-dialog.js),
-[`components/tag-manager-drawer.js`](../src/task-manager/components/tag-manager-drawer.js)
-y [`state/ui.js`](../src/task-manager/state/ui.js), `handleEscape()`.
-
-Tres carencias confirmadas por inspección del código, no por deducción:
-
-1. **Escape no cierra los diálogos principales.** `handleEscape()` solo cierra
-   los menús (lista, tarea e inspector). `new-task-dialog.js` y
-   `tag-manager-drawer.js` no tienen ningún manejador de teclado: cero
-   coincidencias de `keydown`, `Escape` o `focus()`. El único diálogo que sí se
-   cierra con Escape es el selector de etiquetas, que registra su propio
-   listener.
-2. **No hay gestión de foco.** Los tres diálogos declaran `aria-modal="true"`,
-   pero nada mueve el foco al abrirse, lo mantiene dentro ni lo devuelve al
-   cerrarse. El único `tabindex` del módulo está en `task-row.js`.
-3. **La tarjeta de confirmación del gestor de etiquetas no tiene nombre
-   accesible:** declara `role="dialog" aria-modal="true"` sin `aria-label` ni
-   `aria-labelledby`.
-
-**Impacto:** quien navega con teclado puede quedar con el foco detrás del
-diálogo, y `aria-modal="true"` promete al lector de pantalla un comportamiento
-que el código no aplica. No rompe el uso con ratón.
-
-**Mitigación actual:** los diálogos tienen botón de cierre visible y nombre
-accesible (salvo la tarjeta de confirmación). El árbol de tareas sí tiene
-soporte de teclado completo: `role="tree"` y `role="treeitem"`, `tabindex="0"`,
-selección con Intro y Espacio, y el expansor es un `<button>` real con
-`aria-expanded` y `aria-label`. Los avisos van a una región
-`aria-live="polite"`.
-
-**Resolución recomendada:** añadir cierre por Escape y gestión de foco (entrar,
-atrapar y devolver) en los tres diálogos, poner nombre accesible a la tarjeta de
-confirmación, y cubrirlo con una prueba de navegador.
-
 ## Prioridad baja
 
 ### TM-R6: acciones desconocidas del inspector se ignoran
@@ -242,6 +209,41 @@ problema real; no es prioritario frente a los riesgos de concurrencia.
 | RX-7 | Perder la licencia o la atribución de `tk` al copiar el binario | `tk/LICENSE` y `tk/README.md` viajan con el binario, verificado por hash. |
 | RX-8 | Arrastrar dependencias ocultas del anfitrión | El servidor no lee ninguna variable ni ruta del proyecto de origen. |
 
+### TM-R11: accesibilidad de los diálogos — resuelto, con una corrección
+
+**Este riesgo se registró con un diagnóstico parcialmente erróneo y conviene
+dejar constancia de ello.**
+
+El diagnóstico original afirmaba tres carencias. La primera era **falsa**: decía
+que Escape no cerraba los diálogos. Sí los cierra. `workspace.js` registra un
+único listener global de `keydown` que llama a `handleEscape()`, y esa función
+cierra los menús **y** los diálogos (`isNewTaskOpen`, `isTagManagerOpen`,
+`deletingTag`). El error vino de buscar el manejo de teclado solo en los
+componentes y de recortar el contexto al leer `ui.js`, de modo que no se vieron
+las líneas que cierran los diálogos.
+
+Lo que sí era cierto, y ya está corregido:
+
+| Carencia | Corrección |
+|---|---|
+| No había gestión de foco: nada movía el foco al abrir, lo retenía ni lo devolvía | Mixin nuevo [`components/dialog-focus.js`](../src/task-manager/components/dialog-focus.js): al abrir, el foco entra en el diálogo y se recuerda de dónde venía; con el tabulador no se sale del diálogo; al cerrar, el foco vuelve al control de origen |
+| La tarjeta de confirmación de borrado no tenía nombre accesible | `aria-labelledby` apuntando al `<h3>`, que ahora tiene `id` |
+| — | La confirmación de borrado es un diálogo anidado: al abrirse el foco entra en ella y al cancelarse vuelve al cajón |
+
+Además se corrigió un defecto real que apareció al revisar esta área: con el
+selector de etiquetas abierto dentro del diálogo de nueva tarea, **un solo
+Escape cerraba las dos capas**, porque el selector y el espacio de trabajo
+escuchaban el mismo evento en `window`. Ahora el selector se registra en fase de
+captura, solo actúa si está abierto y corta la propagación, de modo que Escape
+cierra únicamente la capa más interna. Si está cerrado, deja pasar el evento.
+
+**Cobertura:** [`tests/task-manager/components/dialog-focus.test.js`](../tests/task-manager/components/dialog-focus.test.js),
+10 pruebas. Cubren el algoritmo —entrar, devolver el foco, no devolverlo a un
+elemento que ya no está, filtrar los elementos no visibles y envolver el
+tabulador en los cuatro casos—, no el cableado de Vue. Que el watcher de `open`
+dispare esto y que `ref="dialogRoot"` apunte al elemento correcto se comprueba
+en el navegador; sigue sin haber pruebas de componentes con DOM montado (TM-R4).
+
 ## Riesgos que quedan del análisis de la extracción
 
 | ID | Riesgo | Por qué sigue abierto |
@@ -265,4 +267,4 @@ problema real; no es prioritario frente a los riesgos de concurrencia.
 | TM-R8 | Integración de servidor con base desechable |
 | TM-R9 | Fallo simulado a mitad del renombrado en cascada |
 | TM-R10 | Recorrido visual que compruebe la marca definitiva |
-| TM-R11 | Diálogo abierto: Escape lo cierra y el foco vuelve al control de origen |
+| TM-R11 | **Cubierto**: `dialog-focus.test.js` prueba entrar, devolver el foco y envolver el tabulador. Falta el montaje real de Vue |

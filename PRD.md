@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Producto | Gestor de tareas local (nombre de trabajo: **Task Manager**) |
-| Versión del documento | 1.5 |
+| Versión del documento | 1.6 |
 | Fecha | 19 de septiembre de 2026 |
 | Autor | Alfredo González Portero |
 | Estado | F1 a F9 ejecutadas. Hitos H1 y H2 alcanzados y commit inicial creado. El recorrido funcional en navegador es correcto. Quedan decisiones abiertas (QA-2, QA-3, QA-5) y deuda registrada en `docs/known-risks.md`. |
@@ -234,7 +234,7 @@ C:\PROJECT-TASK-MANAGER\
 ├── public/
 │   ├── task-manager/         app-vue.html (a mano) + artefactos generados
 │   └── vendor/               vue.global.dev.js / .prod.js
-├── tests/task-manager/       18 pruebas Vitest
+├── tests/task-manager/       28 pruebas Vitest
 └── docs/                     architecture, contracts, operations, known-risks
 ```
 
@@ -377,7 +377,7 @@ Todas verificadas ejecutando `tk.exe` 0.2.4 sobre una base desechable.
 | RNF-09 | El proyecto debe incluir la licencia MIT de tacks y atribución visible. | M |
 | RNF-10 | Los archivos `tacks.db` y `task-manager.db` no se versionan. | M |
 | RNF-11 | Build reproducible: `npm run build` regenera `app-vue.js` y `app-vue.css` a partir de `src/`. | M |
-| RNF-12 | `npm test` ejecuta las 18 pruebas de Vitest y pasa en verde. | M |
+| RNF-12 | `npm test` ejecuta la suite de Vitest y pasa en verde. | M |
 | RNF-13 | Los artefactos generados no se editan a mano. | M |
 | RNF-14 | Interfaz operativa sin conexión a internet. | M |
 | RNF-15 | Arranque del servidor en menos de 2 segundos. | S |
@@ -531,7 +531,7 @@ Orden pensado para poder verificar en cada paso.
 | **F5. Pipeline** | ~~Traer los scripts de esbuild y Vitest; copiar `tests/task-manager/`.~~ **Hecho.** | Verificado: `npm run build` reproduce `app-vue.js` y `app-vue.css` con **hash idéntico** a los artefactos del origen (reproducibilidad byte a byte). `vitest run` pasa 4 archivos y 18 pruebas. |
 | **F6. Servidor** | ~~Extraer de `server.js` los 19 handlers, `runTk` / `runTkText`, `listTasksMerged`, `sendJson` / `readJson`, el servido de estáticos y la guarda de path traversal.~~ **Hecho.** Repartido en `server/index.js` (enrutado, estáticos), `tk.js` (frontera con el CLI), `tasks.js` (14 endpoints de tareas), `tags.js` (5 de etiquetas) y `http.js`. | Verificado: 19 endpoints ejercitados uno a uno contra datos reales. |
 | **F7. Etiquetas** | ~~Sustituir la dependencia de `chatvoiceagent.db` por `data/task-manager.db` con `node:sqlite`.~~ **Hecho.** | Verificado: CRUD completo, renombrado en cascada propagado a las tareas, borrado con retirada, y validaciones 400/409/404. |
-| **F8. Paridad** | ~~Recorrer la matriz de validación de la sección 17.~~ **Hecho en su parte funcional.** Verificado por Alfredo en navegador el 19/09/2026: el recorrido funcional es correcto. La comprobación estática posterior ha encontrado tres carencias de accesibilidad en los diálogos, registradas como **TM-R11** en `docs/known-risks.md`. | Acta: recorrido funcional correcto. Quedan sin verificar de forma individualizada las anchuras 1440/1180/720/390 y el detalle de accesibilidad; véase TM-R11. |
+| **F8. Paridad** | ~~Recorrer la matriz de validación de la sección 17.~~ **Hecho en su parte funcional.** Verificado por Alfredo en navegador el 19/09/2026: el recorrido funcional es correcto. | Acta: recorrido funcional correcto. Quedan sin verificar de forma individualizada las anchuras 1440/1180/720/390 y el foco visible. Las carencias de accesibilidad de los diálogos que se registraron como TM-R11 están corregidas (véase `docs/known-risks.md`), con una corrección de por medio: el diagnóstico inicial afirmaba por error que Escape no cerraba los diálogos. |
 | **F9. Documentación** | ~~Adaptar `architecture.md`, `contracts.md`, `operations.md`, `known-risks.md`.~~ **Hecho.** Movidos a `docs/` y reescritos para el proyecto autónomo. `handoff.md` pasa a `docs/development.md`: el estado vivo se registra en el PRD y el CHANGELOG. Añadidos `CHANGELOG.md` y el contrato de flujo de Git. | Verificado: ninguna referencia al anfitrión salvo las tres registradas en CA-17; `src/task-manager/docs/` ya no existe. |
 
 ### 14.1 Decisión sobre los datos de tareas — RESUELTA
@@ -552,7 +552,8 @@ comportamiento se puede cambiar sin tocar código.
 | `tk/.tacks/tacks.db` | Copiada | Hash `68F2D934…F274` idéntico al zip; 30 tareas |
 | Lectura end-to-end | Verificada | Desde `tk/`, `tk.exe --json list -a` devuelve 30 tareas (15 abiertas o en curso, 15 cerradas) |
 | Build del frontend | Verificado | `npm run build` → `app-vue.js` (74.258 B) y `app-vue.css` (44.103 B) con **hash idéntico** a los artefactos del origen |
-| Suite de pruebas | Verificada | `vitest run` → 4 archivos, 18 pruebas, todas en verde |
+| Línea base vigente de artefactos | Registrada | Tras el arreglo de TM-R11: `app-vue.js` (77.953 B) `03064BC8…3362`; `app-vue.css` (44.103 B) `7A0D1A69…F38B7`, sin cambios porque no se tocó ningún estilo |
+| Suite de pruebas | Verificada | `vitest run` → 5 archivos, 28 pruebas, todas en verde |
 | Servidor (F6) | Verificado | 19 endpoints ejercitados: 8 de lectura de tareas, 6 de escritura, 5 de etiquetas. Incluye creación, edición con diff de etiquetas, comentario, dependencia, retirada de dependencia, reparentado, promoción a raíz, reclamación y cierre. |
 | Estado "blocked" cruzado (RF-11) | Verificado | Con un bloqueante abierto, `/api/tk/list` devuelve la tarea como `blocked` aunque `tk` la guarde como `open`; al retirarlo vuelve a su estado real. |
 | Guardián de cierre (RN-05) | Verificado | Cerrar una tarea con hijas abiertas devuelve el error de `tk` y **no** se reintenta con `--force`; la tarea permanece abierta. |
@@ -618,7 +619,7 @@ sobre el proyecto antiguo, fuera del alcance de este PRD.
 ### 15.2 Técnicos
 
 - [ ] **CA-13** `package.json` no declara ninguna dependencia de runtime.
-- [ ] **CA-14** `npm test` pasa: 4 archivos, 18 pruebas.
+- [ ] **CA-14** `npm test` pasa: 5 archivos, 28 pruebas.
 - [ ] **CA-15** `npm run build` regenera los artefactos sin diferencias inesperadas.
 - [ ] **CA-16** No hay ningún `fetch(` fuera de `api/tk-client.js`.
 - [ ] **CA-17** El proyecto no tiene acoplamiento de ejecución con el anfitrión: ninguna variable de entorno, ruta ni módulo de ChatVoiceAgent participa en el arranque. Se verifican solo las menciones en código y comentarios; las de la documentación se resuelven en F9.
@@ -662,14 +663,18 @@ la extracción** (NO-7), pero deben seguir registrados y con su prueba de cierre
 
 **El registro vivo de riesgos está en [`docs/known-risks.md`](docs/known-risks.md)**,
 que es donde se añaden y se cierran. Además de los siete heredados, contiene
-cuatro surgidos durante la extracción y su desarrollo:
+tres surgidos durante la extracción y su desarrollo:
 
 | ID | Riesgo | Prioridad |
 |---|---|---|
 | TM-R8 | El servidor no tiene pruebas automatizadas | Media |
 | TM-R9 | El renombrado de etiquetas en cascada no es transaccional | Media |
 | TM-R10 | La marca visible sigue siendo la del producto de origen | Media |
-| TM-R11 | Los diálogos no se cierran con Escape ni gestionan el foco | Media |
+
+**TM-R11** (accesibilidad de los diálogos) se registró, se corrigió y está
+cerrado. Su diagnóstico inicial contenía un error —afirmaba que Escape no
+cerraba los diálogos cuando sí lo hacía— y la corrección queda documentada en
+`docs/known-risks.md`.
 
 ### 16.2 Riesgos nuevos de la extracción
 
