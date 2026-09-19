@@ -29,7 +29,8 @@ El gestor **ya es utilizable**: `npm run server` y abre
 ## Requisitos
 
 - **Node.js 22.5 o superior** (por `node:sqlite`, que es nativo).
-- Windows para el binario `tk.exe` incluido.
+- Windows **o** Linux/WSL. El proyecto incluye el binario de las dos plataformas
+  y el servidor elige el que corresponde.
 
 No hay dependencias de runtime: `esbuild` y `vitest` son solo de desarrollo.
 
@@ -122,12 +123,38 @@ del ciclo de vida de una base que administra un tercero.
 
 ## Sobre `tk`
 
-El binario `tk/tk.exe` es **software de terceros**: [tacks](https://github.com/srmccray/tacks)
-0.2.4, escrito en Rust y distribuido bajo licencia MIT. Se incluye sin
-modificar, junto con su licencia en `tk/LICENSE`.
+Los binarios `tk/tk.exe` (Windows) y `tk/tk` (Linux) son **software de terceros**:
+[tacks](https://github.com/srmccray/tacks) 0.2.4, escrito en Rust y distribuido
+bajo licencia MIT. Se incluyen sin modificar, junto con su licencia en
+`tk/LICENSE`.
 
-La base de tareas vive en `tk/.tacks/tacks.db` y la posee `tk`. Ninguno de los
-dos se versiona en git.
+`server/tk.js` elige uno u otro según la plataforma, así que el mismo repositorio
+funciona en Windows y en WSL sin ningún paso adicional. El de Linux es la
+compilación estática para `x86_64-unknown-linux-musl`, verificada contra el
+`sha256` que publica el autor.
+
+La base de tareas vive en `tk/.tacks/tacks.db` y la posee `tk`. No se versiona en
+git, así que **cada máquina tiene la suya**.
+
+## Trabajar desde WSL
+
+Todo funciona igual que en Windows, salvo la base de tareas: al no versionarse,
+en WSL el backlog empieza vacío.
+
+Para ver los datos reales desde WSL, apunte a la base del checkout de Windows,
+que es accesible por `/mnt/c`:
+
+```bash
+TACKS_DB=/mnt/c/PROJECT-TASK-MANAGER/tk/.tacks/tacks.db npm run server
+```
+
+**No levante las dos instancias a la vez sobre la misma base.** SQLite no está
+pensado para dos escritores simultáneos, y aquí además son dos sistemas
+operativos distintos sobre una carpeta compartida: el riesgo de corromperla no
+compensa. Úsela de una en una.
+
+Las pruebas no dependen de esto: crean su propia base desechable en una carpeta
+temporal, así que `npm test` funciona en WSL sin configurar nada.
 
 ## Verificación
 

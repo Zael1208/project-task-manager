@@ -38,7 +38,8 @@ server/index.js                            (enrutado y estaticos)
   -> server/tasks.js                       (14 endpoints de tareas)
   -> server/tags.js                        (5 endpoints de etiquetas)
        -> server/tk.js                     (unica frontera con el CLI)
-            -> tk/tk.exe  ──►  tk/.tacks/tacks.db
+            -> tk/tk.exe (Windows)  ──►  tk/.tacks/tacks.db
+               tk/tk     (Linux)
        -> data/task-manager.db             (catalogo de etiquetas)
   -> server/http.js                        (utilidades compartidas)
 ```
@@ -57,7 +58,9 @@ Reglas de frontera:
   con `fetch`.
 - [`task-model.js`](../src/shared/tasks/task-model.js) aísla alias y formas
   brutas de `tk` del resto del frontend.
-- `server/tk.js` es el único archivo que sabe que existe `tk.exe`.
+- `server/tk.js` es el único archivo que sabe que existe `tk`: elige
+  `tk/tk.exe` en Windows y `tk/tk` en Linux, así que el mismo repositorio sirve
+  en las dos plataformas.
 
 Una dependencia nueva debe apuntar hacia abajo en este esquema. Un componente no
 debe importar el cliente, el cliente no debe conocer Vue, y ningún módulo salvo

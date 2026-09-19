@@ -3,10 +3,10 @@
 | Campo | Valor |
 |---|---|
 | Producto | Gestor de tareas local (nombre de trabajo: **Task Manager**) |
-| Versión del documento | 2.0 |
+| Versión del documento | 2.1 |
 | Fecha | 19 de septiembre de 2026 |
 | Autor | Alfredo González Portero |
-| Estado | Proyecto entregado. Extracción completa (F1 a F9), cuestiones de producto cerradas (QA-1 a QA-5), seis de los siete riesgos heredados resueltos y la capa de servidor cubierta con pruebas de integración. Queda abierto un único riesgo aceptado, TM-R9, y la cobertura de componentes Vue (TM-R4). |
+| Estado | Proyecto entregado y **multiplataforma**: funciona en Windows y en WSL/Linux con el mismo repositorio. Extracción completa (F1 a F9), cuestiones de producto cerradas (QA-1 a QA-5), seis de los siete riesgos heredados resueltos y la capa de servidor cubierta con pruebas de integración. Queda abierto un único riesgo aceptado, TM-R9, y la cobertura de componentes Vue (TM-R4). |
 | Repositorio destino | `C:\PROJECT-TASK-MANAGER` |
 | Origen del código | `C:\PROJECT-CHAT-VOICE-AGENT` (`tk/`, `src/task-manager/`, `src/shared/tasks/`, `public/`, `tests/task-manager/`, `server.js`) |
 
@@ -224,7 +224,8 @@ C:\PROJECT-TASK-MANAGER\
 │   ├── tags.js               Handlers /api/tags* y tabla tag_metadata
 │   └── http.js               Utilidades: readJson, sendJson
 ├── tk/
-│   ├── tk.exe
+│   ├── tk.exe                Binario para Windows
+│   ├── tk                    Binario para Linux/WSL (marcado ejecutable en git)
 │   ├── LICENSE               Licencia MIT de tacks (obligatoria)
 │   ├── README.md             Atribución y versión
 │   └── .tacks/tacks.db       Base de tareas (no versionada)
@@ -261,6 +262,8 @@ C:\PROJECT-TASK-MANAGER\
 | D-14 | `close_reason` solo se presenta cuando la tarea está cerrada | Decidido por Alfredo (QA-3). Se corrige al presentar los datos, no escribiendo en la base de `tk`, que no ofrece forma de limpiarlo y no nos pertenece (D-5). |
 | D-15 | La interfaz se llama «Gestor de tareas» | Decidido por Alfredo (QA-5). Deja de nombrar al producto del que se extrajo. Marca del icono: «G». |
 | D-16 | En `mutate()`, una recarga superada (`null`) **sí** muestra la confirmación | Resolución de TM-R2. `null` no es un fallo: otra recarga posterior ya ha publicado un estado que incluye este cambio. Se descartó serializar o agrupar recargas por ser más complejo sin aportar nada aquí. El caso `false` sigue siendo un fallo explícito. |
+| D-17 | Se incluyen los binarios de Windows y de Linux | El otro equipo de desarrollo trabaja en WSL, donde `tk.exe` no sirve. `server/tk.js` ya elegía por plataforma, así que bastaba con incorporar el binario de Linux (`x86_64-unknown-linux-musl`, verificado contra el `sha256` que publica el autor) y marcarlo ejecutable en el índice de git. Sin esto, en WSL el gestor arrancaba con la capacidad desactivada. |
+| D-18 | La base de tareas es independiente en cada máquina | No se versiona, así que en WSL arranca vacía. Para ver los datos de Windows desde WSL se apunta `TACKS_DB` a `/mnt/c`, **con una sola instancia a la vez**: SQLite no admite dos escritores simultáneos y serían dos sistemas operativos sobre una carpeta compartida. |
 
 ---
 
@@ -532,7 +535,7 @@ Orden pensado para poder verificar en cada paso.
 | Fase | Trabajo | Entregable verificable |
 |---|---|---|
 | **F1. Esqueleto** | ~~Crear `package.json`, `.gitignore`, estructura de carpetas, `README.md`.~~ **Hecho.** | Verificado: `package.json` sin dependencias de runtime; solo `esbuild` y `vitest` como `devDependencies`, fijadas a las versiones exactas del origen (0.28.1 y 4.1.10). |
-| **F2. Dependencia externa** | ~~Copiar `tk.exe`, `LICENSE` y `README.md` a `tk/`.~~ **Hecho.** | Verificado: `tk/tk.exe --version` responde `tk 0.2.4` y lee las 30 tareas desde la ubicación nueva. Hash del binario idéntico al origen. |
+| **F2. Dependencia externa** | ~~Copiar `tk.exe`, `LICENSE` y `README.md` a `tk/`.~~ **Hecho**, y ampliado después con el binario de Linux (D-17). | Verificado: `tk/tk.exe --version` responde `tk 0.2.4` y lee las 30 tareas desde la ubicación nueva. Hash del binario idéntico al origen. El de Linux se verificó contra el `sha256` del release oficial y queda marcado ejecutable en el índice de git. |
 | **F3. Datos** | ~~Decidir y ejecutar la migración de `tacks.db`.~~ **Hecho**: copiada la base canónica (30 tareas) a `tk/.tacks/tacks.db`. | Verificado: hash idéntico al origen, `list -a` devuelve 30 tareas (15 abiertas o en curso, 15 cerradas). |
 | **F4. Frontend** | ~~Copiar `src/task-manager/`, `src/shared/tasks/`, `public/vendor/` y `public/task-manager/app-vue.html`.~~ **Hecho.** | 39 archivos copiados; hashes verificados en una muestra de 5 archivos representativos (todos coincidentes). |
 | **F5. Pipeline** | ~~Traer los scripts de esbuild y Vitest; copiar `tests/task-manager/`.~~ **Hecho.** | Verificado: `npm run build` reproduce `app-vue.js` y `app-vue.css` con **hash idéntico** a los artefactos del origen (reproducibilidad byte a byte). `vitest run` pasa 4 archivos y 18 pruebas. |
@@ -555,6 +558,8 @@ comportamiento se puede cambiar sin tocar código.
 | Elemento | Estado | Evidencia |
 |---|---|---|
 | `tk/tk.exe` | Copiado | Hash `6EB22EED…D154` idéntico al origen; responde `tk 0.2.4` |
+| `tk/tk` (Linux) | Incorporado | `sha256` del `.tar.xz` oficial verificado (`1c67da48…a005`); modo `100755` en el índice de git, sin el cual WSL fallaría con `EACCES` |
+| Portabilidad | Verificada | El código ya elegía por plataforma; se comprobó que el lockfile incluye las dependencias opcionales de Linux, así que `npm ci` funciona en WSL |
 | `tk/LICENSE`, `tk/README.md` | Copiados | Atribución MIT presente (CA-21) |
 | `tk/.tacks/tacks.db` | Copiada | Hash `68F2D934…F274` idéntico al zip; 30 tareas |
 | Lectura end-to-end | Verificada | Desde `tk/`, `tk.exe --json list -a` devuelve 30 tareas (15 abiertas o en curso, 15 cerradas) |
@@ -781,7 +786,8 @@ registrarse con fecha, comando o URL y resultado. Anchuras de referencia: **1440
 
 | Origen | Destino | Notas |
 |---|---|---|
-| `tk/tk.exe` | `tk/tk.exe` | **Copiado.** Binario de terceros, versión 0.2.4, hash verificado |
+| `tk/tk.exe` | `tk/tk.exe` | **Copiado.** Binario de terceros para Windows, versión 0.2.4, hash verificado |
+| — | `tk/tk` | **Descargado** del release oficial de tacks 0.2.4 (`x86_64-unknown-linux-musl`), con el `sha256` del autor verificado y el bit de ejecución puesto en el índice de git (D-17) |
 | `tk/LICENSE`, `tk/README.md` | `tk/` | **Copiados.** Obligatorio por licencia MIT |
 | `tk/.tacks/tacks.db` | `tk/.tacks/tacks.db` | **Copiada** desde `tk/.tacks/tacks.zip` (30 tareas, hash verificado) |
 | `src/task-manager/` (25 archivos) | `src/task-manager/` | Fuente del frontend |

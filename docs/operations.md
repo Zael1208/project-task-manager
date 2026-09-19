@@ -3,7 +3,8 @@
 ## Requisitos
 
 - **Node.js 22.5 o superior** (por `node:sqlite`, que es nativo).
-- Windows para el binario `tk.exe` incluido.
+- Windows **o** Linux/WSL. Se incluye el binario de las dos plataformas y
+  `server/tk.js` elige el que corresponde.
 
 No hay dependencias de runtime. `esbuild` y `vitest` son solo de desarrollo, y
 están fijadas a versiones exactas para que el build sea reproducible.
@@ -236,14 +237,34 @@ Además:
 - Actualizar `CHANGELOG.md` si el cambio es relevante para el usuario.
 - No incluir bases de datos ni `node_modules` en el commit.
 
+## Trabajar desde WSL
+
+El proyecto funciona igual en Windows y en WSL: se incluyen los dos binarios y
+`server/tk.js` elige el suyo. Lo único que cambia es la base de tareas, que no se
+versiona, así que en WSL el backlog arranca vacío.
+
+Para usar los datos del checkout de Windows desde WSL, apunte a su base por
+`/mnt/c`:
+
+```bash
+TACKS_DB=/mnt/c/PROJECT-TASK-MANAGER/tk/.tacks/tacks.db npm run server
+```
+
+**Una sola instancia a la vez.** SQLite no admite dos escritores simultáneos, y
+aquí serían dos sistemas operativos sobre una carpeta compartida. Levantar las dos
+a la vez sobre esa base es la forma más rápida de corromperla.
+
+Las pruebas no necesitan nada de esto: crean su propia base desechable en una
+carpeta temporal y la borran al terminar.
+
 ## Diagnóstico rápido
 
 ### «La capacidad de tareas no está disponible»
 
 El servidor respondió con el 404 específico de capacidad deshabilitada. No es un
-listado vacío. Compruebe `DISABLE_TK`, que `tk/tk.exe` exista y que la ruta de
-`TACKS_DB` sea accesible. La consola del servidor indica el motivo exacto al
-arrancar.
+listado vacío. Compruebe `DISABLE_TK`, que exista el binario que corresponde a su
+plataforma —`tk/tk.exe` en Windows, `tk/tk` en Linux— y que la ruta de `TACKS_DB`
+sea accesible. La consola del servidor indica el motivo exacto al arrancar.
 
 ### La interfaz se ve sin tareas
 

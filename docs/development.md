@@ -66,9 +66,11 @@ ni el CSS.
 ### Cambio en la interacción con `tk`
 
 1. Todo va en [`../server/tk.js`](../server/tk.js). Ningún otro módulo invoca el
-   binario.
+   binario, y es también el único sitio que elige entre `tk.exe` y `tk` según la
+   plataforma.
 2. Use `runTk` si el subcomando devuelve JSON y `runTkText` si no.
-3. Mantenga el tiempo máximo, `windowsHide` y el `--db` explícito.
+3. Mantenga el tiempo máximo, el `--db` explícito y `windowsHide`, que en Linux se
+   ignora sin más.
 4. Confirme el comportamiento ejecutando el binario sobre una base desechable
    **antes** de escribir el código: el contrato real de `tk` no siempre coincide
    con su documentación.
