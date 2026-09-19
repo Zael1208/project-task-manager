@@ -24,7 +24,9 @@ const PUBLIC_DIR = path.join(PROJECT_ROOT, "public");
 
 // D-8: 8890 por defecto. ChatVoiceAgent usa 8792 y `tk serve` usa 3000, asi
 // que un valor distinto permite tener ambos levantados a la vez.
-const PORT = Number(process.env.PORT) || 8890;
+// Con PORT=0 el sistema elige un puerto libre: es lo que usan las pruebas de
+// integracion para no chocar con una instancia ya en marcha.
+const PORT = process.env.PORT === undefined || process.env.PORT === "" ? 8890 : Number(process.env.PORT);
 
 const APP_PAGE = "/task-manager/app-vue.html";
 
@@ -168,10 +170,12 @@ function startServer() {
     server.once("error", reject);
     server.listen(PORT, () => {
       const state = tk.status();
-      console.log(`Gestor de tareas en http://localhost:${PORT}${APP_PAGE}`);
+      // El puerto real, que no es PORT cuando se pidio el 0.
+      const { port } = server.address();
+      console.log(`Gestor de tareas en http://localhost:${port}${APP_PAGE}`);
       console.log(`  tareas: ${state.enabled ? state.dbPath : `DESHABILITADO (${state.reason})`}`);
       console.log(`  etiquetas: ${tags.TAGS_DB_PATH}`);
-      resolve(PORT);
+      resolve(port);
     });
   });
 }

@@ -41,23 +41,28 @@ y el comportamiento en navegador siguen sin cubrirse automáticamente.
 **Resolución recomendada:** priorizar pruebas del sobre `action`, los cinco
 `v-model` del inspector y un recorrido de navegador desktop/móvil.
 
-### TM-R8: el servidor no tiene pruebas automatizadas
+### TM-R8: el servidor no tenía pruebas automatizadas — resuelto
 
-**Ubicación:** `server/`, `tests/`.
+Los 19 endpoints solo estaban verificados a mano, de modo que un cambio en
+`server/tasks.js`, `server/tags.js` o `server/tk.js` podía romper la API sin que
+`npm test` se enterase.
 
-Los 19 endpoints se han verificado a mano, pero no hay ninguna prueba que los
-cubra. Un cambio en `server/tasks.js`, `server/tags.js` o `server/tk.js` puede
-romper la API sin que `npm test` se entere.
+**Corrección:** [`tests/server/api.test.js`](../tests/server/api.test.js), 11
+pruebas de integración que **levantan el servidor de verdad**, en un puerto libre
+y sobre una base desechable que el propio gestor de tareas crea vacía. Recorren el
+arranque, los estáticos, el bloqueo de rutas, la validación de prioridad, el ciclo
+completo de una tarea, el cruce de `blocked`, el guardián de cierre, la coherencia
+de `close_reason` y la cascada del catálogo de etiquetas. No tocan ni el backlog
+ni el catálogo reales.
 
-**Impacto:** regresión silenciosa en la capa que la interfaz consume entera.
+Dos ajustes que hicieron falta, ambos pequeños y con motivo:
 
-**Mitigación actual:** verificación manual documentada en
-[operations.md](operations.md). Al ser código determinista y sin dependencias,
-es fácil de probar.
-
-**Resolución recomendada:** añadir pruebas de integración que levanten el
-servidor con una base desechable y recorran los endpoints principales, incluido
-el cruce de `blocked` y la reversión del renombrado en cascada.
+- El servidor acepta **`PORT=0`** para que el sistema elija un puerto libre. Sin
+  eso, las pruebas chocarían con una instancia en marcha. `startServer()` devuelve
+  ahora el puerto real, que no es el 0 que se pidió.
+- [`server/tags.js`](../server/tags.js) expone `closeTagDatabase()`. En Windows no
+  se puede borrar la carpeta temporal mientras la base del catálogo siga abierta,
+  así que sin cerrarla las pruebas no podían limpiar lo que crean.
 
 ### TM-R9: el renombrado de etiquetas en cascada no es transaccional
 
@@ -206,6 +211,6 @@ con DOM (TM-R4), y esa es la vía para cerrarlo de verdad.
 | TM-R5 | **Cubierto**: «does not treat a 404 without a JSON body as a disabled capability» |
 | TM-R6 | **Cubierto**: «warns instead of staying silent when the action type is unknown» |
 | TM-R7 | **Cubierto**: «removes the busy key when the operation ends instead of storing false» |
-| TM-R8 | Integración de servidor con base desechable |
+| TM-R8 | **Cubierto**: `tests/server/api.test.js`, 11 pruebas de integración contra un servidor real y una base desechable |
 | TM-R9 | Fallo simulado a mitad del renombrado en cascada |
 | TM-R11 | **Cubierto**: `dialog-focus.test.js` prueba entrar, devolver el foco y envolver el tabulador. Falta el montaje real de Vue |

@@ -140,13 +140,13 @@ npm test
 git status --short
 ```
 
-Y, si se tocó el servidor, levantar una instancia contra una base desechable y
-recorrer los endpoints afectados. No hay pruebas automatizadas del servidor
-(véase TM-R8 en [known-risks.md](known-risks.md)).
+Y ejecutar `npm test`: las pruebas de integración del servidor levantan una
+instancia real sobre una base desechable, así que cubren los endpoints sin tener
+que recorrerlos a mano. Están en `tests/server/`, fuera del árbol del frontend.
 
 ## Evidencia
 
-La suite automatizada contiene 7 archivos y 36 pruebas. El build reproduce los
+La suite automatizada contiene 8 archivos y 47 pruebas. El build reproduce los
 artefactos con hash idéntico a la línea base de la extracción.
 
 No hay log de CI, ni pruebas de navegador, ni cobertura automatizada del

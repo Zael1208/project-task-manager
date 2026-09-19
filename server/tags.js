@@ -259,11 +259,21 @@ async function handleTagDelete(req, res, name) {
   }
 }
 
+/**
+ * Cierra la base del catalogo. La usan las pruebas de integracion: en Windows un
+ * archivo SQLite abierto impide eliminar el directorio que lo contiene, asi que
+ * sin esto no pueden limpiar su carpeta temporal.
+ */
+function closeTagDatabase() {
+  db.close();
+}
+
 module.exports = {
   TAGS_DB_PATH,
   TAG_COLORS,
   normalizeTagName,
   sameTagName,
+  closeTagDatabase,
   handleTagList,
   handleTagCreate,
   handleTagAffected,

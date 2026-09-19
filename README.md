@@ -138,13 +138,11 @@ git status --short
 ```
 
 El build produce `app-vue.js` y `app-vue.css` de forma reproducible. La suite
-cubre el cliente HTTP, el mapper, el árbol, las acciones de estado y el
-comportamiento de foco de los diálogos (7 archivos, 36 pruebas).
+cubre el cliente HTTP, el mapper, el árbol, las acciones de estado, el foco de los
+diálogos y la integración del servidor (8 archivos, 47 pruebas).
 
-**El servidor no tiene pruebas automatizadas** (TM-R8): su verificación es manual
-y está descrita en [`docs/operations.md`](docs/operations.md).
-
-Al probar mutaciones, use una copia desechable de la base de tareas: `tk` **no
+Las de servidor levantan una instancia real sobre una base desechable, así que no
+tocan tus datos. Al probar mutaciones a mano, usa también una copia: `tk` **no
 tiene comando de borrado**, así que cualquier tarea de prueba creada contra los
 datos reales se queda ahí.
 
