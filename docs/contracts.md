@@ -301,11 +301,23 @@ dependencia externa de solo lectura.
 |---|---|
 | No existe borrado de tareas | Lo máximo es cerrar. No hay endpoint de borrado. |
 | No existe «reabrir» | Se usa `update <id> -s open`. |
-| Al reabrir, `close_reason` conserva el valor anterior | Una tarea `open` puede mostrar motivo `done`. Pendiente de decisión (QA-3). |
+| Al reabrir, `close_reason` conserva el valor anterior | `tk` no tiene bandera para limpiarlo. El servidor lo normaliza: solo presenta el motivo cuando la tarea está cerrada. |
 | `--claim` fija `assignee = "agent"` | No se puede elegir el nombre al reclamar. |
 | Cerrar con hijas abiertas falla | Requiere `--force`; el servidor **nunca** lo añade por su cuenta. |
-| La prioridad no está validada | `-p 4` y superiores se aceptan; la interfaz solo conoce 0-3. |
+| La prioridad no está validada | Acepta cualquier entero (`-p 5` se guarda). El servidor valida 0-3, que es lo que la interfaz representa. |
 | `dep add` / `dep remove` no devuelven JSON | Se decide por código de salida (`runTkText`). |
 | `blocked` no se almacena | Lo calcula el servidor. |
 | Una «épica» no es un tipo | Es una tarea con el tag `epic`. |
 | `notes` se sobrescribe; los comentarios son append-only | Contexto mutable frente a historial. |
+
+### Reglas que añade el servidor sobre `tk`
+
+`tk` es de solo lectura para nosotros: su base no se toca. Cuando su
+comportamiento deja un estado incoherente, la corrección se hace **al presentar
+los datos**, no escribiendo en su base.
+
+| Regla | Por qué |
+|---|---|
+| `close_reason` solo se presenta cuando `status` es `done` | `tk` no ofrece forma de limpiarlo al reabrir; sin esto, una tarea abierta mostraría el motivo `done`. **La base de `tk` conserva el valor**: mirándola por CLI se sigue viendo. |
+| La prioridad debe ser un entero de 0 a 3 | `tk` acepta cualquiera, pero la interfaz solo representa cuatro niveles. Sin validar, un valor de 4 o superior creado por CLI se mostraría como «Sin prioridad» y no se podría volver a elegir. |
+| `blocked` se calcula cruzando `list --all` con `blocked` | `tk` no almacena ese estado. |

@@ -3,10 +3,10 @@
 | Campo | Valor |
 |---|---|
 | Producto | Gestor de tareas local (nombre de trabajo: **Task Manager**) |
-| Versión del documento | 1.6 |
+| Versión del documento | 1.7 |
 | Fecha | 19 de septiembre de 2026 |
 | Autor | Alfredo González Portero |
-| Estado | F1 a F9 ejecutadas. Hitos H1 y H2 alcanzados y commit inicial creado. El recorrido funcional en navegador es correcto. Quedan decisiones abiertas (QA-2, QA-3, QA-5) y deuda registrada en `docs/known-risks.md`. |
+| Estado | F1 a F9 ejecutadas y las cuestiones de producto cerradas (QA-1 a QA-5). Hitos H1 y H2 alcanzados, commit inicial creado y verificación funcional en navegador correcta. Queda deuda registrada en `docs/known-risks.md`, ninguna bloqueante. |
 | Repositorio destino | `C:\PROJECT-TASK-MANAGER` |
 | Origen del código | `C:\PROJECT-CHAT-VOICE-AGENT` (`tk/`, `src/task-manager/`, `src/shared/tasks/`, `public/`, `tests/task-manager/`, `server.js`) |
 
@@ -254,6 +254,9 @@ C:\PROJECT-TASK-MANAGER\
 | D-10 | Copiar la base canónica de tareas al proyecto nuevo | Decidido por Alfredo: los datos reales sirven además como banco de pruebas. Ejecutado y verificado (sección 14.1). |
 | D-11 | Adoptar el contrato de flujo de Git del proyecto de origen | Decidido por Alfredo. Aporta rama por tarea, commits pequeños con prefijo de tipo, `CHANGELOG.md` al día y etiquetas SemVer solo al publicar. |
 | D-12 | La documentación vive en `docs/` en la raíz | El proyecto ya no es un módulo dentro de otro producto: tenerla en `src/task-manager/docs/` sugeriría que solo documenta el frontend, cuando cubre también el servidor. |
+| D-13 | La API valida la prioridad en 0-3 y rechaza el resto | Decidido por Alfredo (QA-2). `tk` acepta cualquier entero, pero la interfaz solo representa cuatro niveles: sin validar, un valor de 4 o más se mostraba como «Sin prioridad» y no se podía volver a elegir. |
+| D-14 | `close_reason` solo se presenta cuando la tarea está cerrada | Decidido por Alfredo (QA-3). Se corrige al presentar los datos, no escribiendo en la base de `tk`, que no ofrece forma de limpiarlo y no nos pertenece (D-5). |
+| D-15 | La interfaz se llama «Gestor de tareas» | Decidido por Alfredo (QA-5). Deja de nombrar al producto del que se extrajo. Marca del icono: «G». |
 
 ---
 
@@ -346,10 +349,10 @@ Todas verificadas ejecutando `tk.exe` 0.2.4 sobre una base desechable.
 |---|---|---|
 | RN-01 | **No existe borrado.** `tk delete` no es un subcomando válido (código 2). Lo máximo es cerrar. | Verificado |
 | RN-02 | **No existe «reabrir».** Se hace con `update <id> -s open`. | Verificado |
-| RN-03 | Tras reabrir, `close_reason` **conserva el valor anterior** (`"done"`). El estado y el motivo quedan incoherentes. | Verificado |
+| RN-03 | Tras reabrir, `close_reason` **conserva el valor anterior** (`"done"`) en la base de `tk`. **El servidor no lo propaga**: solo presenta el motivo cuando la tarea está cerrada (D-14). | Verificado |
 | RN-04 | `--claim` asigna `assignee = "agent"` de forma fija, sin poder elegir el nombre. | Verificado |
 | RN-05 | Cerrar una tarea con hijas abiertas **falla** (código 1) con el mensaje `has N open dependent(s)`. Requiere `--force`. | Verificado |
-| RN-06 | La prioridad **no está validada**: `-p 5` se acepta y se guarda. La ayuda del CLI documenta 0-3; el README de tacks, 0-4. | Verificado |
+| RN-06 | `tk` **no valida la prioridad**: `-p 5` se acepta y se guarda. La ayuda del CLI documenta 0-3; el README de tacks, 0-4. **El servidor sí la valida** en 0-3 (D-13). | Verificado |
 | RN-07 | `blocked` **no es un estado almacenado**. `tk blocked` devuelve las tareas con su estado original (`open`). El estado `blocked` lo calcula el servidor. | Verificado |
 | RN-08 | `dep add` / `dep remove` **no devuelven JSON aunque se pase `--json`**: devuelven texto (`Added dependency: A is blocked by B`). El éxito se determina por el código de salida, no por el parseo. | Verificado |
 | RN-09 | Las dependencias tienen **detección de ciclos** y de duplicados; ambas fallan con código 1 y mensaje explícito. | Verificado |
@@ -552,9 +555,13 @@ comportamiento se puede cambiar sin tocar código.
 | `tk/.tacks/tacks.db` | Copiada | Hash `68F2D934…F274` idéntico al zip; 30 tareas |
 | Lectura end-to-end | Verificada | Desde `tk/`, `tk.exe --json list -a` devuelve 30 tareas (15 abiertas o en curso, 15 cerradas) |
 | Build del frontend | Verificado | `npm run build` → `app-vue.js` (74.258 B) y `app-vue.css` (44.103 B) con **hash idéntico** a los artefactos del origen |
-| Línea base vigente de artefactos | Registrada | Tras el arreglo de TM-R11: `app-vue.js` (77.953 B) `03064BC8…3362`; `app-vue.css` (44.103 B) `7A0D1A69…F38B7`, sin cambios porque no se tocó ningún estilo |
+| Línea base vigente de artefactos | Registrada | `app-vue.js` (77.934 B) `C6692D3C…FB14`; `app-vue.css` (44.103 B) `7A0D1A69…F38B7`, sin cambios porque no se ha tocado ningún estilo. Sustituye a la línea base de la extracción: el frontend ya ha divergido a propósito. |
 | Suite de pruebas | Verificada | `vitest run` → 5 archivos, 28 pruebas, todas en verde |
 | Foco de los diálogos (TM-R11) | Verificado | Algoritmo cubierto por 10 pruebas; el cableado de Vue se verificó en navegador el 19/09/2026: el foco entra, el tabulador no se escapa y vuelve al control de origen. Sin prueba que lo proteja de una regresión (TM-R4). |
+| Validación de prioridad (QA-2, D-13) | Verificada | Rechazados con 400: 5, −1, 99, 4, «abc» y 1,5. Aceptados 0, 1, 2 y 3. `update` con 7, rechazado. |
+| Coherencia de `close_reason` (QA-3, D-14) | Verificada | Tarea cerrada y reabierta: la API devuelve `null` en la respuesta, en `show` y en `list`, mientras `tk` conserva `done` en la base. |
+| Marca visible (QA-5, D-15) | Verificada | Título de la página y cabecera pasan a «Gestor de tareas»; el bundle servido ya no contiene `Tacks Workspace` ni `ChatVoiceAgent`. |
+| Sin regresión en el backlog real | Verificado | 30 tareas, 23 etiquetas y los mismos conteos por estado que antes de los cambios. |
 | Servidor (F6) | Verificado | 19 endpoints ejercitados: 8 de lectura de tareas, 6 de escritura, 5 de etiquetas. Incluye creación, edición con diff de etiquetas, comentario, dependencia, retirada de dependencia, reparentado, promoción a raíz, reclamación y cierre. |
 | Estado "blocked" cruzado (RF-11) | Verificado | Con un bloqueante abierto, `/api/tk/list` devuelve la tarea como `blocked` aunque `tk` la guarde como `open`; al retirarlo vuelve a su estado real. |
 | Guardián de cierre (RN-05) | Verificado | Cerrar una tarea con hijas abiertas devuelve el error de `tk` y **no** se reintenta con `--force`; la tarea permanece abierta. |
@@ -625,19 +632,18 @@ sobre el proyecto antiguo, fuera del alcance de este PRD.
 - [ ] **CA-16** No hay ningún `fetch(` fuera de `api/tk-client.js`.
 - [ ] **CA-17** El proyecto no tiene acoplamiento de ejecución con el anfitrión: ninguna variable de entorno, ruta ni módulo de ChatVoiceAgent participa en el arranque. Se verifican solo las menciones en código y comentarios; las de la documentación se resuelven en F9.
 
-  Estado actual — 4 menciones, ninguna es una dependencia:
+  Estado actual — **2 menciones, ninguna visible al usuario y ninguna es una
+  dependencia**:
 
   | Ubicación | Tipo | Acción |
   |---|---|---|
   | `server/index.js:25` | Comentario que explica la elección del puerto 8890 | Se conserva: es contexto útil |
   | `server/tasks.js:3` | Comentario de procedencia de los handlers | Se conserva: trazabilidad de la extracción |
-  | `src/task-manager/app-shell.js:18` | **Etiqueta visible en la interfaz**: `ChatVoiceAgent · Vue 3` | Pendiente de decisión (QA-5) |
 
-  La tercera es la única visible para el usuario: la cabecera del gestor todavía
-  muestra el nombre del producto del que se extrajo. Corregirla es un cambio
-  deliberado de marca, no un defecto de la extracción, y rompería la
-  reproducibilidad byte a byte del build mientras no se acepte como divergencia
-  intencionada. Depende de QA-5.
+  La tercera mención que había —la etiqueta visible `ChatVoiceAgent · Vue 3` en
+  la cabecera— **desapareció al resolver QA-5**: la interfaz se llama ahora
+  «Gestor de tareas». Verificado: el bundle servido ya no contiene ninguna de las
+  dos cadenas anteriores.
 - [ ] **CA-18** `tk.exe` se invoca siempre con `execFile` y argumentos en array.
 - [ ] **CA-19** Ninguna petición saliente de red.
 - [ ] **CA-20** Los archivos `.db` están excluidos del control de versiones.
@@ -663,14 +669,13 @@ la extracción** (NO-7), pero deben seguir registrados y con su prueba de cierre
 | TM-R7 | El diccionario `busy` conserva claves con valor `false`. | Crecimiento leve de memoria | Baja |
 
 **El registro vivo de riesgos está en [`docs/known-risks.md`](docs/known-risks.md)**,
-que es donde se añaden y se cierran. Además de los siete heredados, contiene
-tres surgidos durante la extracción y su desarrollo:
+que es donde se añaden y se cierran. Además de los siete heredados, contiene dos
+surgidos durante la extracción y su desarrollo:
 
 | ID | Riesgo | Prioridad |
 |---|---|---|
 | TM-R8 | El servidor no tiene pruebas automatizadas | Media |
 | TM-R9 | El renombrado de etiquetas en cascada no es transaccional | Media |
-| TM-R10 | La marca visible sigue siendo la del producto de origen | Media |
 
 **TM-R11** (accesibilidad de los diálogos) se registró, se corrigió y está
 cerrado. Su diagnóstico inicial contenía un error —afirmaba que Escape no
@@ -682,8 +687,8 @@ cerraba los diálogos cuando sí lo hacía— y la corrección queda documentada
 | ID | Riesgo | Probabilidad | Impacto | Mitigación |
 |---|---|---|---|---|
 | RX-1 | ~~Divergencia de datos si se copia `tacks.db` y se sigue usando el original.~~ **Resuelto**: se copió la base canónica y la del origen no era la que el servidor usaba. | Baja | Bajo | Decisión D-10 ejecutada y verificada por hash. Ver sección 14.2 para las tres bases divergentes. |
-| RX-2 | La prioridad no está validada por `tk`; un valor ≥ 4 creado por CLI o por un agente se muestra como «Sin prioridad» porque la interfaz solo conoce 0-3. | Media | Medio | Validar 0-3 en la API propia y decidir si se amplía la interfaz (sección 19). |
-| RX-3 | `close_reason` queda obsoleto al reabrir una tarea: estado `open` con motivo `done`. | Alta | Bajo | Mostrar el motivo solo cuando el estado sea `done`, o limpiarlo al reabrir. |
+| RX-2 | ~~La prioridad no está validada por `tk`; un valor ≥ 4 creado por CLI o por un agente se muestra como «Sin prioridad».~~ **Resuelto**: la API valida 0-3 y rechaza el resto con 400. | Baja | Bajo | Decisión D-13, ejecutada y verificada. Queda la asimetría conocida: `tk` por CLI sigue aceptando cualquier entero. |
+| RX-3 | ~~`close_reason` queda obsoleto al reabrir una tarea: estado `open` con motivo `done`.~~ **Resuelto** en la presentación de los datos. | Baja | Bajo | Decisión D-14, ejecutada y verificada. **El valor obsoleto sigue en la base de `tk`**, que no ofrece forma de borrarlo. |
 | RX-4 | Un renombrado de etiqueta en cascada es una secuencia de invocaciones del CLI sin transacción; un fallo intermedio deja estado parcial. | Media | Medio | Ya hay reversión implementada; debe conservarse y probarse. |
 | RX-5 | Al copiar solo los artefactos en vez de la fuente, el proyecto quedaría sin mantenimiento posible. | Baja | Alto | D-2 ya resuelto: se trae la fuente y el pipeline. |
 | RX-6 | `node:sqlite` es relativamente reciente; la API puede cambiar entre versiones de Node. | Baja | Medio | Fijar la versión mínima de Node en `engines` y documentarla. |
@@ -741,15 +746,15 @@ registrarse con fecha, comando o URL y resultado. Anchuras de referencia: **1440
 
 ## 19. Cuestiones abiertas
 
-Requieren decisión de Alfredo antes o durante la fase indicada.
+| QA-1 a QA-5 **resueltas**. Quedan estas dos, ninguna bloqueante.
 
 | ID | Cuestión | Fase | Recomendación |
 |---|---|---|---|
 | QA-1 | ~~¿Qué hacemos con los datos de tareas: copiar, compartir o empezar vacío?~~ **RESUELTA**: copiar. Ejecutado (D-10, sección 14.1). | F3 | — |
-| QA-2 | ¿Se amplía la interfaz para soportar prioridades 4 y superiores, o se valida 0-3 en la API? | F6 | Validar 0-3; ampliar solo si el CLI deja de aceptar valores libres |
-| QA-3 | ¿Se limpia `close_reason` al reabrir una tarea? | F6 | Sí, limpiarlo, para no mostrar un motivo incoherente |
+| QA-2 | ~~¿Se amplía la interfaz para soportar prioridades 4 y superiores, o se valida 0-3 en la API?~~ **RESUELTA**: validar 0-3 en la API. Ejecutado y verificado. | F6 | — |
+| QA-3 | ~~¿Se limpia `close_reason` al reabrir una tarea?~~ **RESUELTA**: sí, en la presentación de los datos; `tk` no ofrece forma de borrarlo en la base. Ejecutado y verificado. | F6 | — |
 | QA-4 | ~~¿El proyecto nuevo se publica como repositorio git propio?~~ **RESUELTA**: sí. Se adopta el contrato de flujo de Git del proyecto de origen y se hace el commit inicial. | F1 | — |
-| QA-5 | **Marca visible**: la cabecera de la interfaz muestra `Tacks Workspace` como título y `ChatVoiceAgent · Vue 3` como subtítulo (`src/task-manager/app-shell.js:18`). ¿Se renombra? | F9 | Sí: a «Gestor de tareas». Es un cambio de una línea, pero es una divergencia deliberada respecto al original y conviene hacerla de una vez, con el build regenerado y la prueba de reproducibilidad actualizada |
+| QA-5 | ~~**Marca visible**: la cabecera mostraba `Tacks Workspace` y `ChatVoiceAgent · Vue 3`.~~ **RESUELTA**: la interfaz se llama «Gestor de tareas» y deja de nombrar al producto de origen. Ejecutado y verificado. | F9 | — |
 | QA-6 | ¿Se implementa `tk prime` como panel de contexto, hoy no usado? | Posterior | No en este alcance |
 | QA-7 | ¿Se abordan TM-R1 y TM-R2 tras la extracción? | H4+ | Sí, son los dos riesgos de prioridad alta |
 

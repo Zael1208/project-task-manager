@@ -55,6 +55,9 @@ independiente, sin dependencias de otros productos.
   versiones exactas** para que el build sea reproducible byte a byte.
 - El documento de relevo pasa a ser una **guía de desarrollo**: el estado vivo se
   registra en el `PRD.md` y en este `CHANGELOG.md`.
+- La interfaz pasa a llamarse **«Gestor de tareas»** en la cabecera y en el
+  título de la página, y deja de mostrar el nombre del producto del que se
+  extrajo. La marca del icono pasa de «T» a «G».
 
 ### Corregido
 
@@ -74,6 +77,15 @@ independiente, sin dependencias de otros productos.
 - **La tarjeta de confirmación de borrado tiene nombre accesible**: declara
   `role="dialog"` pero no tenía `aria-label` ni `aria-labelledby`, así que el
   lector de pantalla la anunciaba sin título.
+- **La prioridad se valida.** El gestor de tareas subyacente acepta cualquier
+  entero como prioridad —se comprobó con un valor 5— pero la interfaz solo
+  representa cuatro niveles, de 0 a 3. Se guardaba el valor y luego aparecía como
+  «Sin prioridad», sin poder volver a elegirlo. Ahora la API rechaza lo que no
+  puede representar.
+- **Al reabrir una tarea deja de mostrarse el motivo de cierre anterior.** El
+  gestor subyacente no permite borrarlo, así que una tarea abierta podía seguir
+  diciendo que se cerró por `done`. La API solo presenta el motivo cuando la
+  tarea está realmente cerrada.
 
 ### Seguridad
 
@@ -90,12 +102,11 @@ independiente, sin dependencias de otros productos.
   **30 tareas reales**, que sirven además como banco de pruebas.
 - El build reproduce `app-vue.js` y `app-vue.css` con **hash idéntico** a los
   artefactos del proyecto de origen, lo que demuestra que la fuente y el pipeline
-  se trasladaron sin perder nada.
+  se trasladaron sin perder nada. Esa igualdad se mantuvo hasta el primer cambio
+  funcional del frontend; desde entonces la línea base es la de este proyecto.
 - La suite de pruebas se trasladó intacta: 4 archivos, 18 pruebas. Después se
   añadió `dialog-focus.test.js`, así que la suite vigente tiene 5 archivos y 28
   pruebas.
-- **Pendiente de decisión**: la cabecera de la interfaz todavía muestra el nombre
-  del producto de origen. Véase TM-R10 en `docs/known-risks.md`.
 
 ### Limitaciones conocidas de esta entrega
 
@@ -107,11 +118,9 @@ extracción. El detalle está en [`docs/known-risks.md`](docs/known-risks.md).
 - **No hay pruebas que monten componentes Vue** (TM-R4): la suite prueba lógica
   con contextos mínimos y un DOM simulado, no plantillas ni comportamiento real
   de navegador. El cableado de foco de los diálogos se comprueba a mano.
-- **La prioridad no está validada**: `tk` acepta valores de 4 y superiores, y la
-  interfaz solo representa de 0 a 3, así que se muestran como «Sin prioridad»
-  (RX-2). Pendiente de decisión.
-- **Al reabrir una tarea**, el motivo de cierre conserva su valor anterior y una
-  tarea abierta puede mostrar el motivo `done` (RX-3). Pendiente de decisión.
 - **El renombrado de etiquetas en cascada no es transaccional** (TM-R9): si falla
   a mitad, se revierte, y las tareas que no se pudieron restaurar se indican en
   el mensaje de error.
+- **El motivo de cierre obsoleto sigue en la base de datos.** La API ya no lo
+  presenta en tareas abiertas, pero `tk` no ofrece forma de borrarlo y su base no
+  se toca, así que consultándola por CLI se sigue viendo.

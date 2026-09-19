@@ -132,6 +132,18 @@ ubicación de la base no depende del directorio de trabajo.
 texto. Por eso existe `runTkText()`, que determina el éxito por el código de
 salida real del proceso.
 
+### Correcciones de presentación
+
+`tk` es de solo lectura para nosotros: su base no se toca nunca. Cuando su
+comportamiento deja un estado incoherente, la corrección se hace al presentar los
+datos, no escribiendo en su base. `normalizeTask()` en
+[`server/tk.js`](../server/tk.js) es el único sitio donde ocurre, y hoy hace una
+cosa: no presentar `close_reason` mientras la tarea no esté cerrada, porque `tk`
+no ofrece forma de limpiarlo al reabrir.
+
+Es una distinción importante: **el valor obsoleto sigue en la base**. Si algún día
+se lee `tacks.db` por otra vía, ahí estará. La API es la que no lo propaga.
+
 ## Flujo de carga
 
 `reloadWorkspace(preferredId)` coordina la carga completa:
