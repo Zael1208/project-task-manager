@@ -3,10 +3,10 @@
 | Campo | Valor |
 |---|---|
 | Producto | Gestor de tareas local (nombre de trabajo: **Task Manager**) |
-| Versión del documento | 1.7 |
+| Versión del documento | 1.8 |
 | Fecha | 19 de septiembre de 2026 |
 | Autor | Alfredo González Portero |
-| Estado | F1 a F9 ejecutadas y las cuestiones de producto cerradas (QA-1 a QA-5). Hitos H1 y H2 alcanzados, commit inicial creado y verificación funcional en navegador correcta. Queda deuda registrada en `docs/known-risks.md`, ninguna bloqueante. |
+| Estado | Extracción completa (F1 a F9), cuestiones de producto cerradas (QA-1 a QA-5) y los dos riesgos de prioridad alta resueltos (TM-R1 y TM-R2). Queda deuda técnica registrada en `docs/known-risks.md`, ninguna bloqueante. |
 | Repositorio destino | `C:\PROJECT-TASK-MANAGER` |
 | Origen del código | `C:\PROJECT-CHAT-VOICE-AGENT` (`tk/`, `src/task-manager/`, `src/shared/tasks/`, `public/`, `tests/task-manager/`, `server.js`) |
 
@@ -128,8 +128,10 @@ Queda explícitamente **fuera del alcance** de este PRD:
   producto es local y de un solo usuario.
 - **NO-6** — Editor colaborativo o en tiempo real. La recarga se hace por
   consulta, no por websockets.
-- **NO-7** — Resolver los riesgos heredados TM-R1 a TM-R7 (sección 16). Se
-  documentan y se planifican, no se corrigen en la extracción.
+- **NO-7** — Resolver los riesgos heredados TM-R1 a TM-R7 **durante la extracción**
+  (sección 16). Se documentan y se planifican, no se mezclan con el traslado. Una
+  vez cerrada la extracción sí se han abordado los dos de prioridad alta, TM-R1 y
+  TM-R2, como trabajo propio y con su prueba; los cinco restantes siguen abiertos.
 - **NO-8** — Funciones de tacks que hoy no se usan (`tk serve`, `init-rules`,
   plugin de Claude Code, `prime` como contexto de agente).
 
@@ -234,7 +236,7 @@ C:\PROJECT-TASK-MANAGER\
 ├── public/
 │   ├── task-manager/         app-vue.html (a mano) + artefactos generados
 │   └── vendor/               vue.global.dev.js / .prod.js
-├── tests/task-manager/       28 pruebas Vitest
+├── tests/task-manager/       30 pruebas Vitest
 └── docs/                     architecture, contracts, operations, known-risks
 ```
 
@@ -257,6 +259,7 @@ C:\PROJECT-TASK-MANAGER\
 | D-13 | La API valida la prioridad en 0-3 y rechaza el resto | Decidido por Alfredo (QA-2). `tk` acepta cualquier entero, pero la interfaz solo representa cuatro niveles: sin validar, un valor de 4 o más se mostraba como «Sin prioridad» y no se podía volver a elegir. |
 | D-14 | `close_reason` solo se presenta cuando la tarea está cerrada | Decidido por Alfredo (QA-3). Se corrige al presentar los datos, no escribiendo en la base de `tk`, que no ofrece forma de limpiarlo y no nos pertenece (D-5). |
 | D-15 | La interfaz se llama «Gestor de tareas» | Decidido por Alfredo (QA-5). Deja de nombrar al producto del que se extrajo. Marca del icono: «G». |
+| D-16 | En `mutate()`, una recarga superada (`null`) **sí** muestra la confirmación | Resolución de TM-R2. `null` no es un fallo: otra recarga posterior ya ha publicado un estado que incluye este cambio. Se descartó serializar o agrupar recargas por ser más complejo sin aportar nada aquí. El caso `false` sigue siendo un fallo explícito. |
 
 ---
 
@@ -555,13 +558,14 @@ comportamiento se puede cambiar sin tocar código.
 | `tk/.tacks/tacks.db` | Copiada | Hash `68F2D934…F274` idéntico al zip; 30 tareas |
 | Lectura end-to-end | Verificada | Desde `tk/`, `tk.exe --json list -a` devuelve 30 tareas (15 abiertas o en curso, 15 cerradas) |
 | Build del frontend | Verificado | `npm run build` → `app-vue.js` (74.258 B) y `app-vue.css` (44.103 B) con **hash idéntico** a los artefactos del origen |
-| Línea base vigente de artefactos | Registrada | `app-vue.js` (77.934 B) `C6692D3C…FB14`; `app-vue.css` (44.103 B) `7A0D1A69…F38B7`, sin cambios porque no se ha tocado ningún estilo. Sustituye a la línea base de la extracción: el frontend ya ha divergido a propósito. |
-| Suite de pruebas | Verificada | `vitest run` → 5 archivos, 28 pruebas, todas en verde |
+| Línea base vigente de artefactos | Registrada | `app-vue.js` (78.083 B) `AAEC5225…6C33`; `app-vue.css` (44.103 B) `7A0D1A69…F38B7`, sin cambios porque no se ha tocado ningún estilo. Sustituye a la línea base de la extracción: el frontend ya ha divergido a propósito. |
+| Suite de pruebas | Verificada | `vitest run` → 5 archivos, 30 pruebas, todas en verde |
 | Foco de los diálogos (TM-R11) | Verificado | Algoritmo cubierto por 10 pruebas; el cableado de Vue se verificó en navegador el 19/09/2026: el foco entra, el tabulador no se escapa y vuelve al control de origen. Sin prueba que lo proteja de una regresión (TM-R4). |
 | Validación de prioridad (QA-2, D-13) | Verificada | Rechazados con 400: 5, −1, 99, 4, «abc» y 1,5. Aceptados 0, 1, 2 y 3. `update` con 7, rechazado. |
 | Coherencia de `close_reason` (QA-3, D-14) | Verificada | Tarea cerrada y reabierta: la API devuelve `null` en la respuesta, en `show` y en `list`, mientras `tk` conserva `done` en la base. |
 | Marca visible (QA-5, D-15) | Verificada | Título de la página y cabecera pasan a «Gestor de tareas»; el bundle servido ya no contiene `Tacks Workspace` ni `ChatVoiceAgent`. |
 | Sin regresión en el backlog real | Verificado | 30 tareas, 23 etiquetas y los mismos conteos por estado que antes de los cambios. |
+| TM-R1 y TM-R2 (QA-7) | Verificados | Una prueba por riesgo en `task-actions.test.js`. **Ambas se comprobó que fallan sin el arreglo**: con el código anterior, 2 fallos; con el arreglo, 30 pruebas en verde. |
 | Servidor (F6) | Verificado | 19 endpoints ejercitados: 8 de lectura de tareas, 6 de escritura, 5 de etiquetas. Incluye creación, edición con diff de etiquetas, comentario, dependencia, retirada de dependencia, reparentado, promoción a raíz, reclamación y cierre. |
 | Estado "blocked" cruzado (RF-11) | Verificado | Con un bloqueante abierto, `/api/tk/list` devuelve la tarea como `blocked` aunque `tk` la guarde como `open`; al retirarlo vuelve a su estado real. |
 | Guardián de cierre (RN-05) | Verificado | Cerrar una tarea con hijas abiertas devuelve el error de `tk` y **no** se reintenta con `--force`; la tarea permanece abierta. |
@@ -627,7 +631,7 @@ sobre el proyecto antiguo, fuera del alcance de este PRD.
 ### 15.2 Técnicos
 
 - [ ] **CA-13** `package.json` no declara ninguna dependencia de runtime.
-- [ ] **CA-14** `npm test` pasa: 5 archivos, 28 pruebas.
+- [ ] **CA-14** `npm test` pasa: 5 archivos, 30 pruebas.
 - [ ] **CA-15** `npm run build` regenera los artefactos sin diferencias inesperadas.
 - [ ] **CA-16** No hay ningún `fetch(` fuera de `api/tk-client.js`.
 - [ ] **CA-17** El proyecto no tiene acoplamiento de ejecución con el anfitrión: ninguna variable de entorno, ruta ni módulo de ChatVoiceAgent participa en el arranque. Se verifican solo las menciones en código y comentarios; las de la documentación se resuelven en F9.
@@ -655,18 +659,20 @@ sobre el proyecto antiguo, fuera del alcance de este PRD.
 
 ### 16.1 Riesgos heredados del módulo actual
 
-Se traen tal cual desde `src/task-manager/docs/known-risks.md`. **No se corrigen en
-la extracción** (NO-7), pero deben seguir registrados y con su prueba de cierre.
+Se trajeron tal cual desde `src/task-manager/docs/known-risks.md` con el criterio de
+**no corregirlos durante la extracción** (NO-7), para no mezclar la extracción con
+cambios de comportamiento. Una vez cerrada la extracción se han abordado los dos
+de prioridad alta.
 
-| ID | Riesgo | Impacto | Prioridad |
-|---|---|---|---|
-| TM-R1 | Un fallo tardío de detalle puede publicar un error sobre una selección más reciente (la rama `catch` no comprueba vigencia). | Aviso de error engañoso | Alta |
-| TM-R2 | Dos mutaciones con claves distintas solapan recargas; la anterior devuelve `null` y se queda sin confirmación visible. | Escritura confirmada sin acuse | Alta |
-| TM-R3 | Un ciclo completo de padres puede ocultar tareas: el recorrido empieza solo en raíces. | Tareas invisibles sin error | Media |
-| TM-R4 | No hay pruebas de componentes ni de navegador: plantillas, `v-model`, foco, teclado y responsive sin cubrir. | Contrato visual puede romperse en verde | Media |
-| TM-R5 | Cualquier respuesta 404 con JSON inválido se interpreta como capacidad deshabilitada. | Problema de ruta o proxy enmascarado | Media |
-| TM-R6 | Las acciones desconocidas del inspector se ignoran: el `switch` no tiene rama `default`. | Control que no responde, difícil de diagnosticar | Baja |
-| TM-R7 | El diccionario `busy` conserva claves con valor `false`. | Crecimiento leve de memoria | Baja |
+| ID | Riesgo | Impacto | Prioridad | Estado |
+|---|---|---|---|---|
+| TM-R1 | Un fallo tardío de detalle podía publicar un error sobre una selección más reciente. | Aviso de error engañoso | Alta | **Resuelto** (QA-7) |
+| TM-R2 | Dos mutaciones con claves distintas solapan recargas; la anterior devolvía `null` y se quedaba sin confirmación visible. | Escritura confirmada sin acuse | Alta | **Resuelto** (QA-7) |
+| TM-R3 | Un ciclo completo de padres puede ocultar tareas: el recorrido empieza solo en raíces. | Tareas invisibles sin error | Media | Abierto |
+| TM-R4 | No hay pruebas de componentes ni de navegador: plantillas, `v-model`, foco, teclado y responsive sin cubrir. | Contrato visual puede romperse en verde | Media | Abierto |
+| TM-R5 | Cualquier respuesta 404 con JSON inválido se interpreta como capacidad deshabilitada. | Problema de ruta o proxy enmascarado | Media | Abierto |
+| TM-R6 | Las acciones desconocidas del inspector se ignoran: el `switch` no tiene rama `default`. | Control que no responde, difícil de diagnosticar | Baja | Abierto |
+| TM-R7 | El diccionario `busy` conserva claves con valor `false`. | Crecimiento leve de memoria | Baja | Abierto |
 
 **El registro vivo de riesgos está en [`docs/known-risks.md`](docs/known-risks.md)**,
 que es donde se añaden y se cierran. Además de los siete heredados, contiene dos
@@ -756,7 +762,7 @@ registrarse con fecha, comando o URL y resultado. Anchuras de referencia: **1440
 | QA-4 | ~~¿El proyecto nuevo se publica como repositorio git propio?~~ **RESUELTA**: sí. Se adopta el contrato de flujo de Git del proyecto de origen y se hace el commit inicial. | F1 | — |
 | QA-5 | ~~**Marca visible**: la cabecera mostraba `Tacks Workspace` y `ChatVoiceAgent · Vue 3`.~~ **RESUELTA**: la interfaz se llama «Gestor de tareas» y deja de nombrar al producto de origen. Ejecutado y verificado. | F9 | — |
 | QA-6 | ¿Se implementa `tk prime` como panel de contexto, hoy no usado? | Posterior | No en este alcance |
-| QA-7 | ¿Se abordan TM-R1 y TM-R2 tras la extracción? | H4+ | Sí, son los dos riesgos de prioridad alta |
+| QA-7 | ~~¿Se abordan TM-R1 y TM-R2 tras la extracción?~~ **RESUELTA**: sí, y ambos están corregidos con su prueba. | H4+ | — |
 
 ---
 

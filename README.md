@@ -139,7 +139,7 @@ git status --short
 
 El build produce `app-vue.js` y `app-vue.css` de forma reproducible. La suite
 cubre el cliente HTTP, el mapper, el árbol, las acciones de estado y el
-comportamiento de foco de los diálogos (5 archivos, 28 pruebas).
+comportamiento de foco de los diálogos (5 archivos, 30 pruebas).
 
 **El servidor no tiene pruebas automatizadas** (TM-R8): su verificación es manual
 y está descrita en [`docs/operations.md`](docs/operations.md).

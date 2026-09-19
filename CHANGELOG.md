@@ -86,6 +86,16 @@ independiente, sin dependencias de otros productos.
   gestor subyacente no permite borrarlo, así que una tarea abierta podía seguir
   diciendo que se cerró por `done`. La API solo presenta el motivo cuando la
   tarea está realmente cerrada.
+- **Un fallo tardío del detalle ya no publica un error sobre otra selección.** Si
+  se cambiaba de tarea mientras la anterior aún se estaba cargando y esa carga
+  fallaba, el aviso de error aparecía sobre la tarea nueva, que sí era válida. La
+  rama de error no comprobaba que su petición siguiera siendo la vigente; la rama
+  correcta sí lo hacía.
+- **Una escritura confirmada ya no se queda sin confirmación visible.** Cuando
+  dos operaciones distintas lanzaban recargas solapadas, la más antigua quedaba
+  superada y no mostraba nada, de modo que la operación parecía no haberse
+  realizado aunque estaba guardada. Ahora confirma igualmente, porque la recarga
+  más reciente publica un estado que ya incluye ese cambio.
 
 ### Seguridad
 
@@ -105,8 +115,8 @@ independiente, sin dependencias de otros productos.
   se trasladaron sin perder nada. Esa igualdad se mantuvo hasta el primer cambio
   funcional del frontend; desde entonces la línea base es la de este proyecto.
 - La suite de pruebas se trasladó intacta: 4 archivos, 18 pruebas. Después se
-  añadió `dialog-focus.test.js`, así que la suite vigente tiene 5 archivos y 28
-  pruebas.
+  añadieron `dialog-focus.test.js` y dos pruebas de estado, así que la suite
+  vigente tiene 5 archivos y 30 pruebas.
 
 ### Limitaciones conocidas de esta entrega
 

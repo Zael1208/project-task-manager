@@ -146,7 +146,7 @@ recorrer los endpoints afectados. No hay pruebas automatizadas del servidor
 
 ## Evidencia
 
-La suite automatizada contiene 5 archivos y 28 pruebas. El build reproduce los
+La suite automatizada contiene 5 archivos y 30 pruebas. El build reproduce los
 artefactos con hash idéntico a la línea base de la extracción.
 
 No hay log de CI, ni pruebas de navegador, ni cobertura automatizada del

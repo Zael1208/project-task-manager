@@ -310,6 +310,7 @@
           this.syncEditDraft();
           this.isMobileInspectorOpen = openOnMobile;
         } catch (error) {
+          if (requestSequence !== this.detailRequestSequence || this.selectedTaskId !== id) return;
           this.handleError(error);
         } finally {
           this.setBusy(`detail:${id}`, false);
@@ -335,7 +336,9 @@
           const result = await request();
           const nextId = options.useResultId && result?.id ? result.id : preferredId;
           const reloaded = await this.reloadWorkspace(nextId);
-          if (reloaded === true && !this.errorMessage && !this.unavailable) this.showToast(message);
+          if ((reloaded === true || reloaded === null) && !this.errorMessage && !this.unavailable) {
+            this.showToast(message);
+          }
           if (reloaded === false) {
             const reason = this.errorMessage || "No se pudo recuperar el estado actualizado.";
             this.errorMessage = `${message} La operaci\xF3n fue confirmada, pero no se pudieron actualizar los datos. ${reason}`;

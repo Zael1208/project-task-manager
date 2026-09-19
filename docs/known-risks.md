@@ -8,42 +8,8 @@ entrada en el mismo cambio y añada la prueba que evita su regreso.
 
 ## Alta prioridad
 
-### TM-R1: un fallo de detalle obsoleto puede publicar un error
-
-**Ubicación:** [`state/task-actions.js`](../src/task-manager/state/task-actions.js),
-`loadTaskDetail()`.
-
-La respuesta correcta comprueba `detailRequestSequence` y `selectedTaskId` antes
-de escribir `detail`. La rama `catch` no realiza esa comprobación. Si una
-solicitud antigua falla después de seleccionar y cargar otra tarea, puede
-sobrescribir `errorMessage` aunque sus datos ya no sean relevantes.
-
-**Impacto:** aviso de error engañoso sobre una selección válida.
-
-**Mitigación actual:** los datos obsoletos no sustituyen el detalle; el riesgo se
-limita al mensaje de error.
-
-**Resolución recomendada:** aplicar la misma guarda de vigencia antes de
-`handleError()` y cubrir la carrera con una prueba.
-
-### TM-R2: mutaciones distintas pueden solapar sus recargas
-
-**Ubicación:** [`state/task-actions.js`](../src/task-manager/state/task-actions.js),
-`mutate()` y `reloadWorkspace()`.
-
-Las claves busy impiden repetir la misma operación, pero permiten mutaciones con
-claves diferentes. Cada una inicia una recarga. La secuencia hace que la recarga
-anterior devuelva `null`; `mutate()` no presenta toast ni error para ese retorno.
-
-**Impacto:** una escritura confirmada puede quedar sin confirmación visible. La
-última recarga sigue protegiendo el estado contra datos antiguos.
-
-**Mitigación actual:** el estado final procede de la recarga más reciente y los
-controles de una misma operación no se duplican.
-
-**Resolución recomendada:** definir semántica para `null` dentro de `mutate()` o
-serializar/coalescer recargas posteriores a escrituras; probar dos claves en
-paralelo.
+No queda ninguno. TM-R1 y TM-R2, los dos que había, están resueltos: véase
+「TM-R1 y TM-R2」 en la sección de resueltos, más abajo.
 
 ## Prioridad media
 
@@ -200,6 +166,36 @@ problema real; no es prioritario frente a los riesgos de concurrencia.
 se ve. La API es la que no lo propaga. Es una limitación deliberada y conviene
 tenerla presente si algún día se lee `tacks.db` por otra vía.
 
+### TM-R1 y TM-R2: carreras de carga y mutación — resueltos
+
+Eran los dos únicos de prioridad alta, y los dos con el mismo patrón de fondo: una
+respuesta asíncrona que llega tarde y no comprueba si sigue siendo la vigente.
+
+**TM-R1 — un fallo de detalle obsoleto publicaba un error sobre otra selección.**
+La rama correcta de `loadTaskDetail()` comprobaba `detailRequestSequence` y
+`selectedTaskId` antes de escribir; la rama `catch` no. Si se cambiaba de tarea
+mientras la anterior seguía cargando y esa carga fallaba, el aviso de error
+aparecía sobre la tarea nueva, que sí era válida. Corregido aplicando **la misma
+guarda** en el `catch`, antes de `handleError()`.
+
+**TM-R2 — una escritura confirmada podía quedarse sin confirmación visible.**
+Las claves busy impiden repetir la misma operación, pero permiten dos distintas a
+la vez, cada una con su recarga. La segunda incrementa la secuencia, así que la
+recarga de la primera devuelve `null` y `mutate()` no mostraba nada: la operación
+parecía no haberse realizado, aunque estaba guardada.
+
+Se descartó serializar o agrupar las recargas —es más complejo y no aporta nada
+aquí— y se definió la semántica que faltaba: **`null` no significa fallo, sino
+que otra recarga posterior ha publicado ya un estado que incluye este cambio**, de
+modo que la confirmación es correcta. Se añadió `null` a la condición que muestra
+el aviso. El caso `false` sigue tratándose como fallo explícito, porque ahí la
+recarga sí falló y el usuario no debe reintentar a ciegas.
+
+**Cobertura:** dos pruebas nuevas en
+[`task-actions.test.js`](../tests/task-manager/state/task-actions.test.js), una por
+riesgo. **Ambas se comprobó que fallan sin el arreglo**, para que no fueran
+pruebas vacías que pasan por casualidad.
+
 ### TM-R11: accesibilidad de los diálogos — resuelto, con una corrección
 
 **Este riesgo se registró con un diagnóstico parcialmente erróneo y conviene
@@ -251,8 +247,8 @@ con DOM (TM-R4), y esa es la vía para cerrarlo de verdad.
 
 | Riesgo | Prueba mínima para cerrarlo |
 |---|---|
-| TM-R1 | Fallo tardío de detalle A después de confirmar detalle B |
-| TM-R2 | Dos mutaciones con claves distintas y recargas intercaladas |
+| TM-R1 | **Cubierto**: «does not publish an error from an obsolete task detail failure» |
+| TM-R2 | **Cubierto**: «confirms a mutation whose reload was superseded by a later one» |
 | TM-R3 | Ciclo de dos padres sin raíz |
 | TM-R4 | Montaje de inspector y recorrido responsive en navegador |
 | TM-R5 | Respuesta 404 con cuerpo no JSON |

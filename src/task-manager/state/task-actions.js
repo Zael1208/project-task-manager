@@ -69,6 +69,10 @@ export const taskActions = {
         this.syncEditDraft();
         this.isMobileInspectorOpen = openOnMobile;
       } catch (error) {
+        // La misma guarda de vigencia que la rama correcta. Sin ella, el fallo
+        // tardio de un detalle que ya no es el seleccionado publicaba un error
+        // sobre la seleccion actual, que si es valida.
+        if (requestSequence !== this.detailRequestSequence || this.selectedTaskId !== id) return;
         this.handleError(error);
       } finally {
         this.setBusy(`detail:${id}`, false);
@@ -94,7 +98,15 @@ export const taskActions = {
         const result = await request();
         const nextId = options.useResultId && result?.id ? result.id : preferredId;
         const reloaded = await this.reloadWorkspace(nextId);
-        if (reloaded === true && !this.errorMessage && !this.unavailable) this.showToast(message);
+        // `true` confirma la recarga. `null` significa que otra recarga
+        // posterior ha dejado obsoleta la de esta mutacion: la escritura ya se
+        // confirmo y esa recarga mas reciente publicara un estado que incluye
+        // este cambio, asi que la confirmacion sigue siendo cierta. Antes el
+        // caso `null` no avisaba de nada y la operacion parecia no haber
+        // ocurrido, aunque si se habia guardado.
+        if ((reloaded === true || reloaded === null) && !this.errorMessage && !this.unavailable) {
+          this.showToast(message);
+        }
         if (reloaded === false) {
           const reason = this.errorMessage || 'No se pudo recuperar el estado actualizado.';
           this.errorMessage = `${message} La operación fue confirmada, pero no se pudieron actualizar los datos. ${reason}`;
