@@ -82,7 +82,7 @@ componentes y responsive.
 
 La suite vive en `tests/task-manager/` y ejecuta módulos ES directamente.
 
-Cobertura actual (5 archivos, 28 pruebas):
+Cobertura actual (5 archivos, 30 pruebas):
 
 - **Cliente HTTP**: JSON válido, red, JSON inválido, error HTTP y capacidad TK
   deshabilitada.
@@ -183,7 +183,7 @@ referencia 1440, 1180, 720 y 390 caen dentro de alguno de ellos.
 | Fecha | Tipo | Alcance | Resultado |
 |---|---|---|---|
 | 2026-09-19 | Automatizada | `npm run build` | Artefactos con hash idéntico a la línea base de la extracción |
-| 2026-09-19 | Automatizada | `npm test` | 5 archivos, 28 pruebas, todas en verde |
+| 2026-09-19 | Automatizada | `npm test` | 5 archivos, 30 pruebas, todas en verde |
 | 2026-09-19 | Automatizada | Enlaces de la documentación | 72 comprobados, 0 rotos |
 | 2026-09-19 | Manual (API) | Los 19 endpoints contra datos reales y contra base desechable | Correcto; incluye el cruce de `blocked`, el guardián de cierre y la cascada de etiquetas |
 | 2026-09-19 | Manual (navegador) | Recorrido funcional de la aplicación | Correcto, verificado por Alfredo |
@@ -194,6 +194,7 @@ referencia 1440, 1180, 720 y 390 caen dentro de alguno de ellos.
 | 2026-09-19 | Manual (navegador) | Marca visible (QA-5) | Título y cabecera pasan a «Gestor de tareas»; el bundle servido ya no contiene los nombres anteriores |
 | 2026-09-19 | Manual (API) | Sin regresión en el backlog real | 30 tareas, 23 etiquetas y los mismos conteos por estado que antes del cambio |
 | 2026-09-19 | Manual (navegador) | Cierre de QA-2, QA-3 y QA-5: prioridad, motivo de cierre y marca | Correcto, verificado por Alfredo |
+| 2026-09-19 | Automatizada | Resolución de TM-R1 y TM-R2 | 2 pruebas nuevas; **se comprobó que fallan sin el arreglo**, de modo que no pasan por casualidad |
 
 **Límites de esta evidencia:** no hay log de CI. El recorrido en navegador cubre
 el camino funcional principal, el foco de los diálogos y los cambios de QA-2,
