@@ -193,14 +193,15 @@ referencia 1440, 1180, 720 y 390 caen dentro de alguno de ellos.
 | 2026-09-19 | Manual (API) | Coherencia de `close_reason` al reabrir (QA-3) | La API devuelve `null` en una tarea abierta mientras `tk` conserva `done` en la base |
 | 2026-09-19 | Manual (navegador) | Marca visible (QA-5) | Título y cabecera pasan a «Gestor de tareas»; el bundle servido ya no contiene los nombres anteriores |
 | 2026-09-19 | Manual (API) | Sin regresión en el backlog real | 30 tareas, 23 etiquetas y los mismos conteos por estado que antes del cambio |
+| 2026-09-19 | Manual (navegador) | Cierre de QA-2, QA-3 y QA-5: prioridad, motivo de cierre y marca | Correcto, verificado por Alfredo |
 
 **Límites de esta evidencia:** no hay log de CI. El recorrido en navegador cubre
-el camino funcional principal y el foco de los diálogos, pero no demuestra que se
-hayan revisado de forma individualizada las cuatro anchuras de referencia ni el
-resto del detalle de accesibilidad —el foco visible, por ejemplo—. El servidor no
-tiene pruebas automatizadas (TM-R8). La prueba de foco cubre el algoritmo y su
-cableado se ha verificado a mano una vez, pero **no hay ninguna prueba que lo
-proteja de una regresión futura** (TM-R4).
+el camino funcional principal, el foco de los diálogos y los cambios de QA-2,
+QA-3 y QA-5, pero no demuestra que se hayan revisado de forma individualizada las
+cuatro anchuras de referencia ni el resto del detalle de accesibilidad —el foco
+visible, por ejemplo—. El servidor no tiene pruebas automatizadas (TM-R8). La
+prueba de foco cubre el algoritmo y su cableado se ha verificado a mano, pero
+**no hay ninguna prueba que lo proteja de una regresión futura** (TM-R4).
 
 ## Checklist de entrega
 
