@@ -41,6 +41,13 @@ independiente, sin dependencias de otros productos.
 - **Pruebas del comportamiento de foco** (`dialog-focus.test.js`, 10 pruebas):
   entrar, devolver el foco, no devolverlo a un elemento que ya no está en la
   página, filtrar los elementos no visibles y envolver el tabulador.
+- **Pruebas de integración del servidor** (`tests/server/api.test.js`, 11
+  pruebas): levantan el servidor de verdad en un puerto libre y sobre una base
+  desechable que el propio gestor de tareas crea vacía, y recorren el arranque,
+  los ficheros estáticos, el bloqueo de rutas, la validación de prioridad, el
+  ciclo completo de una tarea, el cruce del estado bloqueado, el guardián de
+  cierre, la coherencia del motivo de cierre y la cascada del catálogo de
+  etiquetas. No tocan ni el backlog ni el catálogo reales.
 
 ### Cambiado
 
@@ -128,16 +135,14 @@ independiente, sin dependencias de otros productos.
   se trasladaron sin perder nada. Esa igualdad se mantuvo hasta el primer cambio
   funcional del frontend; desde entonces la línea base es la de este proyecto.
 - La suite de pruebas se trasladó intacta: 4 archivos, 18 pruebas. Después se
-  añadieron `dialog-focus.test.js` y dos pruebas de estado, así que la suite
-  vigente tiene 7 archivos y 36 pruebas.
+  añadieron el foco de diálogos, pruebas de estado e integración del servidor, así
+  que la suite vigente tiene 8 archivos y 47 pruebas.
 
 ### Limitaciones conocidas de esta entrega
 
 Se registran aquí porque afectan al uso, no porque sean defectos de la
 extracción. El detalle está en [`docs/known-risks.md`](docs/known-risks.md).
 
-- **El servidor no tiene pruebas automatizadas** (TM-R8). Su verificación es
-  manual.
 - **No hay pruebas que monten componentes Vue** (TM-R4): la suite prueba lógica
   con contextos mínimos y un DOM simulado, no plantillas ni comportamiento real
   de navegador. El cableado de foco de los diálogos se comprueba a mano.

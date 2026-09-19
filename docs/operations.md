@@ -82,7 +82,7 @@ componentes y responsive.
 
 La suite vive en `tests/task-manager/` y ejecuta módulos ES directamente.
 
-Cobertura actual (7 archivos, 36 pruebas):
+Cobertura actual (8 archivos, 47 pruebas):
 
 - **Cliente HTTP**: JSON válido, red, JSON inválido, error HTTP y capacidad TK
   deshabilitada.
@@ -99,6 +99,11 @@ Cobertura actual (7 archivos, 36 pruebas):
 - **Estado de la interfaz** (`state/ui.test.js`) y **despacho del inspector**
   (`state/inspector.test.js`): el diccionario busy no acumula claves y una acción
   desconocida avisa en vez de no hacer nada.
+- **Servidor** (`tests/server/api.test.js`, 11 pruebas de integración): levanta el
+  servidor de verdad en un puerto libre y sobre una base vacía que `tk` crea sola,
+  y recorre el arranque, los estáticos, el bloqueo de rutas, la validación de
+  prioridad, el ciclo completo de una tarea, el cruce de `blocked`, el guardián de
+  cierre, la coherencia de `close_reason` y la cascada del catálogo de etiquetas.
 
 [`tests/task-manager/helpers/workspace-fixture.js`](../tests/task-manager/helpers/workspace-fixture.js)
 ensambla los mismos mixins en un objeto JavaScript, sin montar Vue ni DOM. Esto
@@ -111,13 +116,16 @@ un contexto mínimo y un DOM simulado a mano, sin montar Vue. Cubre el algoritmo
 `open` dispare la entrada de foco ni que `ref="dialogRoot"` apunte al elemento
 correcto. Eso se comprueba en el navegador.
 
-Las pruebas simulan el cliente HTTP y no escriben en ninguna base de datos.
+Las pruebas del frontend simulan el cliente HTTP y no escriben en ninguna base de
+datos. Las del servidor sí escriben, pero **solo en una base desechable** que
+crean y borran en su propia carpeta temporal: nunca tocan el backlog real ni el
+catálogo del proyecto.
 
 ### Qué NO cubre la suite
 
-El servidor no tiene pruebas automatizadas. Su verificación es manual y está en
-la matriz de abajo. Tampoco hay pruebas que monten componentes Vue, ni de
-navegador, ni del comportamiento frente a `tk` real.
+Nada que monte componentes Vue: no hay pruebas de plantillas, `v-model`, foco ni
+responsive, ni recorrido de navegador (TM-R4). El comportamiento frente a `tk`
+real sí está cubierto por las pruebas de integración del servidor.
 
 ## Criterios de validación manual
 
@@ -187,7 +195,7 @@ referencia 1440, 1180, 720 y 390 caen dentro de alguno de ellos.
 | Fecha | Tipo | Alcance | Resultado |
 |---|---|---|---|
 | 2026-09-19 | Automatizada | `npm run build` | Artefactos con hash idéntico a la línea base de la extracción |
-| 2026-09-19 | Automatizada | `npm test` | 7 archivos, 36 pruebas, todas en verde |
+| 2026-09-19 | Automatizada | `npm test` | 8 archivos, 47 pruebas, todas en verde |
 | 2026-09-19 | Automatizada | Enlaces de la documentación | 72 comprobados, 0 rotos |
 | 2026-09-19 | Manual (API) | Los 19 endpoints contra datos reales y contra base desechable | Correcto; incluye el cruce de `blocked`, el guardián de cierre y la cascada de etiquetas |
 | 2026-09-19 | Manual (navegador) | Recorrido funcional de la aplicación | Correcto, verificado por Alfredo |
@@ -200,14 +208,15 @@ referencia 1440, 1180, 720 y 390 caen dentro de alguno de ellos.
 | 2026-09-19 | Manual (navegador) | Cierre de QA-2, QA-3 y QA-5: prioridad, motivo de cierre y marca | Correcto, verificado por Alfredo |
 | 2026-09-19 | Automatizada | Resolución de TM-R1 y TM-R2 | 2 pruebas nuevas; **se comprobó que fallan sin el arreglo**, de modo que no pasan por casualidad |
 | 2026-09-19 | Automatizada | Resolución de TM-R3, TM-R5, TM-R6 y TM-R7 | 5 pruebas nuevas; **se comprobó que fallan sin los arreglos**: 5 fallos con el código anterior |
+| 2026-09-19 | Automatizada | Integración del servidor (TM-R8) | 11 pruebas nuevas contra un servidor real y una base desechable |
 
 **Límites de esta evidencia:** no hay log de CI. El recorrido en navegador cubre
 el camino funcional principal, el foco de los diálogos y los cambios de QA-2,
 QA-3 y QA-5, pero no demuestra que se hayan revisado de forma individualizada las
 cuatro anchuras de referencia ni el resto del detalle de accesibilidad —el foco
-visible, por ejemplo—. El servidor no tiene pruebas automatizadas (TM-R8). La
-prueba de foco cubre el algoritmo y su cableado se ha verificado a mano, pero
-**no hay ninguna prueba que lo proteja de una regresión futura** (TM-R4).
+visible, por ejemplo—. La prueba de foco cubre el algoritmo y su cableado se ha
+verificado a mano, pero **no hay ninguna prueba que lo proteja de una regresión
+futura** (TM-R4).
 
 ## Checklist de entrega
 
