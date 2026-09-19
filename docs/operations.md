@@ -150,12 +150,39 @@ npm run server
 Anchuras de referencia: 1440, 1180, 720 y 390 px. En móvil compruebe apertura y
 retorno del inspector, scroll de paneles y ausencia de desbordamiento horizontal.
 
-Accesibilidad mínima:
+Accesibilidad: qué está implementado y qué no.
 
-- Navegación de tareas con Tab, Enter y Espacio.
-- Nombres accesibles de iconos, selects y menús.
-- `aria-expanded`, `aria-selected`, diálogos y regiones live.
-- Foco visible y cierre por Escape donde está implementado.
+| Comprobación | Estado |
+|---|---|
+| Navegación del árbol con Tab, Intro y Espacio | Implementado: `role="tree"`/`treeitem`, `tabindex="0"`, `aria-level`, `aria-selected` |
+| Expansor de subtareas | Implementado: `<button>` real con `aria-expanded` y `aria-label` |
+| Nombres accesibles de iconos, menús y controles | Implementado: 28 usos de `aria-label` |
+| Menús desplegables | Implementado: `role="menu"`, `aria-haspopup` |
+| Cierre por Escape de los menús | Implementado |
+| Avisos anunciados | Implementado: región `aria-live="polite" aria-atomic="true"` |
+| **Cierre por Escape de los diálogos principales** | **NO implementado** (TM-R11) |
+| **Gestión de foco en los diálogos** (entrar, atrapar, devolver) | **NO implementado** (TM-R11) |
+| **Nombre accesible en la tarjeta de confirmación** | **NO implementado** (TM-R11) |
+| Foco visible | Por revisar en navegador |
+
+Puntos de ruptura declarados: 1500, 1180, 1120, 720 y 560 px. Las anchuras de
+referencia 1440, 1180, 720 y 390 caen dentro de alguno de ellos.
+
+## Evidencia de validación
+
+| Fecha | Tipo | Alcance | Resultado |
+|---|---|---|---|
+| 2026-09-19 | Automatizada | `npm run build` | Artefactos con hash idéntico a la línea base de la extracción |
+| 2026-09-19 | Automatizada | `npm test` | 4 archivos, 18 pruebas, todas en verde |
+| 2026-09-19 | Automatizada | Enlaces de la documentación | 67 comprobados, 0 rotos |
+| 2026-09-19 | Manual (API) | Los 19 endpoints contra datos reales y contra base desechable | Correcto; incluye el cruce de `blocked`, el guardián de cierre y la cascada de etiquetas |
+| 2026-09-19 | Manual (navegador) | Recorrido funcional de la aplicación | Correcto, verificado por Alfredo |
+
+**Límites de esta evidencia:** no hay log de CI. El recorrido en navegador cubre
+el camino funcional principal, pero no demuestra que se hayan revisado de forma
+individualizada las cuatro anchuras de referencia ni el detalle de accesibilidad.
+El servidor no tiene pruebas automatizadas (TM-R8) y los diálogos tienen las
+carencias de accesibilidad de TM-R11.
 
 ## Checklist de entrega
 
