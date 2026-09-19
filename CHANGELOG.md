@@ -20,6 +20,13 @@ Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PA
   en inglés. El código, los comentarios, la documentación y la interfaz siguen en
   español de España, y los commits anteriores no se reescriben.
 
+### Seguridad
+
+- **Actualizado `vitest` de 4.1.10 a 4.1.11**, que corrige CVE-2026-84373
+  (recorrido de rutas en `@vitest/mocker`, CVSS 5.9). `npm audit` pasa de 2
+  vulnerabilidades moderadas a 0. Afecta solo a dependencias de desarrollo: el
+  producto no tiene dependencias de runtime.
+
 ## [0.1.0] - 2026-09-19
 
 Primera entrega funcional: el gestor de tareas extraído a un proyecto
