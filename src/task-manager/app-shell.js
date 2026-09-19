@@ -14,8 +14,8 @@ export const AppShell = {
   <div class="workspace-app">
     <header class="workspace-header">
       <div class="workspace-header__brand">
-        <div class="brand-mark">T</div>
-        <div><strong>Tacks Workspace</strong><span>ChatVoiceAgent · Vue 3</span></div>
+        <div class="brand-mark">G</div>
+        <div><strong>Gestor de tareas</strong><span>Local</span></div>
       </div>
       <div class="workspace-header__actions">
         <button class="tk-icon-button" type="button" aria-label="Actualizar datos" title="Actualizar datos"

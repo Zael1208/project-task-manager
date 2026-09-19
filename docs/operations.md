@@ -189,6 +189,10 @@ referencia 1440, 1180, 720 y 390 caen dentro de alguno de ellos.
 | 2026-09-19 | Manual (navegador) | Recorrido funcional de la aplicación | Correcto, verificado por Alfredo |
 | 2026-09-19 | Automatizada | Foco y tabulador en diálogos (`dialog-focus.test.js`) | 10 pruebas en verde; cubre el algoritmo, no el montaje de Vue |
 | 2026-09-19 | Manual (navegador) | Foco de los diálogos modales (TM-R11): entrada, tabulador y retorno | Correcto, verificado por Alfredo. Cubre el cableado de Vue que la prueba automática no alcanza |
+| 2026-09-19 | Manual (API) | Validación de prioridad 0-3 (QA-2) | Rechazados con 400: 5, −1, 99, 4, «abc» y 1,5. Aceptados 0, 1, 2 y 3. `update` con 7, rechazado |
+| 2026-09-19 | Manual (API) | Coherencia de `close_reason` al reabrir (QA-3) | La API devuelve `null` en una tarea abierta mientras `tk` conserva `done` en la base |
+| 2026-09-19 | Manual (navegador) | Marca visible (QA-5) | Título y cabecera pasan a «Gestor de tareas»; el bundle servido ya no contiene los nombres anteriores |
+| 2026-09-19 | Manual (API) | Sin regresión en el backlog real | 30 tareas, 23 etiquetas y los mismos conteos por estado que antes del cambio |
 
 **Límites de esta evidencia:** no hay log de CI. El recorrido en navegador cubre
 el camino funcional principal y el foco de los diálogos, pero no demuestra que se

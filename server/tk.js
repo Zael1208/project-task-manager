@@ -137,6 +137,30 @@ function runTkText(args) {
   });
 }
 
+// Colecciones de `show` que contienen tareas completas, no solo {id, title}.
+const NESTED_TASK_KEYS = ["children", "blockers", "dependents"];
+
+/**
+ * tk no ofrece forma de limpiar `close_reason`: `close` lo escribe y `update`
+ * no tiene ninguna bandera para borrarlo (comprobado en su ayuda). Al reabrir
+ * con `-s open` la base conserva el motivo anterior, de modo que una tarea
+ * abierta puede seguir diciendo "done".
+ *
+ * La base pertenece a tk y no se toca (D-5). Lo que se hace es no propagar la
+ * incoherencia: el motivo solo se presenta cuando la tarea esta cerrada.
+ *
+ * Muta el objeto recibido, que siempre viene de un `JSON.parse` recien hecho en
+ * runTk y por tanto no lo comparte nadie.
+ */
+function normalizeTask(task) {
+  if (!task || typeof task !== "object" || task.error) return task;
+  if (task.status !== "done") task.close_reason = null;
+  for (const key of NESTED_TASK_KEYS) {
+    if (Array.isArray(task[key])) task[key].forEach(normalizeTask);
+  }
+  return task;
+}
+
 /**
  * Listado completo con el estado "blocked" ya aplicado.
  *
@@ -154,7 +178,7 @@ async function listTasksMerged() {
   ]);
   if (all?.error) return all;
   const blockedIds = new Set((Array.isArray(blocked) ? blocked : []).map((t) => t.id));
-  return all.map((t) => (blockedIds.has(t.id) ? { ...t, status: "blocked" } : t));
+  return all.map((t) => normalizeTask(blockedIds.has(t.id) ? { ...t, status: "blocked" } : t));
 }
 
 module.exports = {
@@ -162,6 +186,7 @@ module.exports = {
   UNAVAILABLE_MESSAGE,
   status,
   unavailableReason,
+  normalizeTask,
   runTk,
   runTkText,
   listTasksMerged,

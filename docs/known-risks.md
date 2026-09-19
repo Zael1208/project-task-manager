@@ -149,24 +149,6 @@ no se pudieron restaurar.
 **Resolución recomendada:** cubrirlo con una prueba que simule un fallo a mitad,
 y valorar si merece la pena agrupar el cambio en una sola invocación.
 
-### TM-R10: la marca visible todavía es la del producto de origen
-
-**Ubicación:**
-[`app-shell.js`](../src/task-manager/app-shell.js), cabecera.
-
-La interfaz muestra `Tacks Workspace` como título y `ChatVoiceAgent · Vue 3` como
-subtítulo. El segundo es el nombre del producto del que se extrajo el gestor.
-
-**Impacto:** la aplicación independiente muestra el nombre de otro producto.
-Confunde sobre qué se está usando.
-
-**Mitigación actual:** ninguna. Se conserva a propósito para no romper la
-reproducibilidad byte a byte del build durante la extracción.
-
-**Resolución recomendada:** decidir el nombre definitivo (cuestión QA-5 del
-[PRD](../PRD.md)), cambiarlo de una vez, regenerar el artefacto y registrar la
-nueva línea base de hashes.
-
 ## Prioridad baja
 
 ### TM-R6: acciones desconocidas del inspector se ignoran
@@ -208,6 +190,15 @@ problema real; no es prioritario frente a los riesgos de concurrencia.
 | RX-5 | Traer solo los artefactos generados y quedarse sin fuente mantenible | Se trajo la fuente, el pipeline y las pruebas. |
 | RX-7 | Perder la licencia o la atribución de `tk` al copiar el binario | `tk/LICENSE` y `tk/README.md` viajan con el binario, verificado por hash. |
 | RX-8 | Arrastrar dependencias ocultas del anfitrión | El servidor no lee ninguna variable ni ruta del proyecto de origen. |
+| RX-2 | La prioridad no estaba validada y un valor ≥ 4 se mostraba como «Sin prioridad» | La API valida 0-3 al crear y al actualizar, y rechaza el resto con 400. Decisión QA-2. |
+| RX-3 | Al reabrir, `close_reason` conservaba el valor anterior | El servidor solo presenta el motivo cuando la tarea está cerrada. Decisión QA-3. |
+| TM-R10 | La marca visible era la del producto de origen | La cabecera y el título pasan a «Gestor de tareas». Decisión QA-5. |
+
+**Nota sobre RX-3:** la corrección es de presentación, no de almacenamiento.
+`tk` no ofrece ninguna bandera para limpiar `close_reason` y su base no se toca
+(D-5), así que **el valor obsoleto sigue en la base**: consultándola con el CLI
+se ve. La API es la que no lo propaga. Es una limitación deliberada y conviene
+tenerla presente si algún día se lee `tacks.db` por otra vía.
 
 ### TM-R11: accesibilidad de los diálogos — resuelto, con una corrección
 
@@ -253,8 +244,6 @@ con DOM (TM-R4), y esa es la vía para cerrarlo de verdad.
 
 | ID | Riesgo | Por qué sigue abierto |
 |---|---|---|
-| RX-2 | La prioridad no está validada por `tk`; un valor ≥ 4 se muestra como «Sin prioridad» porque la interfaz solo conoce 0-3 | Depende de la decisión QA-2 del [PRD](../PRD.md) |
-| RX-3 | Al reabrir, `close_reason` conserva el valor anterior | Depende de la decisión QA-3 del [PRD](../PRD.md) |
 | RX-4 | El renombrado en cascada no es transaccional | Registrado como TM-R9 |
 | RX-6 | `node:sqlite` puede cambiar entre versiones de Node | Mitigado fijando `engines.node >= 22.5.0` |
 
@@ -271,5 +260,4 @@ con DOM (TM-R4), y esa es la vía para cerrarlo de verdad.
 | TM-R7 | No requiere prueba hasta decidir cambiar la representación |
 | TM-R8 | Integración de servidor con base desechable |
 | TM-R9 | Fallo simulado a mitad del renombrado en cascada |
-| TM-R10 | Recorrido visual que compruebe la marca definitiva |
 | TM-R11 | **Cubierto**: `dialog-focus.test.js` prueba entrar, devolver el foco y envolver el tabulador. Falta el montaje real de Vue |
