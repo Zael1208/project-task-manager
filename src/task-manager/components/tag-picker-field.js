@@ -40,14 +40,21 @@ export const TagPickerField = {
       this.$emit('update:modelValue', this.modelValue.filter((tag) => tag !== name));
     },
     handleEscape(event) {
-      if (event.key === 'Escape') this.open = false;
+      // Si el selector esta cerrado no consume el evento: asi Escape llega al
+      // listener global y puede cerrar el dialogo que lo contiene.
+      if (event.key !== 'Escape' || !this.open) return;
+      this.open = false;
+      // Se registra en fase de captura y corta la propagacion para que Escape
+      // cierre solo la capa mas interna. Sin esto, con el selector abierto
+      // dentro del dialogo de nueva tarea, un solo Escape cerraba los dos.
+      event.stopPropagation();
     }
   },
   mounted() {
-    window.addEventListener('keydown', this.handleEscape);
+    window.addEventListener('keydown', this.handleEscape, true);
   },
   beforeUnmount() {
-    window.removeEventListener('keydown', this.handleEscape);
+    window.removeEventListener('keydown', this.handleEscape, true);
   },
   template: `
     <label :class="['tk-field', { 'span-2': wide }]">

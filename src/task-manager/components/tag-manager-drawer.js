@@ -1,5 +1,8 @@
+import { dialogFocus } from './dialog-focus.js';
+
 export const TagManagerDrawer = {
   name: 'TagManagerDrawer',
+  mixins: [dialogFocus],
   props: {
     open: { type: Boolean, required: true },
     tags: { type: Array, required: true },
@@ -16,6 +19,15 @@ export const TagManagerDrawer = {
     colorHex: { type: Function, required: true }
   },
   emits: ['close', 'update-search', 'open-create', 'open-edit', 'request-delete', 'update-draft', 'close-form', 'save', 'cancel-delete', 'delete'],
+  watch: {
+    // La confirmacion de borrado es un dialogo anidado dentro del cajon: al
+    // abrirse el foco entra en ella, y al cancelarse vuelve al control del
+    // cajon desde el que se pidio.
+    deletingTag(value) {
+      if (value) this.enterDialog(this.$refs.confirmDialog);
+      else this.exitDialog();
+    }
+  },
   methods: {
     update(field, value) {
       this.$emit('update-draft', { ...this.draft, [field]: value });
@@ -23,7 +35,7 @@ export const TagManagerDrawer = {
   },
   template: `
     <section v-show="open" class="tag-manager-layer is-open" @click.self="$emit('close')">
-  <aside class="tag-manager-drawer" role="dialog" aria-modal="true" aria-labelledby="tag-manager-title">
+  <aside class="tag-manager-drawer" ref="dialogRoot" tabindex="-1" @keydown.tab="trapDialogTab" role="dialog" aria-modal="true" aria-labelledby="tag-manager-title">
     <header class="tag-manager-header">
       <div>
         <h2 id="tag-manager-title">Gestor de etiquetas</h2>
@@ -73,8 +85,9 @@ export const TagManagerDrawer = {
     </div>
     <footer class="tag-manager-footer">Los usos proceden de las tareas reales.</footer>
     <div v-show="deletingTag" class="tag-manager-confirm">
-      <div class="tag-manager-confirm-card" role="dialog" aria-modal="true">
-        <h3>Eliminar etiqueta</h3>
+      <div class="tag-manager-confirm-card" ref="confirmDialog" tabindex="-1" role="dialog" aria-modal="true"
+        aria-labelledby="tag-manager-confirm-title">
+        <h3 id="tag-manager-confirm-title">Eliminar etiqueta</h3>
         <p>Vas a eliminar “{{ deletingTag?.name }}” de {{ affectedTasks.length }}
           {{ affectedTasks.length === 1 ? 'tarea' : 'tareas' }}.</p>
         <ul class="tag-manager-affected">

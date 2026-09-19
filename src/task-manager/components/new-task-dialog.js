@@ -1,8 +1,10 @@
 import { TagPickerField } from './tag-picker-field.js';
+import { dialogFocus } from './dialog-focus.js';
 
 export const NewTaskDialog = {
   name: 'NewTaskDialog',
   components: { TagPickerField },
+  mixins: [dialogFocus],
   props: {
     open: { type: Boolean, required: true },
     draft: { type: Object, required: true },
@@ -20,7 +22,8 @@ export const NewTaskDialog = {
   template: `
     <div v-show="open" class="modal-layer" role="dialog" aria-modal="true" aria-labelledby="new-task-title"
   @click.self="$emit('close')">
-  <form class="tk-modal tk-modal--wide" @submit.prevent="$emit('submit')">
+  <form class="tk-modal tk-modal--wide" ref="dialogRoot" tabindex="-1" @keydown.tab="trapDialogTab"
+    @submit.prevent="$emit('submit')">
     <header class="tk-modal__header">
       <h2 id="new-task-title">{{ draft.parent ? 'Nueva subtarea' : 'Nueva tarea' }}</h2><button class="tk-icon-button"
         type="button" aria-label="Cerrar" @click="$emit('close')">×</button>

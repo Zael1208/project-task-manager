@@ -716,9 +716,93 @@
     }
   };
 
+  // src/task-manager/components/dialog-focus.js
+  var FOCUSABLE_SELECTOR = [
+    "a[href]",
+    "button:not([disabled])",
+    'input:not([disabled]):not([type="hidden"])',
+    "select:not([disabled])",
+    "textarea:not([disabled])",
+    '[tabindex]:not([tabindex="-1"])'
+  ].join(",");
+  function isVisible(element) {
+    return Boolean(element.offsetWidth || element.offsetHeight || element.getClientRects().length);
+  }
+  var dialogFocus = {
+    data() {
+      return { focusReturnTarget: null };
+    },
+    watch: {
+      open(value) {
+        if (value) this.enterDialog();
+        else this.exitDialog();
+      }
+    },
+    mounted() {
+      if (this.open) this.enterDialog();
+    },
+    beforeUnmount() {
+      this.exitDialog();
+    },
+    methods: {
+      /**
+       * Elemento que actua como raiz del dialogo. Los componentes marcan su
+       * elemento modal con `ref="dialogRoot"`; si no lo hacen, se usa la raiz
+       * del propio componente.
+       */
+      dialogElement() {
+        return this.$refs.dialogRoot || this.$el;
+      },
+      focusableElements(scope = this.dialogElement()) {
+        if (!scope?.querySelectorAll) return [];
+        return [...scope.querySelectorAll(FOCUSABLE_SELECTOR)].filter(isVisible);
+      },
+      /** Entra en el dialogo guardando de donde venimos para poder volver. */
+      enterDialog(scope) {
+        const active = document.activeElement;
+        this.focusReturnTarget = active && active !== document.body ? active : null;
+        this.$nextTick(() => this.focusInside(scope));
+      },
+      /** Devuelve el foco al control que abrio el dialogo, si sigue en la pagina. */
+      exitDialog() {
+        const target = this.focusReturnTarget;
+        this.focusReturnTarget = null;
+        if (target?.isConnected && typeof target.focus === "function") target.focus();
+      },
+      /**
+       * El foco entra en el contenedor del dialogo, no en su primer control.
+       * Asi el lector de pantalla anuncia el dialogo por su nombre y no se abre
+       * directamente sobre la "x" de cerrar.
+       */
+      focusInside(scope = this.dialogElement()) {
+        const root = scope || this.dialogElement();
+        if (root?.focus) return root.focus();
+        const [first] = this.focusableElements(root);
+        if (first) first.focus();
+      },
+      /** Mantiene el tabulador dentro del dialogo: del ultimo vuelve al primero. */
+      trapDialogTab(event) {
+        const scope = this.dialogElement();
+        const focusables = this.focusableElements(scope);
+        if (!focusables.length) return;
+        const first = focusables[0];
+        const last = focusables[focusables.length - 1];
+        const active = document.activeElement;
+        if (event.shiftKey && (active === first || active === scope)) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && active === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    }
+  };
+
   // src/task-manager/components/tag-manager-drawer.js
   var TagManagerDrawer = {
     name: "TagManagerDrawer",
+    mixins: [dialogFocus],
     props: {
       open: { type: Boolean, required: true },
       tags: { type: Array, required: true },
@@ -735,6 +819,15 @@
       colorHex: { type: Function, required: true }
     },
     emits: ["close", "update-search", "open-create", "open-edit", "request-delete", "update-draft", "close-form", "save", "cancel-delete", "delete"],
+    watch: {
+      // La confirmacion de borrado es un dialogo anidado dentro del cajon: al
+      // abrirse el foco entra en ella, y al cancelarse vuelve al control del
+      // cajon desde el que se pidio.
+      deletingTag(value) {
+        if (value) this.enterDialog(this.$refs.confirmDialog);
+        else this.exitDialog();
+      }
+    },
     methods: {
       update(field, value) {
         this.$emit("update-draft", { ...this.draft, [field]: value });
@@ -742,7 +835,7 @@
     },
     template: `
     <section v-show="open" class="tag-manager-layer is-open" @click.self="$emit('close')">
-  <aside class="tag-manager-drawer" role="dialog" aria-modal="true" aria-labelledby="tag-manager-title">
+  <aside class="tag-manager-drawer" ref="dialogRoot" tabindex="-1" @keydown.tab="trapDialogTab" role="dialog" aria-modal="true" aria-labelledby="tag-manager-title">
     <header class="tag-manager-header">
       <div>
         <h2 id="tag-manager-title">Gestor de etiquetas</h2>
@@ -792,8 +885,9 @@
     </div>
     <footer class="tag-manager-footer">Los usos proceden de las tareas reales.</footer>
     <div v-show="deletingTag" class="tag-manager-confirm">
-      <div class="tag-manager-confirm-card" role="dialog" aria-modal="true">
-        <h3>Eliminar etiqueta</h3>
+      <div class="tag-manager-confirm-card" ref="confirmDialog" tabindex="-1" role="dialog" aria-modal="true"
+        aria-labelledby="tag-manager-confirm-title">
+        <h3 id="tag-manager-confirm-title">Eliminar etiqueta</h3>
         <p>Vas a eliminar \u201C{{ deletingTag?.name }}\u201D de {{ affectedTasks.length }}
           {{ affectedTasks.length === 1 ? 'tarea' : 'tareas' }}.</p>
         <ul class="tag-manager-affected">
@@ -852,14 +946,16 @@
         this.$emit("update:modelValue", this.modelValue.filter((tag) => tag !== name));
       },
       handleEscape(event) {
-        if (event.key === "Escape") this.open = false;
+        if (event.key !== "Escape" || !this.open) return;
+        this.open = false;
+        event.stopPropagation();
       }
     },
     mounted() {
-      window.addEventListener("keydown", this.handleEscape);
+      window.addEventListener("keydown", this.handleEscape, true);
     },
     beforeUnmount() {
-      window.removeEventListener("keydown", this.handleEscape);
+      window.removeEventListener("keydown", this.handleEscape, true);
     },
     template: `
     <label :class="['tk-field', { 'span-2': wide }]">
@@ -890,6 +986,7 @@
   var NewTaskDialog = {
     name: "NewTaskDialog",
     components: { TagPickerField },
+    mixins: [dialogFocus],
     props: {
       open: { type: Boolean, required: true },
       draft: { type: Object, required: true },
@@ -907,7 +1004,8 @@
     template: `
     <div v-show="open" class="modal-layer" role="dialog" aria-modal="true" aria-labelledby="new-task-title"
   @click.self="$emit('close')">
-  <form class="tk-modal tk-modal--wide" @submit.prevent="$emit('submit')">
+  <form class="tk-modal tk-modal--wide" ref="dialogRoot" tabindex="-1" @keydown.tab="trapDialogTab"
+    @submit.prevent="$emit('submit')">
     <header class="tk-modal__header">
       <h2 id="new-task-title">{{ draft.parent ? 'Nueva subtarea' : 'Nueva tarea' }}</h2><button class="tk-icon-button"
         type="button" aria-label="Cerrar" @click="$emit('close')">\xD7</button>
