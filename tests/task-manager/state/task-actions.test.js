@@ -94,6 +94,22 @@ describe('task actions', () => {
     expect(workspace.detail).toMatchObject({ id: 'tk-2', title: 'Detalle nuevo' });
   });
 
+  it('does not publish an error from an obsolete task detail failure', async () => {
+    const firstDetail = deferred();
+    api.showTask
+      .mockImplementationOnce(() => firstDetail.promise)
+      .mockResolvedValueOnce({ id: 'tk-2', title: 'Detalle nuevo' });
+    const workspace = createWorkspace();
+
+    const firstLoad = workspace.loadTaskDetail('tk-1');
+    await workspace.loadTaskDetail('tk-2');
+    firstDetail.reject(new Error('Fallo tardio del detalle antiguo'));
+    await firstLoad;
+
+    expect(workspace.errorMessage).toBe('');
+    expect(workspace.detail).toMatchObject({ id: 'tk-2', title: 'Detalle nuevo' });
+  });
+
   it('keeps the mutation busy until reload and then shows confirmation', async () => {
     const request = deferred();
     const workspace = createWorkspace({
@@ -122,6 +138,19 @@ describe('task actions', () => {
 
     expect(workspace.errorMessage).toContain('La operación fue confirmada');
     expect(workspace.errorMessage).toContain('Servidor temporalmente inaccesible.');
+  });
+
+  it('confirms a mutation whose reload was superseded by a later one', async () => {
+    const workspace = createWorkspace({
+      reloadWorkspace: vi.fn().mockResolvedValue(null),
+      showToast: vi.fn()
+    });
+
+    const result = await workspace.mutate('edit:tk-1', async () => ({ id: 'tk-1' }), 'Cambios guardados.');
+
+    expect(result).toEqual({ id: 'tk-1' });
+    expect(workspace.showToast).toHaveBeenCalledWith('Cambios guardados.');
+    expect(workspace.errorMessage).toBe('');
   });
 
   it('normalizes priority values before updating a task', async () => {
