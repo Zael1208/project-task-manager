@@ -188,14 +188,15 @@ referencia 1440, 1180, 720 y 390 caen dentro de alguno de ellos.
 | 2026-09-19 | Manual (API) | Los 19 endpoints contra datos reales y contra base desechable | Correcto; incluye el cruce de `blocked`, el guardián de cierre y la cascada de etiquetas |
 | 2026-09-19 | Manual (navegador) | Recorrido funcional de la aplicación | Correcto, verificado por Alfredo |
 | 2026-09-19 | Automatizada | Foco y tabulador en diálogos (`dialog-focus.test.js`) | 10 pruebas en verde; cubre el algoritmo, no el montaje de Vue |
+| 2026-09-19 | Manual (navegador) | Foco de los diálogos modales (TM-R11): entrada, tabulador y retorno | Correcto, verificado por Alfredo. Cubre el cableado de Vue que la prueba automática no alcanza |
 
 **Límites de esta evidencia:** no hay log de CI. El recorrido en navegador cubre
-el camino funcional principal, pero no demuestra que se hayan revisado de forma
-individualizada las cuatro anchuras de referencia ni el detalle de accesibilidad.
-El servidor no tiene pruebas automatizadas (TM-R8). La prueba de foco cubre el
-algoritmo, no el cableado de Vue ni el comportamiento real del navegador
-(TM-R4): que el watcher de `open` dispare la entrada de foco y que
-`ref="dialogRoot"` apunte al elemento correcto se comprueba a mano.
+el camino funcional principal y el foco de los diálogos, pero no demuestra que se
+hayan revisado de forma individualizada las cuatro anchuras de referencia ni el
+resto del detalle de accesibilidad —el foco visible, por ejemplo—. El servidor no
+tiene pruebas automatizadas (TM-R8). La prueba de foco cubre el algoritmo y su
+cableado se ha verificado a mano una vez, pero **no hay ninguna prueba que lo
+proteja de una regresión futura** (TM-R4).
 
 ## Checklist de entrega
 
