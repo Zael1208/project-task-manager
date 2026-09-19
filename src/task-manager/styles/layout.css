@@ -1,0 +1,95 @@
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#app {
+  min-height: 100%;
+  margin: 0;
+}
+body {
+  background:
+    radial-gradient(circle at 90% 0, rgba(98, 167, 255, 0.07), transparent 30%),
+    var(--tk-color-canvas);
+  color: var(--tk-color-text-primary);
+  font-size: 15px;
+  line-height: 1.55;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+button {
+  color: inherit;
+}
+button:disabled,
+select:disabled,
+input:disabled,
+textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--tk-color-accent);
+  outline-offset: 2px;
+}
+.workspace-frame {
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--tk-color-canvas);
+}
+.workspace-app {
+  display: grid;
+  height: 100%;
+  grid-template-rows: var(--tk-header-height) minmax(0, 1fr);
+}
+.workspace-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--tk-space-4);
+  padding: 0 var(--tk-space-5);
+  border-bottom: 1px solid var(--tk-color-border-subtle);
+  background: var(--tk-color-sidebar);
+}
+.workspace-header__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--tk-space-3);
+}
+.brand-mark {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  border: 1px solid rgba(98, 167, 255, 0.34);
+  border-radius: var(--tk-radius-md);
+  background: var(--tk-color-accent-soft);
+  color: var(--tk-color-accent);
+  font-weight: 850;
+  letter-spacing: -0.04em;
+}
+.workspace-header__brand strong {
+  display: block;
+  font-size: 16px;
+}
+.workspace-header__brand span {
+  display: block;
+  color: var(--tk-color-text-muted);
+  font-size: 13px;
+}
+.workspace-header__actions {
+  display: flex;
+  gap: var(--tk-space-2);
+}
+.workspace-body {
+  display: grid;
+  grid-template-columns: minmax(600px, 38%) minmax(0, 1fr);
+  min-height: 0;
+  overflow: hidden;
+}

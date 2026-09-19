@@ -1,0 +1,265 @@
+# Arquitectura
+
+## Contexto de ejecución
+
+El gestor es una aplicación local con tres piezas:
+
+1. **Servidor Node** (`server/`), sin framework y sin dependencias de runtime.
+2. **Interfaz Vue 3** (`src/task-manager/` → `public/task-manager/`), con
+   Options API, empaquetada como IIFE por esbuild.
+3. **`tk` (tacks)**, binario de terceros que posee la base de tareas.
+
+La interfaz no ejecuta `tk` ni toca el sistema de archivos: todo pasa por la API
+HTTP del servidor. El servidor es el único que habla con el binario.
+
+No hay router, Pinia, TypeScript ni archivos `.vue`. La página carga primero
+`public/vendor/vue.global.dev.js` y después el bundle, por lo que
+[`main.js`](../src/task-manager/main.js) espera que `globalThis.Vue` ya exista.
+
+## Capas y dirección de dependencias
+
+```text
+Navegador
+  │
+  │  http://localhost:8890/task-manager/app-vue.html
+  ▼
+public/task-manager/app-vue.html
+  -> main.js
+     -> app-shell.js
+        -> components/*
+        -> state/workspace.js
+           -> state/*
+              -> api/tk-client.js      (unica frontera fetch del frontend)
+              -> ../shared/tasks/task-model.js
+  │
+  │  fetch /api/tk/*  y  /api/tags*
+  ▼
+server/index.js                            (enrutado y estaticos)
+  -> server/tasks.js                       (14 endpoints de tareas)
+  -> server/tags.js                        (5 endpoints de etiquetas)
+       -> server/tk.js                     (unica frontera con el CLI)
+            -> tk/tk.exe  ──►  tk/.tacks/tacks.db
+       -> data/task-manager.db             (catalogo de etiquetas)
+  -> server/http.js                        (utilidades compartidas)
+```
+
+Reglas de frontera:
+
+- [`main.js`](../src/task-manager/main.js) monta una única raíz e importa CSS en
+  orden.
+- [`app-shell.js`](../src/task-manager/app-shell.js) compone la vista y conecta
+  props y eventos.
+- `components/` presenta datos y emite intenciones.
+- `state/` posee el estado, los cálculos y los casos de uso.
+- [`api/tk-client.js`](../src/task-manager/api/tk-client.js) es el único archivo
+  con `fetch`.
+- [`task-model.js`](../src/shared/tasks/task-model.js) aísla alias y formas
+  brutas de `tk` del resto del frontend.
+- `server/tk.js` es el único archivo que sabe que existe `tk.exe`.
+
+Una dependencia nueva debe apuntar hacia abajo en este esquema. Un componente no
+debe importar el cliente, el cliente no debe conocer Vue, y ningún módulo salvo
+`server/tk.js` debe invocar el binario.
+
+## Raíz y mixins
+
+[`workspace.js`](../src/task-manager/state/workspace.js) combina seis objetos de
+opciones en la misma instancia Vue. No son stores independientes: todos leen y
+escriben el mismo `this`.
+
+| Mixin | Propiedad principal | Colabora con |
+|---|---|---|
+| `workspace-data.js` | Estado inicial y fábricas de borradores | Base de todos |
+| `ui.js` | Errores, busy, toast, menús, teclado y etiquetas visuales | Todos los casos de uso |
+| `task-tree.js` | Mapeo jerárquico, filtros, selección y props del listado | Datos, UI y etiquetas |
+| `task-actions.js` | Carga, detalle y mutaciones de tareas | API, mapper, UI y borradores |
+| `tag-actions.js` | Catálogo y CRUD de etiquetas | Mutación común, árbol y UI |
+| `inspector.js` | Props y despacho del inspector | Todos los métodos de tareas |
+
+El orden actual del array de mixins expresa la progresión de responsabilidades,
+pero la colaboración real se resuelve sobre la instancia combinada. Antes de
+renombrar un método o dato hay que buscar su uso en todos los mixins y en
+`app-shell.js`.
+
+El ciclo de vida raíz registra `Escape`, lanza `reloadWorkspace()` al montar y
+retira el listener al desmontar.
+
+## Servidor
+
+[`index.js`](../server/index.js) resuelve cada petición con dos tablas de rutas:
+
+- `EXACT_ROUTES`: método y ruta completa (la mayoría de los endpoints).
+- `PREFIX_ROUTES`: rutas con parámetro al final. El prefijo incluye la barra, de
+  modo que `/api/tk/show/` no casa con `/api/tk/showcase`.
+
+Antes de enrutar se comprueba si `tk` está disponible; si no lo está, cualquier
+ruta `/api/tk/*` o `/api/tags*` responde 404 con el mensaje exacto que el cliente
+reconoce como capacidad no disponible. La interfaz se sigue sirviendo, para que
+el usuario vea el aviso y no una página rota.
+
+Los ficheros estáticos se resuelven contra `public/` comprobando la ruta
+resuelta y, si el archivo existe, también su ruta real: así un enlace simbólico
+tampoco permite escapar del directorio.
+
+### Las dos bases de datos
+
+| Base | Contenido | Propietario |
+|---|---|---|
+| `tk/.tacks/tacks.db` | Tareas, dependencias, comentarios | El binario `tk` |
+| `data/task-manager.db` | Catálogo de etiquetas: nombre, descripción, color | Este servidor |
+
+Se mantienen separadas a propósito. `tk` no tiene concepto de color ni de
+descripción de etiqueta, y su base la administra un tercero: no conviene que
+nuestros metadatos dependan de su ciclo de vida.
+
+### Estado "bloqueada"
+
+`tk` no almacena `blocked`: guarda el estado real de la tarea (normalmente
+`open`) y `tk blocked` devuelve las que tienen bloqueantes abiertos.
+`listTasksMerged()`, en [`server/tk.js`](../server/tk.js), cruza ambas listas y
+devuelve el estado `blocked` ya aplicado. El cruce se hace en código
+determinista, no en la interfaz.
+
+### Invocación de `tk`
+
+Toda llamada usa `execFile` con argumentos en array —nunca interpolación de
+shell—, con un tiempo máximo de 5 segundos y `--db` explícito, de modo que la
+ubicación de la base no depende del directorio de trabajo.
+
+`dep add` y `dep remove` **no devuelven JSON aunque se pase `--json`**: devuelven
+texto. Por eso existe `runTkText()`, que determina el éxito por el código de
+salida real del proceso.
+
+## Flujo de carga
+
+`reloadWorkspace(preferredId)` coordina la carga completa:
+
+1. Incrementa `reloadRequestSequence` y conserva el número local.
+2. Distingue carga inicial (`loading`) de recarga (`refreshing`).
+3. Solicita tareas y etiquetas en paralelo.
+4. Valida que ambas respuestas sean arrays.
+5. Descarta la respuesta si una recarga posterior ya incrementó la secuencia.
+6. Normaliza todas las tareas con `mapTask()`.
+7. Conserva `preferredId` si sigue existiendo; en otro caso selecciona la
+   primera tarea o deja la selección vacía.
+8. Expande los padres presentes y carga el detalle de la selección.
+9. Solo la petición vigente puede retirar `loading` y `refreshing`.
+
+Durante una recarga se mantienen visibles los últimos datos confirmados. La
+función devuelve `true` al confirmar el nuevo estado, `false` ante un fallo
+vigente y `null` cuando su respuesta quedó obsoleta.
+
+## Selección y detalle
+
+La lista y el detalle tienen fuentes distintas:
+
+- `tasks` contiene la instantánea completa y alimenta árbol y filtros.
+- `detail` contiene la respuesta enriquecida de la tarea seleccionada.
+- `selectedTaskId` identifica la intención de selección actual.
+- `selectedTask` combina detalle y fila listada; el estado de la lista prevalece
+  para no presentar un estado antiguo en el inspector.
+
+`loadTaskDetail()` incrementa `detailRequestSequence`. Solo aplica una respuesta
+si sigue siendo la última y la selección no cambió. Al cambiar de tarea elimina
+el detalle anterior antes de solicitar el nuevo, sincroniza el borrador de
+edición al confirmar y puede abrir el inspector móvil.
+
+## Flujo de mutación
+
+Todas las escrituras de tareas y etiquetas pasan por
+`mutate(key, request, message, preferredId, options)`:
+
+```text
+comprobar busy -> marcar busy -> ejecutar escritura
+  -> recargar workspace -> confirmar toast o explicar recarga fallida
+  -> retirar busy
+```
+
+La mutación no aplica cambios optimistas. La API confirma primero y la UI vuelve
+a consultar tareas, etiquetas y detalle. Esto mantiene una única verdad
+confirmada por TK y permite que cambios derivados, como bloqueos o usos de
+etiquetas, lleguen juntos.
+
+Si la escritura se confirma pero la recarga falla, el mensaje de error declara
+explícitamente que la operación sí se realizó. El usuario no debe reintentar a
+ciegas una mutación en ese estado.
+
+Las claves `busy` impiden repetir la misma operación y deshabilitan el control
+correspondiente. No serializan operaciones con claves diferentes.
+
+## Árbol y filtros
+
+`mappedTasks` enriquece cada tarea normalizada con:
+
+- `level`, calculado al recorrer padres existentes;
+- `children`, que indica si tiene descendientes directos.
+
+`filteredTaskIds` combina filtros rápidos, estados, prioridades, etiquetas y
+búsqueda normalizada. `visibleTasks` reconstruye el recorrido padre-hijo:
+
+- sin filtros solo visita descendientes de padres expandidos;
+- con cualquier filtro visita todos los descendientes y agrega solo las tareas
+  que cumplen el filtro;
+- una tarea padre que no cumple el filtro no se agrega automáticamente por
+  tener un hijo coincidente.
+
+Los hijos conservan el orden recibido de la API. Los padres sin padre conocido
+se tratan como raíces.
+
+## Catálogo de etiquetas
+
+El catálogo combina dos fuentes:
+
+- **Las tareas**, que aportan las etiquetas realmente en uso y su número de usos.
+- **`tag_metadata`**, que aporta descripción y color.
+
+Una etiqueta puede existir en un solo lado: en las tareas (`uses > 0`, sin
+metadatos) o solo en el catálogo (`uses: 0`, creada pero aún sin usar). El listado
+rellena descripción y color ausentes con `""` y `"blue"`.
+
+Renombrar o borrar recorre todas las tareas que usan la etiqueta y las actualiza
+una a una con el CLI. No hay transacción: si una falla a mitad, las anteriores se
+revierten en orden inverso y el error indica cuáles no se pudieron restaurar.
+
+## Componentes
+
+`AppShell` es el único componente que conoce directamente el workspace. Sus dos
+ramas principales son:
+
+- `TaskList`, que contiene filtros y filas y reemite eventos hacia la raíz.
+- `TaskInspector`, que concentra detalle, edición, subtareas, dependencias y
+  comentarios mediante un único evento `action`.
+
+Los diálogos de alta y etiquetas reciben borradores inmutables desde la raíz y
+emiten copias actualizadas. `TagPickerField` implementa el contrato estándar
+`modelValue` / `update:modelValue`. `OverflowMenu` y `Toast` son hojas sin
+conocimiento de dominio.
+
+Consulte [contracts.md](contracts.md) para los sobres exactos de datos y eventos.
+
+## CSS y responsive
+
+El orden de importación forma parte del contrato visual:
+
+1. `tokens.css`: variables y base.
+2. `layout.css`: estructura principal.
+3. `components.css`: controles y componentes.
+4. `responsive.css`: adaptaciones por anchura.
+
+Cambiar este orden puede alterar la cascada aunque no cambie ninguna regla.
+esbuild extrae los imports al único `app-vue.css` generado.
+
+## Invariantes
+
+- No hay `fetch` fuera del cliente.
+- No hay invocaciones de `tk` fuera de `server/tk.js`.
+- El formato bruto de TK no debe llegar a componentes.
+- La selección debe seguir apuntando a una tarea existente tras recargar.
+- Una respuesta de carga obsoleta no debe sobrescribir datos confirmados.
+- Una escritura solo se presenta como completada después de recargar.
+- Los componentes emiten intenciones y no mutan props.
+- Los artefactos públicos se regeneran; nunca se corrigen a mano.
+- Ninguna llamada de red saliente: el producto es estrictamente local.
+
+Los límites actuales de estas garantías se registran en
+[known-risks.md](known-risks.md).

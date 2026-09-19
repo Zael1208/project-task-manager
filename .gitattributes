@@ -1,0 +1,17 @@
+# Finales de línea y normalización de fin de línea
+#
+# Todo el contenido se trata como texto y se normaliza a LF, tanto en el
+# repositorio como en el working tree.
+# Por favor no cambie esta configuración a menos que tenga una buena razón para hacerlo.
+# Corrige los finales de línea en todos los archivos de texto al hacer checkout y commit.
+# Utilizar la configuración de fin de línea LF en todos los sistemas operativos.
+#
+* text=auto eol=lf
+
+# Contenido de terceros: se conserva tal cual.
+# tk/tk.exe es un binario y no debe sufrir conversion de finales de linea;
+# la licencia y el README de tacks se dejan intactos para que su contenido
+# coincida byte a byte con el que publica el autor.
+tk/tk.exe binary
+tk/LICENSE -text
+tk/README.md -text

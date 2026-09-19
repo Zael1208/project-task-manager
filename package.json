@@ -1,0 +1,24 @@
+{
+  "name": "task-manager",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Gestor de tareas local: interfaz Vue 3 sobre el CLI tacks (tk), con catálogo de etiquetas propio.",
+  "author": "Alfredo González Portero",
+  "license": "UNLICENSED",
+  "main": "server/index.js",
+  "scripts": {
+    "server": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "build": "esbuild src/task-manager/main.js --bundle --format=iife --target=es2020 --outfile=public/task-manager/app-vue.js",
+    "watch": "npm run build -- --watch",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.1",
+    "vitest": "4.1.10"
+  },
+  "engines": {
+    "node": ">=22.5.0"
+  }
+}

@@ -1,0 +1,178 @@
+# tacks
+
+Lightweight task manager for AI coding agents. Local-only, single-binary, SQLite-backed.
+
+## Install
+
+### Pre-built binaries (recommended)
+
+```bash
+# macOS / Linux
+curl --proto '=https' --tlsv1.2 -LsSf https://github.com/srmccray/tacks/releases/latest/download/tacks-installer.sh | sh
+
+# Windows
+powershell -ExecutionPolicy ByPass -c "irm https://github.com/srmccray/tacks/releases/latest/download/tacks-installer.ps1 | iex"
+```
+
+Or download binaries directly from [GitHub Releases](https://github.com/srmccray/tacks/releases).
+
+### From crates.io
+
+```bash
+cargo install tacks
+```
+
+### From source
+
+```bash
+git clone https://github.com/srmccray/tacks.git
+cd tacks
+cargo install --path .
+```
+
+## Quick start
+
+```bash
+tk init                              # initialize in current directory
+tk create "Implement auth" -p 1      # create a P1 task
+tk create "Write tests" -d "Unit and integration tests for auth module"
+tk list                              # show open tasks
+tk ready                             # tasks with no blockers
+tk update <id> --claim               # claim a task (sets in_progress + assignee)
+tk update <id> --parent <epic-id>    # reparent task under an epic
+tk update <id> --parent none         # promote subtask to top-level
+tk close <id> -c "Done"              # close with comment
+```
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `tk init` | Initialize a tacks database in the current directory |
+| `tk create <title>` | Create a task (`-p` priority, `-d` description, `-t` tags, `--parent` subtask) |
+| `tk list` | List open tasks (`-a` all, `-s` status, `-p` priority, `-t` tag, `--parent` filter) |
+| `tk ready` | Show tasks with no open blockers (`--limit N`) |
+| `tk show <id>` | Task details with blockers, dependents, comments, notes |
+| `tk update <id>` | Update fields (`--claim`, `--notes`, `--parent`, `-d`, `-p`, `-t`, `-s`) |
+| `tk close <id>` | Close a task (`-c` comment, `-r` reason, `--force` to bypass subtask guard) |
+| `tk dep add <child> <parent>` | Add a dependency (cycle-checked) |
+| `tk dep remove <child> <parent>` | Remove a dependency |
+| `tk comment <id> <body>` | Add a comment |
+| `tk children <id>` | List subtasks of a task |
+| `tk epic` | Show epic progress (completion stats) |
+| `tk blocked` | List tasks blocked by open dependencies |
+| `tk stats` | Backlog overview (`--oneline` for compact output) |
+| `tk prime` | AI context output: stats + in-progress + ready queue |
+| `tk init-rules` | Install Claude Code rules file (`--global` for all projects) |
+| `tk serve` | Start web UI server (`--port` to set port, default 3000) |
+
+All commands support `--json` for machine-readable output.
+
+## Web UI
+
+Tacks includes a built-in web interface. Start it with:
+
+```bash
+tk serve              # http://localhost:3000
+tk serve --port 8080  # custom port
+```
+
+### Board view
+
+Kanban board with drag-and-drop status changes, column counts, and multi-select filters.
+
+![Board view](docs/images/board.png)
+
+### Task list
+
+Sortable table with inline editing — click any field to edit in place.
+
+![Task list](docs/images/list.png)
+
+### Features
+
+- **Kanban board** with drag-and-drop between status columns
+- **Inline editing** on both board and list views
+- **Multi-select filters** for status, priority, epic, and tags
+- **Dark mode** by default
+- **Keyboard shortcuts** — press `?` for the full list
+- **Live polling** — changes from CLI or other sessions appear automatically
+- **Epic detail pages** with subtask progress and board view
+- **Responsive layout** for different screen sizes
+
+## Claude Code Plugin
+
+Tacks ships a Claude Code plugin that wires `tk` commands into slash commands and session hooks.
+
+### Install from marketplace
+
+```bash
+/plugin marketplace add srmccray/tacks
+/plugin install tacks@tacks-marketplace
+```
+
+### Manual install from local clone
+
+```bash
+git clone https://github.com/srmccray/tacks.git
+cd tacks
+
+# Option 1: Session-scoped (for testing)
+claude --plugin-dir ./claude-plugin
+
+# Option 2: Persistent install
+/plugin marketplace add ./claude-plugin
+/plugin install tacks@tacks-marketplace
+```
+
+**Prerequisite**: the `tk` binary must be installed and on your `PATH` (see Install section above).
+
+### What the plugin provides
+
+- **Slash commands** for all `tk` operations: `/tacks:create`, `/tacks:list`, `/tacks:ready`, `/tacks:show`, `/tacks:update`, `/tacks:close`, `/tacks:dep`, `/tacks:comment`, `/tacks:children`, `/tacks:epic`, `/tacks:blocked`, `/tacks:stats`, `/tacks:prime`, `/tacks:init`
+- **SessionStart hook** that auto-loads backlog context via `tk prime` — every session starts with full situational awareness
+- **PreCompact hook** that re-runs `tk prime` before context compaction to preserve backlog state
+- **Task agent** (`@task-agent`) for autonomous work discovery: finds ready tasks, claims them, executes, files discoveries, and closes on completion
+
+## Designed for agents
+
+Tacks is built to be consumed by AI coding agents like Claude Code:
+
+- **`tk init-rules`** installs a Claude Code rules file that teaches Claude how to use `tk` — command reference, workflow, and conventions. Use `--global` to install for all projects.
+- **`tk prime --json`** gives agents a snapshot of project state: what's in progress, what's ready, backlog stats
+- **`tk ready --limit 1`** picks the next task for an agent to work on
+- **`--json` on every command** means agents can parse output reliably
+- **Hash-based IDs** (`tk-a1b2`) are short and unambiguous
+- **Dependency tracking** with cycle detection prevents agents from picking up blocked work
+- **Subtask hierarchies** with auto-tagging: creating a subtask automatically tags the parent as an epic
+
+## Key concepts
+
+- **Priority**: 0-4 (0 = critical, 4 = backlog)
+- **Close reasons**: `done`, `duplicate`, `absorbed`, `stale`, `superseded`
+- **Notes vs comments**: Notes are mutable working context (overwritten). Comments are append-only history.
+- **Close guard**: Can't close a task with open subtasks unless you use `--force`
+- **Tags over types**: Epic, bug, etc. are tags, not a type system. The `epic` tag is auto-added when you create a subtask.
+
+## Stability contract
+
+Tacks is consumed by downstream tools (e.g., [Tackline](https://github.com/steveyegge/tackline)) that call `tk` commands in hooks, skills, and agent definitions. The CLI interface is stable and all changes are backwards-compatible:
+
+- **Commands and flags are permanent.** No existing command, subcommand, or flag will be removed or renamed. New flags are always optional.
+- **JSON output is frozen.** Fields in `--json` output will not be removed or have their types changed. New fields may be added.
+- **Enums are append-only.** Status values (`open`, `in_progress`, `done`, `blocked`) and close reasons (`done`, `duplicate`, `absorbed`, `stale`, `superseded`) will not be removed. New values may be added.
+- **DB schema is additive.** Existing columns and tables are never removed or renamed. New columns are nullable or defaulted.
+- **Exit codes are stable.** 0 for success, 1 for error.
+- **ID format is stable.** `tk-XXXX` for tasks, `tk-XXXX.N` for subtasks.
+
+If a breaking change is ever necessary, it will be flagged with a `BREAKING:` commit prefix and include a migration path.
+
+## Storage
+
+Tacks uses SQLite (bundled, no system dependency) stored at `.tacks/tacks.db` in your project directory. Override with `TACKS_DB` environment variable.
+
+No sync, no git integration, no network calls. Everything stays local.
+
+## License
+
+MIT

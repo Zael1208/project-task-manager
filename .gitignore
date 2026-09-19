@@ -1,0 +1,41 @@
+# Dependencias y cachés de herramientas
+node_modules/
+.npm-cache/
+
+# Directorios de herramientas locales
+.atl/
+.codegraph/
+.agents
+
+# Sistema operativo y editores
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.code-workspace
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+
+# Marcadores de zona de seguridad de Windows (ADS)
+*:Zone.Identifier
+
+# Entorno -- nunca se versiona: las claves no viajan en el repositorio
+.env
+.env.local
+.env.*.local
+
+# Bases de datos locales -- nunca se versionan (RNF-10 del PRD)
+#   tk/.tacks/          -> las tareas, y pertenecen al binario tk
+#   data/*.db           -> el catalogo de etiquetas, y es de este servidor
+tk/.tacks/
+data/*.db
+data/*.db-*
+
+# Salidas generadas que no se versionan
+coverage/
+dist/
