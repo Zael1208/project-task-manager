@@ -19,6 +19,9 @@ Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PA
   `CHANGELOG.md` bajo `[Sin publicar]`— y qué es petición explícita que no se
   recorta. No sustituye al contrato: lo enruta. Así las reglas llegan solas al
   agente que trabaja en este repositorio, en lugar de depender de que las lea.
+  Incluye que el `PRD.md` es también el tablero de estado: un agente recién llegado
+  puede responder «qué trabajo está en curso» sin más que mirar sus marcas de
+  `Hecho` / `Pendiente`.
 
 ### Cambiado
 
