@@ -14,6 +14,12 @@ Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PA
   resuelva referencias en todo el repositorio y no solo en los ficheros abiertos.
   No interviene en la ejecución, en el build ni en las pruebas.
 
+### Cambiado
+
+- **Idioma de los mensajes de commit y de etiqueta anotada**: pasan a escribirse
+  en inglés. El código, los comentarios, la documentación y la interfaz siguen en
+  español de España, y los commits anteriores no se reescriben.
+
 ## [0.1.0] - 2026-09-19
 
 Primera entrega funcional: el gestor de tareas extraído a un proyecto

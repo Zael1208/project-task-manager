@@ -108,8 +108,9 @@ ni el CSS.
 
 ## Convenciones
 
-- **Idioma**: español de España en código, comentarios, documentación e interfaz.
-  Sin voseo ni giros rioplatenses.
+- **Idioma**: español de España en código, comentarios, documentación,
+  `CHANGELOG.md` e interfaz. Sin voseo ni giros rioplatenses. Los mensajes de
+  commit y de etiqueta anotada van en inglés.
 - **Comentarios**: explican *por qué*, no *qué*. Los que documentan decisiones,
   procedencia o trampas de `tk` son valiosos y no deben borrarse.
 - **Sin dependencias de runtime**: si necesita una, justifíquelo en el PRD y en

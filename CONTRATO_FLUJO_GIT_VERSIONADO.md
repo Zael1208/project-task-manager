@@ -57,6 +57,11 @@ Si hay cambios sin confirmar, el agente debe informar de ellos y decidir con el 
 
 Los commits deben ser pequeños, coherentes y relacionados con una sola intención.
 
+Los mensajes de commit y de etiqueta anotada se escriben en **inglés**. El resto
+—código, comentarios, documentación, `CHANGELOG.md` e interfaz— sigue en español
+de España. Los commits anteriores en español se conservan tal cual: no se reescribe
+el historial ya publicado.
+
 Formato recomendado:
 
 ```text
@@ -77,10 +82,10 @@ Ejemplos:
 
 ```powershell
 git add archivo.js archivo.css
-git commit -m "feat: añade filtro por estado"
+git commit -m "feat: add status filter"
 
 git add README.md
-git commit -m "docs: documenta el flujo de instalación"
+git commit -m "docs: document the installation flow"
 ```
 
 El agente no debe crear commits gigantes que mezclen funcionalidades, refactorizaciones y documentación no relacionada.
@@ -212,9 +217,9 @@ git switch main
 git status --short
 
 git add CHANGELOG.md package.json
-git commit -m "chore: prepara versión 0.2.0"
+git commit -m "chore: prepare release 0.2.0"
 
-git tag -a v0.2.0 -m "Versión 0.2.0"
+git tag -a v0.2.0 -m "Release 0.2.0"
 git show --stat --oneline v0.2.0
 ```
 
