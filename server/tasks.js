@@ -8,13 +8,37 @@
 // como la presencia de data.error.
 
 const { sendJson, readJson } = require("./http");
-const { runTk, runTkText, listTasksMerged } = require("./tk");
+const { runTk, runTkText, listTasksMerged, normalizeTask } = require("./tk");
 const { normalizeTagName, sameTagName } = require("./tags");
 
 /** tk no devuelve JSON si falla: se traduce a 200 + { error }, como el original. */
 function sendTkResult(res, result) {
   if (result?.error) return sendJson(res, 200, { error: result.error });
-  return sendJson(res, 200, result);
+  return sendJson(res, 200, normalizeResult(result));
+}
+
+/** Aplica a las respuestas con tareas la coherencia de `close_reason`. */
+function normalizeResult(result) {
+  if (Array.isArray(result)) return result.map(normalizeTask);
+  return normalizeTask(result);
+}
+
+// La interfaz solo representa las prioridades 0 a 3 (critica, alta, media,
+// baja). tk acepta cualquier entero --probado con -p 5-- asi que la validacion
+// tiene que estar aqui: si no, se guardan valores que luego se muestran como
+// "Sin prioridad" y no se pueden volver a elegir.
+const VALID_PRIORITIES = new Set([0, 1, 2, 3]);
+
+/**
+ * @returns {{ ok: true, value: number|null } | { ok: false, error: string }}
+ */
+function parsePriority(value) {
+  if (value === undefined || value === null || value === "") return { ok: true, value: null };
+  const parsed = Number(value);
+  if (!Number.isInteger(parsed) || !VALID_PRIORITIES.has(parsed)) {
+    return { ok: false, error: "La prioridad debe ser un numero entero entre 0 y 3." };
+  }
+  return { ok: true, value: parsed };
 }
 
 // --- Lectura -----------------------------------------------------------------
@@ -39,7 +63,7 @@ async function handleTkStats(req, res) {
 }
 
 async function handleTkReady(req, res) {
-  sendJson(res, 200, await runTk(["--json", "ready"]));
+  sendTkResult(res, await runTk(["--json", "ready"]));
 }
 
 async function handleTkEpic(req, res) {
@@ -47,12 +71,12 @@ async function handleTkEpic(req, res) {
 }
 
 async function handleTkBlocked(req, res) {
-  sendJson(res, 200, await runTk(["--json", "blocked"]));
+  sendTkResult(res, await runTk(["--json", "blocked"]));
 }
 
 async function handleTkChildren(req, res, id) {
   if (!id) return sendJson(res, 400, { error: "Falta el id." });
-  sendJson(res, 200, await runTk(["--json", "children", id]));
+  sendTkResult(res, await runTk(["--json", "children", id]));
 }
 
 // --- Escritura ---------------------------------------------------------------
@@ -62,8 +86,11 @@ async function handleTkCreate(req, res) {
   if (!input) return;
   if (!input.title) return sendJson(res, 400, { error: "Falta el titulo." });
 
+  const priority = parsePriority(input.priority);
+  if (!priority.ok) return sendJson(res, 400, { error: priority.error });
+
   const args = ["--json", "create", input.title];
-  if (input.priority != null) args.push("-p", String(input.priority));
+  if (priority.value != null) args.push("-p", String(priority.value));
   if (input.description) args.push("-d", input.description);
   if (Array.isArray(input.tags) && input.tags.length) args.push("-t", input.tags.join(","));
   if (input.parent) args.push("--parent", input.parent);
@@ -92,6 +119,13 @@ async function handleTkUpdate(req, res) {
 
   const changes = input.changes || {};
 
+  let priorityValue = null;
+  if (changes.priority != null) {
+    const priority = parsePriority(changes.priority);
+    if (!priority.ok) return sendJson(res, 400, { error: priority.error });
+    priorityValue = priority.value;
+  }
+
   // Las etiquetas se envian de forma diferencial: tk solo sabe anadir y
   // quitar, no reemplazar. Se compara con el estado real para calcular que
   // sobra y que falta.
@@ -112,7 +146,7 @@ async function handleTkUpdate(req, res) {
 
   const args = ["--json", "update", input.id];
   if (changes.title) args.push("--title", changes.title);
-  if (changes.priority != null) args.push("-p", String(changes.priority));
+  if (priorityValue != null) args.push("-p", String(priorityValue));
   if (changes.status) args.push("-s", changes.status);
   if (changes.description != null) args.push("-d", changes.description);
   if (changes.notes != null) args.push("--notes", changes.notes);
