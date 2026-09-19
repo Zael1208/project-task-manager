@@ -22,6 +22,14 @@ Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PA
   Incluye que el `PRD.md` es también el tablero de estado: un agente recién llegado
   puede responder «qué trabajo está en curso» sin más que mirar sus marcas de
   `Hecho` / `Pendiente`.
+- **Skill `tk` para agentes** (`skills/tk/SKILL.md`): describe el uso del gestor de
+  tareas como estado de alto nivel del proyecto —qué es una tarea y una subtarea,
+  cuándo se escribe en tk y cuándo no— y las trampas verificadas del binario
+  (guarda de cierre, ausencia de borrado, `--claim` sin poder elegir nombre,
+  prioridad sin validar). Se escribe en el formato estándar de Agent Skills, con
+  solo `name` y `description` en el *frontmatter*, de modo que sirve a cualquier
+  agente y no solo a uno. El proyecto sigue funcionando sin ella: no interviene en
+  la ejecución, ni en el build, ni en las pruebas.
 
 ### Cambiado
 
