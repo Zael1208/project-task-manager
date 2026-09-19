@@ -13,24 +13,6 @@ No queda ninguno. TM-R1 y TM-R2, los dos que había, están resueltos: véase
 
 ## Prioridad media
 
-### TM-R3: un ciclo completo de padres puede ocultar tareas
-
-**Ubicación:** [`state/task-tree.js`](../src/task-manager/state/task-tree.js),
-`visibleTasks`.
-
-`mappedTasks` evita recursión infinita al calcular niveles, pero `visibleTasks`
-empieza su recorrido solo en raíces. Si varias tareas forman un ciclo y ninguna
-queda como raíz, ninguna entra en el recorrido.
-
-**Impacto:** datos corruptos o relaciones cíclicas pueden desaparecer del listado
-sin un error explícito.
-
-**Mitigación actual:** TK debería impedir jerarquías cíclicas; padres ausentes sí
-se muestran como raíces.
-
-**Resolución recomendada:** confirmar la garantía del servidor o agregar un
-recorrido de nodos no visitados con protección de ciclos y prueba dedicada.
-
 ### TM-R4: no hay pruebas de componentes ni de navegador
 
 **Ubicación:** `tests/task-manager/`.
@@ -58,25 +40,6 @@ y el comportamiento en navegador siguen sin cubrirse automáticamente.
 
 **Resolución recomendada:** priorizar pruebas del sobre `action`, los cinco
 `v-model` del inspector y un recorrido de navegador desktop/móvil.
-
-### TM-R5: cualquier JSON inválido con 404 se marca como indisponibilidad
-
-**Ubicación:**
-[`api/tk-client.js`](../src/task-manager/api/tk-client.js), parseo de respuesta.
-
-Cuando `response.json()` falla, `unavailable` se calcula solo con
-`response.status === 404`. No se puede comprobar el mensaje específico usado en
-la rama de JSON válido.
-
-**Impacto:** un 404 HTML o malformado de infraestructura puede mostrarse como
-capacidad TK deshabilitada, ocultando un problema de ruta o proxy.
-
-**Mitigación actual:** otros estados con JSON inválido se presentan como error
-genérico de respuesta. En este proyecto el 404 de capacidad lo emite nuestro
-propio servidor, así que la causa probable se reduce.
-
-**Resolución recomendada:** reservar `unavailable` para una señal estructurada o
-endpoint de capacidad y ampliar la prueba de JSON inválido 404.
 
 ### TM-R8: el servidor no tiene pruebas automatizadas
 
@@ -117,36 +80,7 @@ y valorar si merece la pena agrupar el cambio en una sola invocación.
 
 ## Prioridad baja
 
-### TM-R6: acciones desconocidas del inspector se ignoran
-
-**Ubicación:** [`state/inspector.js`](../src/task-manager/state/inspector.js),
-`handleInspectorAction()`.
-
-El `switch` no tiene rama `default`. Un error tipográfico al emitir una acción no
-produce aviso ni fallo de desarrollo.
-
-**Impacto:** un control nuevo puede no responder y ser difícil de diagnosticar.
-
-**Mitigación actual:** los tipos admitidos están centralizados y documentados.
-
-**Resolución recomendada:** decidir si se desea advertencia solo en desarrollo o
-una prueba exhaustiva del contrato antes de añadir comportamiento en runtime.
-
-### TM-R7: el diccionario busy conserva claves con valor falso
-
-**Ubicación:** [`state/ui.js`](../src/task-manager/state/ui.js), `setBusy()`.
-
-Al finalizar una operación se asigna `false` en vez de eliminar la propiedad. IDs
-o nombres distintos aumentan gradualmente el número de claves durante una sesión
-larga.
-
-**Impacto:** crecimiento pequeño de memoria y estado de depuración más ruidoso;
-`isBusy()` conserva el comportamiento correcto.
-
-**Mitigación actual:** el volumen normal de operaciones es reducido.
-
-**Resolución recomendada:** eliminar la clave al desactivarla si se observa un
-problema real; no es prioritario frente a los riesgos de concurrencia.
+No queda ninguno. TM-R6 y TM-R7 están resueltos: véase más abajo.
 
 ## Resueltos durante la extracción
 
@@ -165,6 +99,24 @@ problema real; no es prioritario frente a los riesgos de concurrencia.
 (D-5), así que **el valor obsoleto sigue en la base**: consultándola con el CLI
 se ve. La API es la que no lo propaga. Es una limitación deliberada y conviene
 tenerla presente si algún día se lee `tacks.db` por otra vía.
+
+### TM-R3, TM-R5, TM-R6 y TM-R7: los cuatro de baja y media — resueltos
+
+Los cuatro eran pequeños y se han cerrado de una vez, cada uno con su prueba.
+
+| Riesgo | Qué pasaba | Corrección |
+|---|---|---|
+| **TM-R3** | `visibleTasks` empezaba el recorrido solo en raíces. Un ciclo de padres no produce ninguna raíz, así que sus tareas **desaparecían del listado sin ningún error**. | Se calcula primero qué es alcanzable desde las raíces reales y lo que queda fuera se trata como raíz adicional. Se añadió protección de ciclos al recorrido, que además elimina el riesgo de recursión infinita. |
+| **TM-R5** | Si la respuesta no era JSON, un 404 se marcaba como «capacidad no disponible» solo por el código de estado. Un 404 de un proxy o de una ruta mal escrita se presentaba como que el gestor de tareas estaba desactivado. | `unavailable` se reserva a la señal estructurada: 404 **y** el mensaje concreto en un cuerpo JSON válido. |
+| **TM-R6** | El `switch` de acciones del inspector no tenía rama `default`: una acción mal emitida no hacía nada y no avisaba. | Rama `default` con `console.warn` indicando el tipo desconocido. |
+| **TM-R7** | `setBusy(key, false)` dejaba la clave con valor `false` en vez de eliminarla; los identificadores cambian en cada operación, así que el diccionario crecía durante una sesión larga. | Se elimina la clave al desactivarla. |
+
+**Cobertura:** cinco pruebas nuevas entre
+[`task-tree.test.js`](../tests/task-manager/state/task-tree.test.js),
+[`tk-client.test.js`](../tests/task-manager/api/tk-client.test.js),
+[`inspector.test.js`](../tests/task-manager/state/inspector.test.js) y
+[`ui.test.js`](../tests/task-manager/state/ui.test.js). **Se comprobó que fallan
+sin los arreglos**: 5 fallos con el código anterior.
 
 ### TM-R1 y TM-R2: carreras de carga y mutación — resueltos
 
@@ -249,11 +201,11 @@ con DOM (TM-R4), y esa es la vía para cerrarlo de verdad.
 |---|---|
 | TM-R1 | **Cubierto**: «does not publish an error from an obsolete task detail failure» |
 | TM-R2 | **Cubierto**: «confirms a mutation whose reload was superseded by a later one» |
-| TM-R3 | Ciclo de dos padres sin raíz |
+| TM-R3 | **Cubierto**: «shows tasks that form a parent cycle instead of hiding them» |
 | TM-R4 | Montaje de inspector y recorrido responsive en navegador |
-| TM-R5 | Respuesta 404 con cuerpo no JSON |
-| TM-R6 | Todos los tipos del inspector llegan al método esperado |
-| TM-R7 | No requiere prueba hasta decidir cambiar la representación |
+| TM-R5 | **Cubierto**: «does not treat a 404 without a JSON body as a disabled capability» |
+| TM-R6 | **Cubierto**: «warns instead of staying silent when the action type is unknown» |
+| TM-R7 | **Cubierto**: «removes the busy key when the operation ends instead of storing false» |
 | TM-R8 | Integración de servidor con base desechable |
 | TM-R9 | Fallo simulado a mitad del renombrado en cascada |
 | TM-R11 | **Cubierto**: `dialog-focus.test.js` prueba entrar, devolver el foco y envolver el tabulador. Falta el montaje real de Vue |

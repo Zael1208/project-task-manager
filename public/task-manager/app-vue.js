@@ -67,6 +67,9 @@
             return this.removeDependent(payload.id);
           case "comment.add":
             return this.addComment();
+          default:
+            console.warn(`[Gestor de tareas] Accion de inspector desconocida: ${action.type}`);
+            return;
         }
       }
     }
@@ -95,7 +98,7 @@
     try {
       data = await response.json();
     } catch {
-      throw new ApiError("El servidor devolvi\xF3 una respuesta no v\xE1lida.", response.status === 404);
+      throw new ApiError("El servidor devolvi\xF3 una respuesta no v\xE1lida.");
     }
     if (!response.ok || data?.error) {
       const unavailable = response.status === 404 && String(data?.error || "").includes("capacidad de tareas no esta disponible");
@@ -508,8 +511,21 @@
           }
         }
         const hasFilter = this.activeTaskFilter !== "all" || this.advancedStatuses.length || this.advancedPriorities.length || this.advancedTags.length || this.quickTagFilter || this.taskSearchQuery.trim();
+        const reachable = /* @__PURE__ */ new Set();
+        const markReachable = (task) => {
+          if (reachable.has(task.id)) return;
+          reachable.add(task.id);
+          for (const child of childrenByParent.get(task.id) || []) markReachable(child);
+        };
+        for (const root of roots) markReachable(root);
+        for (const task of this.mappedTasks) {
+          if (!reachable.has(task.id)) roots.push(task);
+        }
         const rows = [];
+        const visited = /* @__PURE__ */ new Set();
         const visit = (task) => {
+          if (visited.has(task.id)) return;
+          visited.add(task.id);
           if (this.filteredTaskIds.has(task.id)) rows.push(task);
           if (hasFilter || this.expandedIds.includes(task.id)) {
             for (const child of childrenByParent.get(task.id) || []) visit(child);
@@ -650,7 +666,10 @@
         }
       },
       setBusy(key, value) {
-        this.busy = { ...this.busy, [key]: value };
+        const next = { ...this.busy };
+        if (value) next[key] = true;
+        else delete next[key];
+        this.busy = next;
       },
       isBusy(key) {
         return Boolean(this.busy[key]);

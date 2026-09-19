@@ -48,8 +48,29 @@ export const taskTree = {
         }
       }
       const hasFilter = this.activeTaskFilter !== 'all' || this.advancedStatuses.length || this.advancedPriorities.length || this.advancedTags.length || this.quickTagFilter || this.taskSearchQuery.trim();
+
+      // Un ciclo de padres no produce ninguna raiz, asi que sus nodos no
+      // entrarian en el recorrido y las tareas desapareceran del listado sin un
+      // error. Se calcula primero que es alcanzable desde las raices reales y lo
+      // que quede fuera se trata como raiz adicional.
+      const reachable = new Set();
+      const markReachable = (task) => {
+        if (reachable.has(task.id)) return;
+        reachable.add(task.id);
+        for (const child of childrenByParent.get(task.id) || []) markReachable(child);
+      };
+      for (const root of roots) markReachable(root);
+      for (const task of this.mappedTasks) {
+        if (!reachable.has(task.id)) roots.push(task);
+      }
+
       const rows = [];
+      const visited = new Set();
       const visit = (task) => {
+        // La proteccion de ciclos es lo que permite recorrer los nodos que no
+        // cuelgan de ninguna raiz sin caer en una recursion infinita.
+        if (visited.has(task.id)) return;
+        visited.add(task.id);
         if (this.filteredTaskIds.has(task.id)) rows.push(task);
         if (hasFilter || this.expandedIds.includes(task.id)) {
           for (const child of childrenByParent.get(task.id) || []) visit(child);

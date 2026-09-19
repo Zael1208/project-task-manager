@@ -64,4 +64,17 @@ describe('tk-client', () => {
       expect(error.unavailable).toBe(true);
     }
   });
+
+  it('does not treat a 404 without a JSON body as a disabled capability', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({
+      ok: false,
+      status: 404,
+      json: vi.fn().mockRejectedValue(new SyntaxError('invalid JSON'))
+    }));
+
+    await expect(listTasks()).rejects.toMatchObject({
+      message: 'El servidor devolvió una respuesta no válida.',
+      unavailable: false
+    });
+  });
 });

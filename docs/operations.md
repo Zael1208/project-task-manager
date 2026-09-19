@@ -82,19 +82,23 @@ componentes y responsive.
 
 La suite vive en `tests/task-manager/` y ejecuta módulos ES directamente.
 
-Cobertura actual (5 archivos, 30 pruebas):
+Cobertura actual (7 archivos, 36 pruebas):
 
 - **Cliente HTTP**: JSON válido, red, JSON inválido, error HTTP y capacidad TK
   deshabilitada.
 - **Mapper**: valores por defecto, tipos de tarea, alias, relaciones y
   comentarios.
-- **Árbol**: niveles, expansión y combinación de filtros.
+- **Árbol**: niveles, expansión, combinación de filtros y el respaldo para
+  jerarquías cíclicas, que si no desaparecerían del listado.
 - **Acciones**: selección tras recarga, descarte de respuestas obsoletas, busy,
   normalización de prioridad y mutación confirmada con recarga fallida.
 - **Foco de diálogos** (`components/dialog-focus.test.js`): entrar guardando el
   origen, devolver el foco al cerrar, no devolverlo a un elemento que ya no está
   en la página, filtrar los elementos no visibles y envolver el tabulador en los
   cuatro casos.
+- **Estado de la interfaz** (`state/ui.test.js`) y **despacho del inspector**
+  (`state/inspector.test.js`): el diccionario busy no acumula claves y una acción
+  desconocida avisa en vez de no hacer nada.
 
 [`tests/task-manager/helpers/workspace-fixture.js`](../tests/task-manager/helpers/workspace-fixture.js)
 ensambla los mismos mixins en un objeto JavaScript, sin montar Vue ni DOM. Esto
@@ -183,7 +187,7 @@ referencia 1440, 1180, 720 y 390 caen dentro de alguno de ellos.
 | Fecha | Tipo | Alcance | Resultado |
 |---|---|---|---|
 | 2026-09-19 | Automatizada | `npm run build` | Artefactos con hash idéntico a la línea base de la extracción |
-| 2026-09-19 | Automatizada | `npm test` | 5 archivos, 30 pruebas, todas en verde |
+| 2026-09-19 | Automatizada | `npm test` | 7 archivos, 36 pruebas, todas en verde |
 | 2026-09-19 | Automatizada | Enlaces de la documentación | 72 comprobados, 0 rotos |
 | 2026-09-19 | Manual (API) | Los 19 endpoints contra datos reales y contra base desechable | Correcto; incluye el cruce de `blocked`, el guardián de cierre y la cascada de etiquetas |
 | 2026-09-19 | Manual (navegador) | Recorrido funcional de la aplicación | Correcto, verificado por Alfredo |
@@ -195,6 +199,7 @@ referencia 1440, 1180, 720 y 390 caen dentro de alguno de ellos.
 | 2026-09-19 | Manual (API) | Sin regresión en el backlog real | 30 tareas, 23 etiquetas y los mismos conteos por estado que antes del cambio |
 | 2026-09-19 | Manual (navegador) | Cierre de QA-2, QA-3 y QA-5: prioridad, motivo de cierre y marca | Correcto, verificado por Alfredo |
 | 2026-09-19 | Automatizada | Resolución de TM-R1 y TM-R2 | 2 pruebas nuevas; **se comprobó que fallan sin el arreglo**, de modo que no pasan por casualidad |
+| 2026-09-19 | Automatizada | Resolución de TM-R3, TM-R5, TM-R6 y TM-R7 | 5 pruebas nuevas; **se comprobó que fallan sin los arreglos**: 5 fallos con el código anterior |
 
 **Límites de esta evidencia:** no hay log de CI. El recorrido en navegador cubre
 el camino funcional principal, el foco de los diálogos y los cambios de QA-2,

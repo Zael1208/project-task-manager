@@ -36,6 +36,18 @@ describe('task-tree state', () => {
     expect(workspace.visibleTasks.map((task) => task.id)).toEqual(['tk-1']);
   });
 
+  it('shows tasks that form a parent cycle instead of hiding them', () => {
+    const cyclic = [
+      mapTask({ id: 'tk-a', title: 'A', parent_id: 'tk-b' }),
+      mapTask({ id: 'tk-b', title: 'B', parent_id: 'tk-a' })
+    ];
+    const workspace = createWorkspace({ tasks: cyclic });
+
+    // Ninguna de las dos es raiz, asi que antes del arreglo el recorrido no
+    // empezaba y las dos desaparecian del listado sin ningun error.
+    expect(workspace.visibleTasks.map((task) => task.id)).toEqual(['tk-a', 'tk-b']);
+  });
+
   it('expands and collapses every parent task', () => {
     const workspace = createWorkspace({ tasks });
 
