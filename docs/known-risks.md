@@ -13,33 +13,29 @@ No queda ninguno. TM-R1 y TM-R2, los dos que había, están resueltos: véase
 
 ## Prioridad media
 
-### TM-R4: no hay pruebas de componentes ni de navegador
+### TM-R4: no hay pruebas de navegador ni de responsive
 
 **Ubicación:** `tests/task-manager/`.
 
-La fixture de estado no monta Vue. La suite no detecta errores de plantilla,
-argumentos reemitidos, nombres de `v-model`, foco, teclado, accesibilidad ni
-regresiones responsive.
+**Lo que ya está cubierto:** el cableado de los componentes se prueba montando
+Vue de verdad con jsdom. Se comprueban el sobre `action` llegando a su destino,
+los cinco `v-model` del inspector, los eventos de intención del gestor de
+etiquetas, el contrato `modelValue` del selector de etiquetas —incluido que no
+muta el array que recibe—, y el foco de los diálogos: que entre al abrirse,
+envuelva con el tabulador y vuelva al cerrarse. Son 30 pruebas en
+`tests/task-manager/components/`.
 
-**Impacto:** un contrato documentado puede romperse en el cableado visual aunque
-las pruebas unitarias sigan pasando.
+**Lo que sigue sin cubrirse:** jsdom **no tiene motor de composición**. No calcula
+geometría, así que no valida CSS, ni las anchuras de referencia, ni los anillos de
+foco, ni el teclado real del navegador. La comprobación en navegador del
+19/09/2026 cubrió el camino funcional principal y el foco de los diálogos, pero no
+demuestra que se hayan revisado de forma individualizada las cuatro anchuras.
 
-**Mitigación actual:** props y emits están declarados y existe una matriz manual
-en [operations.md](operations.md). Esa matriz es un criterio de recorrido, no
-evidencia persistida de que todos los casos se hayan ejecutado.
+**Impacto:** una regresión visual o de responsive puede pasar en verde. El
+cableado lógico de los componentes ya no.
 
-**Estado parcial:** el 19/09/2026 Alfredo recorrió la aplicación en navegador y
-el comportamiento funcional resultó correcto. Eso cubre el camino visual
-principal, pero no sustituye a una prueba automatizada ni demuestra que se
-hayan revisado de forma individualizada las cuatro anchuras de referencia ni el
-detalle de accesibilidad.
-
-**Avance:** se ha añadido la primera prueba de componentes del módulo
-(`dialog-focus.test.js`, 10 pruebas), aunque sin montar DOM. El cableado de Vue
-y el comportamiento en navegador siguen sin cubrirse automáticamente.
-
-**Resolución recomendada:** priorizar pruebas del sobre `action`, los cinco
-`v-model` del inspector y un recorrido de navegador desktop/móvil.
+**Resolución recomendada:** un recorrido de navegador desktop/móvil, que es
+infraestructura aparte y no se ha acometido.
 
 ### TM-R8: el servidor no tenía pruebas automatizadas — resuelto
 
@@ -207,7 +203,7 @@ con DOM (TM-R4), y esa es la vía para cerrarlo de verdad.
 | TM-R1 | **Cubierto**: «does not publish an error from an obsolete task detail failure» |
 | TM-R2 | **Cubierto**: «confirms a mutation whose reload was superseded by a later one» |
 | TM-R3 | **Cubierto**: «shows tasks that form a parent cycle instead of hiding them» |
-| TM-R4 | Montaje de inspector y recorrido responsive en navegador |
+| TM-R4 | Recorrido de navegador desktop/móvil y anchuras. El montaje de componentes ya está cubierto |
 | TM-R5 | **Cubierto**: «does not treat a 404 without a JSON body as a disabled capability» |
 | TM-R6 | **Cubierto**: «warns instead of staying silent when the action type is unknown» |
 | TM-R7 | **Cubierto**: «removes the busy key when the operation ends instead of storing false» |

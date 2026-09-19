@@ -83,7 +83,7 @@ componentes y responsive.
 
 La suite vive en `tests/task-manager/` y ejecuta módulos ES directamente.
 
-Cobertura actual (8 archivos, 47 pruebas):
+Cobertura actual (12 archivos, 77 pruebas):
 
 - **Cliente HTTP**: JSON válido, red, JSON inválido, error HTTP y capacidad TK
   deshabilitada.
@@ -100,6 +100,12 @@ Cobertura actual (8 archivos, 47 pruebas):
 - **Estado de la interfaz** (`state/ui.test.js`) y **despacho del inspector**
   (`state/inspector.test.js`): el diccionario busy no acumula claves y una acción
   desconocida avisa en vez de no hacer nada.
+- **Componentes** (`tests/task-manager/components/`, 30 pruebas): **montan Vue de
+  verdad** sobre jsdom y comprueban el sobre `action` llegando a su destino, los
+  cinco `v-model` del inspector, los eventos de intención del gestor de etiquetas,
+  el contrato `modelValue` del selector —incluido que no muta el array que
+  recibe— y el foco de los diálogos: que entre al abrirse, envuelva con el
+  tabulador y vuelva al cerrarse.
 - **Servidor** (`tests/server/api.test.js`, 11 pruebas de integración): levanta el
   servidor de verdad en un puerto libre y sobre una base vacía que `tk` crea sola,
   y recorre el arranque, los estáticos, el bloqueo de rutas, la validación de
@@ -107,15 +113,33 @@ Cobertura actual (8 archivos, 47 pruebas):
   cierre, la coherencia de `close_reason` y la cascada del catálogo de etiquetas.
 
 [`tests/task-manager/helpers/workspace-fixture.js`](../tests/task-manager/helpers/workspace-fixture.js)
-ensambla los mismos mixins en un objeto JavaScript, sin montar Vue ni DOM. Esto
-hace las pruebas rápidas, pero no valida plantillas, props en tiempo de
-ejecución, foco ni responsive.
+ensambla los mismos mixins en un objeto JavaScript, sin montar Vue ni DOM. Es el
+criterio de la mayoría de las pruebas de estado: rápidas, pero sin plantillas ni
+props en tiempo de ejecución.
 
-`dialog-focus.test.js` sigue el mismo criterio: prueba los métodos del mixin con
-un contexto mínimo y un DOM simulado a mano, sin montar Vue. Cubre el algoritmo
-—que es donde está la lógica fácil de equivocar—, pero **no** que el watcher de
-`open` dispare la entrada de foco ni que `ref="dialogRoot"` apunte al elemento
-correcto. Eso se comprueba en el navegador.
+`dialog-focus.test.js` sigue ese mismo criterio: prueba los métodos del mixin con
+un contexto mínimo y un DOM simulado a mano. Cubre el algoritmo —donde está la
+lógica fácil de equivocar—, pero no que el watcher de `open` dispare la entrada de
+foco ni que `ref="dialogRoot"` apunte al elemento correcto. **Eso sí lo cubren
+ahora las pruebas de componentes**, que montan los diálogos de verdad.
+
+### Cómo montan las pruebas de componentes
+
+[`tests/task-manager/helpers/mount.js`](../tests/task-manager/helpers/mount.js)
+carga **el Vue vendorizado de `public/vendor/`**, el mismo que sirve la página, en
+vez de usar una copia distinta desde npm: lo que se prueba es el runtime que se
+distribuye. El archivo de pruebas lleva `// @vitest-environment jsdom` arriba, así
+que solo esas pruebas usan jsdom.
+
+Dos límites que conviene tener presentes al escribir nuevas:
+
+- **jsdom no tiene motor de composición.** Todo mide cero, y el mixin de foco
+  descarta los elementos no visibles. El ayudante simula una medida positiva salvo
+  cuando el elemento está oculto con `v-show`, que es lo único que el filtro
+  necesita saber. No es geometría real.
+- **Hay que esperar dos vueltas de `nextTick`** tras cambiar un estado: los
+  cambios se aplican en la primera y los `$nextTick` encadenados desde un `watch`
+  corren en la siguiente. Para eso está `flush()`.
 
 Las pruebas del frontend simulan el cliente HTTP y no escriben en ninguna base de
 datos. Las del servidor sí escriben, pero **solo en una base desechable** que
@@ -124,9 +148,10 @@ catálogo del proyecto.
 
 ### Qué NO cubre la suite
 
-Nada que monte componentes Vue: no hay pruebas de plantillas, `v-model`, foco ni
-responsive, ni recorrido de navegador (TM-R4). El comportamiento frente a `tk`
-real sí está cubierto por las pruebas de integración del servidor.
+Nada que necesite un navegador de verdad: jsdom no calcula geometría, así que no
+hay pruebas de CSS, de responsive, de anchuras de referencia ni del teclado real
+del navegador (TM-R4). El comportamiento frente a `tk` real sí está cubierto por
+las pruebas de integración del servidor.
 
 ## Criterios de validación manual
 
@@ -196,7 +221,7 @@ referencia 1440, 1180, 720 y 390 caen dentro de alguno de ellos.
 | Fecha | Tipo | Alcance | Resultado |
 |---|---|---|---|
 | 2026-09-19 | Automatizada | `npm run build` | Artefactos con hash idéntico a la línea base de la extracción |
-| 2026-09-19 | Automatizada | `npm test` | 8 archivos, 47 pruebas, todas en verde |
+| 2026-09-19 | Automatizada | `npm test` | 12 archivos, 77 pruebas, todas en verde |
 | 2026-09-19 | Automatizada | Enlaces de la documentación | 72 comprobados, 0 rotos |
 | 2026-09-19 | Manual (API) | Los 19 endpoints contra datos reales y contra base desechable | Correcto; incluye el cruce de `blocked`, el guardián de cierre y la cascada de etiquetas |
 | 2026-09-19 | Manual (navegador) | Recorrido funcional de la aplicación | Correcto, verificado por Alfredo |
@@ -210,6 +235,7 @@ referencia 1440, 1180, 720 y 390 caen dentro de alguno de ellos.
 | 2026-09-19 | Automatizada | Resolución de TM-R1 y TM-R2 | 2 pruebas nuevas; **se comprobó que fallan sin el arreglo**, de modo que no pasan por casualidad |
 | 2026-09-19 | Automatizada | Resolución de TM-R3, TM-R5, TM-R6 y TM-R7 | 5 pruebas nuevas; **se comprobó que fallan sin los arreglos**: 5 fallos con el código anterior |
 | 2026-09-19 | Automatizada | Integración del servidor (TM-R8) | 11 pruebas nuevas contra un servidor real y una base desechable |
+| 2026-09-19 | Automatizada | Componentes montados (TM-R4) | 30 pruebas nuevas con jsdom y el Vue vendorizado; **se comprobó que la de Escape por capas falla** al revertir la corrección |
 
 **Límites de esta evidencia:** no hay log de CI. El recorrido en navegador cubre
 el camino funcional principal, el foco de los diálogos y los cambios de QA-2,
