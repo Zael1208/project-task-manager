@@ -71,6 +71,12 @@ export const inspectorState = {
           return this.removeDependent(payload.id);
         case 'comment.add':
           return this.addComment();
+        default:
+          // Los tipos validos estan centralizados en docs/contracts.md. Un tipo
+          // desconocido solo puede venir de una emision mal escrita, y sin este
+          // aviso el control se quedaria sin responder sin decir por que.
+          console.warn(`[Gestor de tareas] Accion de inspector desconocida: ${action.type}`);
+          return;
       }
     }
   }

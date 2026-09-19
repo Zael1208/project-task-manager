@@ -11,7 +11,13 @@ export const workspaceUi = {
       }
     },
     setBusy(key, value) {
-      this.busy = { ...this.busy, [key]: value };
+      // Al terminar se elimina la clave en vez de dejarla en false: los
+      // identificadores cambian en cada operacion, asi que el diccionario
+      // crecia durante una sesion larga sin necesidad.
+      const next = { ...this.busy };
+      if (value) next[key] = true;
+      else delete next[key];
+      this.busy = next;
     },
     isBusy(key) {
       return Boolean(this.busy[key]);

@@ -32,7 +32,11 @@ async function apiRequest(path, options = {}) {
   try {
     data = await response.json();
   } catch {
-    throw new ApiError('El servidor devolvió una respuesta no válida.', response.status === 404);
+    // Un 404 con un cuerpo que no es JSON no es la señal de capacidad
+    // deshabilitada, que llega como JSON con un mensaje concreto. Darla por
+    // buena ocultaria un problema de ruta o de proxy detras de un aviso de
+    // "capacidad no disponible".
+    throw new ApiError('El servidor devolvió una respuesta no válida.');
   }
 
   if (!response.ok || data?.error) {
