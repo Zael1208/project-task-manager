@@ -46,6 +46,7 @@ sujeto a la tijera:
 
 ## Mapa
 
-`PRD.md` (requisitos) · `docs/architecture.md` · `docs/contracts.md` ·
+`PRD.md` (requisitos **y estado del trabajo en curso**: su tabla de RF/RNF lleva las
+marcas `Hecho` / `Pendiente`) · `docs/architecture.md` · `docs/contracts.md` ·
 `docs/operations.md` · `docs/development.md` · `docs/known-risks.md` ·
 `CONTRATO_FLUJO_GIT_VERSIONADO.md` · `CHANGELOG.md` · `README.md`
