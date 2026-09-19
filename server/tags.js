@@ -64,6 +64,9 @@ function tagInput(input) {
 
 // --- Acceso a datos ----------------------------------------------------------
 
+// ponytail: recorre el catalogo entero y filtra en JS porque COLLATE NOCASE no
+// distingue acentos y sameTagName si. Sobra con un catalogo pequeno; si pasa de
+// unos cientos de etiquetas, guardar el nombre plegado en una columna indexada.
 function metadataForTag(name) {
   return db
     .prepare("SELECT name, description, color FROM tag_metadata")
@@ -106,6 +109,9 @@ async function restoreTagUpdates(updated, from, to) {
 // --- Handlers ----------------------------------------------------------------
 
 async function handleTagList(req, res) {
+  // ponytail: cada peticion lanza el listado completo de tk y carga todo el
+  // catalogo para cruzarlos en JS. Sobra para el tamano actual; si el backlog
+  // crece, cachear los metadatos o resolver el cruce en SQL.
   const tasks = await listTasksMerged();
   if (tasks?.error) return sendJson(res, 503, { error: tasks.error });
 

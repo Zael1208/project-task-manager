@@ -26,6 +26,11 @@ Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PA
   reversión de etiquetas deja de estar duplicado cuatro veces en `server/tags.js`,
   que ahora lo compone `restoreTagUpdates`; y `MIME` deja de exportarse desde
   `server/http.js` porque ningún módulo lo importaba.
+- **Deuda técnica declarada en `server/tags.js`**: los dos atajos conocidos —el
+  recorrido completo del catálogo al buscar metadatos y la recarga de todas las
+  tareas en cada listado de etiquetas— quedan marcados con comentarios
+  `ponytail:` que nombran su techo y la vía de mejora. Así son cosechables en un
+  registro en vez de quedar en decisiones que nadie recuerda haber tomado.
 - **Idioma de los mensajes de commit y de etiqueta anotada**: pasan a escribirse
   en inglés. El código, los comentarios, la documentación y la interfaz siguen en
   español de España, y los commits anteriores no se reescriben.
