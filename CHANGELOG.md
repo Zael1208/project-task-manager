@@ -4,13 +4,12 @@ Cambios relevantes del gestor de tareas local. El formato sigue las
 recomendaciones de *Keep a Changelog* y el versionado es semántico.
 
 Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PATCH`.
-El proyecto declara `0.1.0` en `package.json`, todavía **sin etiqueta ni
-publicación**.
 
-## [Sin publicar]
+## [0.1.0] - 2026-09-19
 
 Primera entrega funcional: el gestor de tareas extraído a un proyecto
-independiente, sin dependencias de otros productos.
+independiente, sin dependencias de otros productos y con soporte para Windows y
+WSL.
 
 ### Añadido
 
