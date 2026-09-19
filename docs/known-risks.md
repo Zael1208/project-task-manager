@@ -240,9 +240,14 @@ cierra únicamente la capa más interna. Si está cerrado, deja pasar el evento.
 **Cobertura:** [`tests/task-manager/components/dialog-focus.test.js`](../tests/task-manager/components/dialog-focus.test.js),
 10 pruebas. Cubren el algoritmo —entrar, devolver el foco, no devolverlo a un
 elemento que ya no está, filtrar los elementos no visibles y envolver el
-tabulador en los cuatro casos—, no el cableado de Vue. Que el watcher de `open`
-dispare esto y que `ref="dialogRoot"` apunte al elemento correcto se comprueba
-en el navegador; sigue sin haber pruebas de componentes con DOM montado (TM-R4).
+tabulador en los cuatro casos—, no el cableado de Vue.
+
+Ese cableado —que el watcher de `open` dispare la entrada de foco y que
+`ref="dialogRoot"` apunte al elemento correcto— se verificó **manualmente en
+navegador el 19/09/2026**: el foco entra, el tabulador no se escapa y vuelve al
+control de origen. Es una comprobación puntual, no una garantía: **nada protege
+esto de una regresión futura**. Sigue sin haber pruebas que monten componentes
+con DOM (TM-R4), y esa es la vía para cerrarlo de verdad.
 
 ## Riesgos que quedan del análisis de la extracción
 

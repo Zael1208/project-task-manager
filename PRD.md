@@ -554,6 +554,7 @@ comportamiento se puede cambiar sin tocar código.
 | Build del frontend | Verificado | `npm run build` → `app-vue.js` (74.258 B) y `app-vue.css` (44.103 B) con **hash idéntico** a los artefactos del origen |
 | Línea base vigente de artefactos | Registrada | Tras el arreglo de TM-R11: `app-vue.js` (77.953 B) `03064BC8…3362`; `app-vue.css` (44.103 B) `7A0D1A69…F38B7`, sin cambios porque no se tocó ningún estilo |
 | Suite de pruebas | Verificada | `vitest run` → 5 archivos, 28 pruebas, todas en verde |
+| Foco de los diálogos (TM-R11) | Verificado | Algoritmo cubierto por 10 pruebas; el cableado de Vue se verificó en navegador el 19/09/2026: el foco entra, el tabulador no se escapa y vuelve al control de origen. Sin prueba que lo proteja de una regresión (TM-R4). |
 | Servidor (F6) | Verificado | 19 endpoints ejercitados: 8 de lectura de tareas, 6 de escritura, 5 de etiquetas. Incluye creación, edición con diff de etiquetas, comentario, dependencia, retirada de dependencia, reparentado, promoción a raíz, reclamación y cierre. |
 | Estado "blocked" cruzado (RF-11) | Verificado | Con un bloqueante abierto, `/api/tk/list` devuelve la tarea como `blocked` aunque `tk` la guarde como `open`; al retirarlo vuelve a su estado real. |
 | Guardián de cierre (RN-05) | Verificado | Cerrar una tarea con hijas abiertas devuelve el error de `tk` y **no** se reintenta con `--force`; la tarea permanece abierta. |
