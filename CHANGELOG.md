@@ -13,6 +13,12 @@ Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PA
   alcance en `src/`, `server/` y `tests/` para que el servidor de lenguaje
   resuelva referencias en todo el repositorio y no solo en los ficheros abiertos.
   No interviene en la ejecución, en el build ni en las pruebas.
+- **Reglas del repositorio para agentes** (`AGENTS.md`): el repositorio pasa a
+  declarar por sí mismo lo que debe valer en cada turno —rama por tarea, commits
+  pequeños en inglés, verificación antes de integrar, sin push automático,
+  `CHANGELOG.md` bajo `[Sin publicar]`— y qué es petición explícita que no se
+  recorta. No sustituye al contrato: lo enruta. Así las reglas llegan solas al
+  agente que trabaja en este repositorio, en lugar de depender de que las lea.
 
 ### Cambiado
 
