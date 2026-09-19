@@ -119,7 +119,7 @@ del ciclo de vida de una base que administra un tercero.
 - `public/task-manager/app-vue.html` se mantiene a mano.
 - `public/task-manager/app-vue.js` y `app-vue.css` son **generados** por
   `npm run build`. No se editan a mano: el siguiente build los sobrescribe.
-- `public/vendor/vue.global.dev.js` aporta `globalThis.Vue` antes del bundle, así
+- `public/vendor/vue.global.prod.js` aporta `globalThis.Vue` antes del bundle, así
   que Vue no entra en el empaquetado.
 
 ## Sobre `tk`

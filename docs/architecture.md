@@ -13,7 +13,7 @@ La interfaz no ejecuta `tk` ni toca el sistema de archivos: todo pasa por la API
 HTTP del servidor. El servidor es el único que habla con el binario.
 
 No hay router, Pinia, TypeScript ni archivos `.vue`. La página carga primero
-`public/vendor/vue.global.dev.js` y después el bundle, por lo que
+`public/vendor/vue.global.prod.js` y después el bundle, por lo que
 [`main.js`](../src/task-manager/main.js) espera que `globalThis.Vue` ya exista.
 
 ## Capas y dirección de dependencias

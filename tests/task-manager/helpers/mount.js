@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url';
 //    filtro necesita saber, no de la geometria real.
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const VUE_FILE = path.resolve(here, '../../../public/vendor/vue.global.dev.js');
+const VUE_FILE = path.resolve(here, '../../../public/vendor/vue.global.prod.js');
 
 let layoutShimInstalled = false;
 

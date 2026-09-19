@@ -16,6 +16,16 @@ Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PA
 
 ### Cambiado
 
+- **La página sirve el build de producción de Vue** (`vue.global.prod.js`) en vez
+  del de desarrollo: la carga útil pasa de 591 KB a 166 KB y desaparecen los avisos
+  de desarrollo. El build de desarrollo se conserva en `public/vendor/` para
+  depurar, y las pruebas montan los componentes con el mismo fichero que sirve la
+  página.
+- **Limpieza interna sin cambio de comportamiento**: la tabla de tipos MIME se
+  reduce a lo que `public/` contiene de verdad (html, js, css y json); el aviso de
+  reversión de etiquetas deja de estar duplicado cuatro veces en `server/tags.js`,
+  que ahora lo compone `restoreTagUpdates`; y `MIME` deja de exportarse desde
+  `server/http.js` porque ningún módulo lo importaba.
 - **Idioma de los mensajes de commit y de etiqueta anotada**: pasan a escribirse
   en inglés. El código, los comentarios, la documentación y la interfaz siguen en
   español de España, y los commits anteriores no se reescriben.

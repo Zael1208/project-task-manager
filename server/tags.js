@@ -92,7 +92,7 @@ function updateTaskTag(task, from, to) {
  * sin transaccion: si una falla a mitad hay que revertir las anteriores para
  * no dejar el catalogo y las tareas en desacuerdo (RF-37).
  *
- * @returns {Promise<string[]>} IDs de las tareas que tampoco se pudieron restaurar.
+ * @returns {Promise<string>} Nota para anadir al error (vacia si todo se restauro).
  */
 async function restoreTagUpdates(updated, from, to) {
   const failures = [];
@@ -100,7 +100,7 @@ async function restoreTagUpdates(updated, from, to) {
     const restored = await updateTaskTag(task, to, from);
     if (restored?.error) failures.push(task.id);
   }
-  return failures;
+  return failures.length ? ` No se pudo restaurar: ${failures.join(", ")}.` : "";
 }
 
 // --- Handlers ----------------------------------------------------------------
@@ -197,9 +197,8 @@ async function handleTagUpdate(req, res, oldName) {
     const actualName = task.tags.find((taskTag) => sameTagName(taskTag, oldName));
     const result = await updateTaskTag(task, actualName, tag.name);
     if (result?.error) {
-      const restoreFailures = await restoreTagUpdates(updated, tag.name, oldName);
-      const suffix = restoreFailures.length ? ` No se pudo restaurar: ${restoreFailures.join(", ")}.` : "";
-      return sendJson(res, 409, { error: `No se pudo renombrar la etiqueta en ${task.id}.${suffix}` });
+      const note = await restoreTagUpdates(updated, tag.name, oldName);
+      return sendJson(res, 409, { error: `No se pudo renombrar la etiqueta en ${task.id}.${note}` });
     }
     updated.push(task);
   }
@@ -224,10 +223,9 @@ async function handleTagUpdate(req, res, oldName) {
       );
     }
     sendJson(res, 200, { ...tag, uses: tasks.length });
-  } catch (err) {
-    const restoreFailures = await restoreTagUpdates(updated, tag.name, oldName);
-    const suffix = restoreFailures.length ? ` No se pudo restaurar: ${restoreFailures.join(", ")}.` : "";
-    sendJson(res, 500, { error: `No se pudieron guardar los metadatos.${suffix}` });
+  } catch {
+    const note = await restoreTagUpdates(updated, tag.name, oldName);
+    sendJson(res, 500, { error: `No se pudieron guardar los metadatos.${note}` });
   }
 }
 
@@ -242,9 +240,8 @@ async function handleTagDelete(req, res, name) {
     const actualName = task.tags.find((taskTag) => sameTagName(taskTag, name));
     const result = await updateTaskTag(task, actualName, "");
     if (result?.error) {
-      const restoreFailures = await restoreTagUpdates(updated, "", existing?.name || name);
-      const suffix = restoreFailures.length ? ` No se pudo restaurar: ${restoreFailures.join(", ")}.` : "";
-      return sendJson(res, 409, { error: `No se pudo retirar la etiqueta de ${task.id}.${suffix}` });
+      const note = await restoreTagUpdates(updated, "", existing?.name || name);
+      return sendJson(res, 409, { error: `No se pudo retirar la etiqueta de ${task.id}.${note}` });
     }
     updated.push(task);
   }
@@ -252,10 +249,9 @@ async function handleTagDelete(req, res, name) {
   try {
     if (existing) db.prepare("DELETE FROM tag_metadata WHERE name = ?").run(existing.name);
     sendJson(res, 200, { ok: true, affected: tasks.length });
-  } catch (err) {
-    const restoreFailures = await restoreTagUpdates(updated, "", existing?.name || name);
-    const suffix = restoreFailures.length ? ` No se pudo restaurar: ${restoreFailures.join(", ")}.` : "";
-    sendJson(res, 500, { error: `No se pudieron eliminar los metadatos.${suffix}` });
+  } catch {
+    const note = await restoreTagUpdates(updated, "", existing?.name || name);
+    sendJson(res, 500, { error: `No se pudieron eliminar los metadatos.${note}` });
   }
 }
 

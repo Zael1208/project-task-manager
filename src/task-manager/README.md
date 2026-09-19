@@ -58,7 +58,7 @@ colaboran mediante `this`.
 - `public/task-manager/app-vue.html` se mantiene a mano.
 - `public/task-manager/app-vue.js` y `app-vue.css` son artefactos generados y
   versionados.
-- `public/vendor/vue.global.dev.js` aporta `globalThis.Vue`; Vue no entra en el
+- `public/vendor/vue.global.prod.js` aporta `globalThis.Vue`; Vue no entra en el
   bundle de esbuild.
 
 No edite los artefactos generados. Ejecute `npm run build` y revise que sus

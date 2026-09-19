@@ -5,23 +5,14 @@
 
 const path = require("node:path");
 
-// Tipos servidos. Deliberadamente corto: solo lo que este proyecto usa.
+// Tipos servidos: solo los que public/ contiene de verdad (html, js, css), mas
+// json por si se llega a servir un dato estatico. Cualquier otra extension sale
+// como application/octet-stream.
 const MIME = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
-  ".mjs": "text/javascript; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".json": "application/json; charset=utf-8",
-  ".svg": "image/svg+xml",
-  ".png": "image/png",
-  ".jpg": "image/jpeg",
-  ".jpeg": "image/jpeg",
-  ".gif": "image/gif",
-  ".ico": "image/x-icon",
-  ".woff": "font/woff",
-  ".woff2": "font/woff2",
-  ".mp3": "audio/mpeg",
-  ".wasm": "application/wasm",
 };
 
 function contentTypeFor(filePath) {
@@ -50,4 +41,4 @@ async function readJson(req, res) {
   }
 }
 
-module.exports = { MIME, contentTypeFor, sendJson, readJson };
+module.exports = { contentTypeFor, sendJson, readJson };
