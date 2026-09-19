@@ -82,7 +82,7 @@ componentes y responsive.
 
 La suite vive en `tests/task-manager/` y ejecuta módulos ES directamente.
 
-Cobertura actual (4 archivos, 18 pruebas):
+Cobertura actual (5 archivos, 28 pruebas):
 
 - **Cliente HTTP**: JSON válido, red, JSON inválido, error HTTP y capacidad TK
   deshabilitada.
@@ -91,19 +91,29 @@ Cobertura actual (4 archivos, 18 pruebas):
 - **Árbol**: niveles, expansión y combinación de filtros.
 - **Acciones**: selección tras recarga, descarte de respuestas obsoletas, busy,
   normalización de prioridad y mutación confirmada con recarga fallida.
+- **Foco de diálogos** (`components/dialog-focus.test.js`): entrar guardando el
+  origen, devolver el foco al cerrar, no devolverlo a un elemento que ya no está
+  en la página, filtrar los elementos no visibles y envolver el tabulador en los
+  cuatro casos.
 
 [`tests/task-manager/helpers/workspace-fixture.js`](../tests/task-manager/helpers/workspace-fixture.js)
 ensambla los mismos mixins en un objeto JavaScript, sin montar Vue ni DOM. Esto
 hace las pruebas rápidas, pero no valida plantillas, props en tiempo de
 ejecución, foco ni responsive.
 
+`dialog-focus.test.js` sigue el mismo criterio: prueba los métodos del mixin con
+un contexto mínimo y un DOM simulado a mano, sin montar Vue. Cubre el algoritmo
+—que es donde está la lógica fácil de equivocar—, pero **no** que el watcher de
+`open` dispare la entrada de foco ni que `ref="dialogRoot"` apunte al elemento
+correcto. Eso se comprueba en el navegador.
+
 Las pruebas simulan el cliente HTTP y no escriben en ninguna base de datos.
 
 ### Qué NO cubre la suite
 
 El servidor no tiene pruebas automatizadas. Su verificación es manual y está en
-la matriz de abajo. Tampoco hay pruebas de componentes, de navegador ni del
-comportamiento frente a `tk` real.
+la matriz de abajo. Tampoco hay pruebas que monten componentes Vue, ni de
+navegador, ni del comportamiento frente a `tk` real.
 
 ## Criterios de validación manual
 
@@ -150,7 +160,7 @@ npm run server
 Anchuras de referencia: 1440, 1180, 720 y 390 px. En móvil compruebe apertura y
 retorno del inspector, scroll de paneles y ausencia de desbordamiento horizontal.
 
-Accesibilidad: qué está implementado y qué no.
+Accesibilidad: qué está implementado.
 
 | Comprobación | Estado |
 |---|---|
@@ -158,11 +168,11 @@ Accesibilidad: qué está implementado y qué no.
 | Expansor de subtareas | Implementado: `<button>` real con `aria-expanded` y `aria-label` |
 | Nombres accesibles de iconos, menús y controles | Implementado: 28 usos de `aria-label` |
 | Menús desplegables | Implementado: `role="menu"`, `aria-haspopup` |
-| Cierre por Escape de los menús | Implementado |
+| Cierre por Escape de los menús y de los diálogos | Implementado: un único listener global en `workspace.js` llama a `handleEscape()` |
+| Cierre por Escape solo de la capa más interna | Implementado: el selector de etiquetas corta la propagación cuando está abierto |
+| Gestión de foco en los diálogos (entrar, retener, devolver) | Implementado: mixin `components/dialog-focus.js` |
+| Nombre accesible en la tarjeta de confirmación | Implementado: `aria-labelledby` |
 | Avisos anunciados | Implementado: región `aria-live="polite" aria-atomic="true"` |
-| **Cierre por Escape de los diálogos principales** | **NO implementado** (TM-R11) |
-| **Gestión de foco en los diálogos** (entrar, atrapar, devolver) | **NO implementado** (TM-R11) |
-| **Nombre accesible en la tarjeta de confirmación** | **NO implementado** (TM-R11) |
 | Foco visible | Por revisar en navegador |
 
 Puntos de ruptura declarados: 1500, 1180, 1120, 720 y 560 px. Las anchuras de
@@ -173,16 +183,19 @@ referencia 1440, 1180, 720 y 390 caen dentro de alguno de ellos.
 | Fecha | Tipo | Alcance | Resultado |
 |---|---|---|---|
 | 2026-09-19 | Automatizada | `npm run build` | Artefactos con hash idéntico a la línea base de la extracción |
-| 2026-09-19 | Automatizada | `npm test` | 4 archivos, 18 pruebas, todas en verde |
-| 2026-09-19 | Automatizada | Enlaces de la documentación | 67 comprobados, 0 rotos |
+| 2026-09-19 | Automatizada | `npm test` | 5 archivos, 28 pruebas, todas en verde |
+| 2026-09-19 | Automatizada | Enlaces de la documentación | 72 comprobados, 0 rotos |
 | 2026-09-19 | Manual (API) | Los 19 endpoints contra datos reales y contra base desechable | Correcto; incluye el cruce de `blocked`, el guardián de cierre y la cascada de etiquetas |
 | 2026-09-19 | Manual (navegador) | Recorrido funcional de la aplicación | Correcto, verificado por Alfredo |
+| 2026-09-19 | Automatizada | Foco y tabulador en diálogos (`dialog-focus.test.js`) | 10 pruebas en verde; cubre el algoritmo, no el montaje de Vue |
 
 **Límites de esta evidencia:** no hay log de CI. El recorrido en navegador cubre
 el camino funcional principal, pero no demuestra que se hayan revisado de forma
 individualizada las cuatro anchuras de referencia ni el detalle de accesibilidad.
-El servidor no tiene pruebas automatizadas (TM-R8) y los diálogos tienen las
-carencias de accesibilidad de TM-R11.
+El servidor no tiene pruebas automatizadas (TM-R8). La prueba de foco cubre el
+algoritmo, no el cableado de Vue ni el comportamiento real del navegador
+(TM-R4): que el watcher de `open` dispare la entrada de foco y que
+`ref="dialogRoot"` apunte al elemento correcto se comprueba a mano.
 
 ## Checklist de entrega
 

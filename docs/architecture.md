@@ -50,6 +50,8 @@ Reglas de frontera:
 - [`app-shell.js`](../src/task-manager/app-shell.js) compone la vista y conecta
   props y eventos.
 - `components/` presenta datos y emite intenciones.
+- `components/dialog-focus.js` es el único sitio que mueve el foco de los
+  diálogos modales.
 - `state/` posee el estado, los cálculos y los casos de uso.
 - [`api/tk-client.js`](../src/task-manager/api/tk-client.js) es el único archivo
   con `fetch`.
@@ -234,6 +236,32 @@ Los diálogos de alta y etiquetas reciben borradores inmutables desde la raíz y
 emiten copias actualizadas. `TagPickerField` implementa el contrato estándar
 `modelValue` / `update:modelValue`. `OverflowMenu` y `Toast` son hojas sin
 conocimiento de dominio.
+
+### Diálogos modales
+
+[`components/dialog-focus.js`](../src/task-manager/components/dialog-focus.js)
+es un mixin compartido por los diálogos que declaran `aria-modal="true"`. Sin él
+esa declaración sería falsa: promete al lector de pantalla que el resto de la
+página queda inerte, y eso no ocurre solo.
+
+El mixin, al abrirse el diálogo, recuerda dónde estaba el foco y lo mueve al
+contenedor del diálogo —no a su primer control, para que el lector lo anuncie
+por su nombre y no se abra sobre la «x» de cerrar—. Mientras está abierto,
+`trapDialogTab` impide que el tabulador se escape: del último vuelve al primero
+y del primero, hacia atrás, al último. Al cerrarse, el foco regresa al control
+que lo abrió, si sigue en la página.
+
+Los componentes marcan su elemento modal con `ref="dialogRoot"` y le ponen
+`tabindex="-1"`. La confirmación de borrado del gestor de etiquetas es un
+diálogo anidado y usa la misma pieza con su propio `ref`.
+
+**El cierre con Escape no vive aquí.** Lo centraliza
+[`state/ui.js`](../src/task-manager/state/ui.js) con `handleEscape()`, y
+`workspace.js` registra un único listener global que lo invoca. Un solo sitio
+decide qué se cierra, en vez de repartir esa decisión entre componentes. La
+excepción es el selector de etiquetas, que se cierra a sí mismo cuando está
+abierto y corta la propagación para que Escape cierre solo la capa más interna;
+si está cerrado, deja pasar el evento.
 
 Consulte [contracts.md](contracts.md) para los sobres exactos de datos y eventos.
 

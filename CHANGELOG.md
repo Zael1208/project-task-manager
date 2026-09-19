@@ -34,6 +34,13 @@ independiente, sin dependencias de otros productos.
 - **Configuración por variables de entorno**: puerto, rutas de ambas bases de
   datos, carpeta del binario y tiempo máximo de ejecución, todas con valores por
   defecto utilizables.
+- **Gestión de foco en los diálogos modales**: al abrirse, el foco entra en el
+  diálogo; el tabulador no puede salir de él; al cerrarse, el foco vuelve al
+  control que lo abrió. Antes, un diálogo que se declaraba modal no retenía el
+  foco, de modo que quien navega con teclado podía acabar detrás de él.
+- **Pruebas del comportamiento de foco** (`dialog-focus.test.js`, 10 pruebas):
+  entrar, devolver el foco, no devolverlo a un elemento que ya no está en la
+  página, filtrar los elementos no visibles y envolver el tabulador.
 
 ### Cambiado
 
@@ -59,6 +66,14 @@ independiente, sin dependencias de otros productos.
   `/api/tk/showcase`.
 - La resolución de ficheros estáticos comprueba también la ruta real del archivo,
   de modo que un enlace simbólico tampoco permite salir de `public/`.
+- **Escape cierra solo la capa más interna.** Con el selector de etiquetas abierto
+  dentro del diálogo de nueva tarea, un solo Escape cerraba los dos, porque el
+  selector y el espacio de trabajo escuchaban el mismo evento en `window`. Ahora
+  el selector se registra en fase de captura, actúa solo si está abierto y corta
+  la propagación. Si está cerrado, deja pasar el evento.
+- **La tarjeta de confirmación de borrado tiene nombre accesible**: declara
+  `role="dialog"` pero no tenía `aria-label` ni `aria-labelledby`, así que el
+  lector de pantalla la anunciaba sin título.
 
 ### Seguridad
 
@@ -76,7 +91,9 @@ independiente, sin dependencias de otros productos.
 - El build reproduce `app-vue.js` y `app-vue.css` con **hash idéntico** a los
   artefactos del proyecto de origen, lo que demuestra que la fuente y el pipeline
   se trasladaron sin perder nada.
-- La suite de pruebas se trasladó intacta: 4 archivos, 18 pruebas.
+- La suite de pruebas se trasladó intacta: 4 archivos, 18 pruebas. Después se
+  añadió `dialog-focus.test.js`, así que la suite vigente tiene 5 archivos y 28
+  pruebas.
 - **Pendiente de decisión**: la cabecera de la interfaz todavía muestra el nombre
   del producto de origen. Véase TM-R10 en `docs/known-risks.md`.
 
@@ -85,12 +102,11 @@ independiente, sin dependencias de otros productos.
 Se registran aquí porque afectan al uso, no porque sean defectos de la
 extracción. El detalle está en [`docs/known-risks.md`](docs/known-risks.md).
 
-- **Los diálogos no se cierran con Escape ni gestionan el foco** (TM-R11). Los
-  menús sí se cierran con Escape y el árbol de tareas tiene navegación por
-  teclado completa, pero el alta de tarea, el gestor de etiquetas y el selector
-  de etiquetas no. Afecta a quien navega con teclado.
 - **El servidor no tiene pruebas automatizadas** (TM-R8). Su verificación es
   manual.
+- **No hay pruebas que monten componentes Vue** (TM-R4): la suite prueba lógica
+  con contextos mínimos y un DOM simulado, no plantillas ni comportamiento real
+  de navegador. El cableado de foco de los diálogos se comprueba a mano.
 - **La prioridad no está validada**: `tk` acepta valores de 4 y superiores, y la
   interfaz solo representa de 0 a 3, así que se muestran como «Sin prioridad»
   (RX-2). Pendiente de decisión.
