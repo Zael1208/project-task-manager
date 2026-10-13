@@ -904,6 +904,36 @@
   };
 
   // src/task-manager/state/task-tree.js
+  var CURRENT_PERIODS = ["today", "week", "month", "year"];
+  function startOfPeriod(now, period) {
+    const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    if (period === "week") {
+      const daysSinceMonday = (start.getDay() + 6) % 7;
+      start.setDate(start.getDate() - daysSinceMonday);
+    } else if (period === "month") {
+      start.setDate(1);
+    } else if (period === "year") {
+      start.setMonth(0, 1);
+    }
+    return start;
+  }
+  function endOfPeriod(start, period) {
+    const end = new Date(start);
+    if (period === "today") end.setDate(end.getDate() + 1);
+    if (period === "week") end.setDate(end.getDate() + 7);
+    if (period === "month") end.setMonth(end.getMonth() + 1, 1);
+    if (period === "year") end.setFullYear(end.getFullYear() + 1, 0, 1);
+    return end;
+  }
+  function taskInCurrentPeriod(task, period, now = /* @__PURE__ */ new Date()) {
+    if (!CURRENT_PERIODS.includes(period)) return false;
+    const start = startOfPeriod(now, period).getTime();
+    const end = endOfPeriod(new Date(start), period).getTime();
+    return ["created_at", "updated_at"].some((field) => {
+      const timestamp = Date.parse(task[field]);
+      return Number.isFinite(timestamp) && timestamp >= start && timestamp < end;
+    });
+  }
   var taskTree = {
     computed: {
       mappedTasks() {
@@ -930,7 +960,7 @@
       filteredTaskIds() {
         const query = this.normalizeSearchText(this.taskSearchQuery);
         return new Set(this.mappedTasks.filter(
-          (task) => (this.activeTaskFilter === "all" || task.status === this.activeTaskFilter) && (!this.advancedStatuses.length || this.advancedStatuses.includes(task.status)) && (!this.advancedPriorities.length || this.advancedPriorities.includes(task.priority)) && (!this.advancedTags.length || task.chips.some((tag) => this.advancedTags.includes(tag))) && (!this.quickTagFilter || task.chips.includes(this.quickTagFilter)) && (!query || this.normalizeSearchText(`${task.id} ${task.title} ${task.chips.join(" ")}`).includes(query))
+          (task) => (this.activeTaskFilter === "all" || this.activeTaskFilter === "current" && taskInCurrentPeriod(task, this.currentPeriod, this.currentPeriodNow || /* @__PURE__ */ new Date()) || this.activeTaskFilter !== "current" && task.status === this.activeTaskFilter) && (!this.advancedStatuses.length || this.advancedStatuses.includes(task.status)) && (!this.advancedPriorities.length || this.advancedPriorities.includes(task.priority)) && (!this.advancedTags.length || task.chips.some((tag) => this.advancedTags.includes(tag))) && (!this.quickTagFilter || task.chips.includes(this.quickTagFilter)) && (!query || this.normalizeSearchText(`${task.id} ${task.title} ${task.chips.join(" ")}`).includes(query))
         ).map((task) => task.id));
       },
       visibleTasks() {
@@ -1003,6 +1033,7 @@
           activeTaskFilter: this.activeTaskFilter,
           quickTagFilter: this.quickTagFilter,
           taskChipsVisible: this.areTaskChipsVisible,
+          currentPeriod: this.currentPeriod,
           visibleCount: this.visibleTasks.length,
           listMenuOpen: this.isListMenuOpen,
           tagColor: this.tagColor
@@ -1062,6 +1093,8 @@
         busy: {},
         activeInspectorTab: "detail",
         activeTaskFilter: "all",
+        currentPeriod: "today",
+        currentPeriodNow: null,
         taskSearchQuery: "",
         quickTagFilter: "",
         advancedStatuses: [],
@@ -1536,13 +1569,14 @@
       advancedTags: { type: Array, required: true },
       tagCatalog: { type: Array, required: true },
       activeTaskFilter: { type: String, required: true },
+      currentPeriod: { type: String, required: true },
       quickTagFilter: { type: String, required: true },
       taskChipsVisible: { type: Boolean, required: true },
       visibleCount: { type: Number, required: true },
       listMenuOpen: { type: Boolean, required: true },
       tagColor: { type: Function, required: true }
     },
-    emits: ["refresh", "dismiss-error", "update-search", "toggle-filters", "close-filters", "clear-filters", "update-statuses", "update-priorities", "update-tags", "update-quick-filter", "update-active-filter", "toggle-chips", "toggle-list-menu", "set-expanded"],
+    emits: ["refresh", "dismiss-error", "update-search", "toggle-filters", "close-filters", "clear-filters", "update-statuses", "update-priorities", "update-tags", "update-quick-filter", "update-active-filter", "update-current-period", "toggle-chips", "toggle-list-menu", "set-expanded"],
     methods: {
       toggleValue(values, value, checked, eventName) {
         this.$emit(eventName, checked ? [...values, value] : values.filter((item) => item !== value));
@@ -1601,9 +1635,13 @@
     <p class="task-filter-popover__summary">{{ visibleCount }} {{ visibleCount === 1 ? 'resultado' : 'resultados' }}</p>
   </section>
   <nav class="tk-tabs task-filter-tabs" aria-label="Filtros r\xE1pidos"><button
-      v-for="item in [['all', 'Todas'], ['open', 'Pendientes'], ['in_progress', 'En curso'], ['blocked', 'Bloqueadas'], ['done', 'Hechas']]"
+      v-for="item in [['all', 'Todas'], ['current', 'Actuales'], ['open', 'Pendientes'], ['in_progress', 'En curso'], ['blocked', 'Bloqueadas'], ['done', 'Hechas']]"
       :key="item[0]" class="tk-tab" type="button" :title="item[1]" :aria-selected="activeTaskFilter === item[0]"
       @click="$emit('update-active-filter', item[0])">{{ item[1] }}</button></nav>
+  <nav v-show="activeTaskFilter === 'current'" class="tk-tabs current-period-tabs" aria-label="Periodo de tareas actuales"><button
+      v-for="item in [['today', 'Hoy'], ['week', 'Semana'], ['month', 'Mes'], ['year', 'A\xF1o']]"
+      :key="item[0]" class="tk-tab" type="button" :title="item[1]" :aria-pressed="currentPeriod === item[0]"
+      @click="$emit('update-current-period', item[0])">{{ item[1] }}</button></nav>
   <div class="tag-manager-filter-controls"><select :value="quickTagFilter" class="tk-select tag-manager-filter"
       aria-label="Filtrar por etiqueta" @change="$emit('update-quick-filter', $event.target.value)">
       <option value="">Todas las etiquetas</option>
@@ -1722,7 +1760,7 @@
       tagColor: { type: Function, required: true },
       filterProps: { type: Object, required: true }
     },
-    emits: ["refresh", "dismiss-error", "update-search", "toggle-filters", "close-filters", "clear-filters", "update-statuses", "update-priorities", "update-tags", "update-quick-filter", "update-active-filter", "toggle-chips", "toggle-list-menu", "set-expanded", "select", "toggle-expanded", "update-field", "toggle-menu", "menu-action"],
+    emits: ["refresh", "dismiss-error", "update-search", "toggle-filters", "close-filters", "clear-filters", "update-statuses", "update-priorities", "update-tags", "update-quick-filter", "update-active-filter", "update-current-period", "toggle-chips", "toggle-list-menu", "set-expanded", "select", "toggle-expanded", "update-field", "toggle-menu", "menu-action"],
     template: `
     <aside class="task-explorer" aria-label="Explorador de tareas">
   <task-filters v-bind="filterProps" @refresh="$emit('refresh')" @dismiss-error="$emit('dismiss-error')"
@@ -1730,7 +1768,8 @@
     @close-filters="$emit('close-filters')" @clear-filters="$emit('clear-filters')"
     @update-statuses="$emit('update-statuses', $event)" @update-priorities="$emit('update-priorities', $event)"
     @update-tags="$emit('update-tags', $event)" @update-quick-filter="$emit('update-quick-filter', $event)"
-    @update-active-filter="$emit('update-active-filter', $event)" @toggle-chips="$emit('toggle-chips')"
+    @update-active-filter="$emit('update-active-filter', $event)" @update-current-period="$emit('update-current-period', $event)"
+    @toggle-chips="$emit('toggle-chips')"
     @toggle-list-menu="$emit('toggle-list-menu')" @set-expanded="$emit('set-expanded', $event)"></task-filters>
   <div class="task-tree-scroll">
     <div v-show="loading" class="skeleton-stack" aria-label="Cargando tareas">
@@ -2059,7 +2098,8 @@
         @close-filters="isAdvancedFiltersOpen = false" @clear-filters="clearAdvancedFilters"
         @update-statuses="advancedStatuses = $event" @update-priorities="advancedPriorities = $event"
         @update-tags="advancedTags = $event" @update-quick-filter="quickTagFilter = $event"
-        @update-active-filter="activeTaskFilter = $event" @toggle-chips="areTaskChipsVisible = !areTaskChipsVisible"
+        @update-active-filter="activeTaskFilter = $event" @update-current-period="currentPeriod = $event"
+        @toggle-chips="areTaskChipsVisible = !areTaskChipsVisible"
         @toggle-list-menu="isListMenuOpen = !isListMenuOpen" @set-expanded="setAllExpanded" @select="loadTaskDetail"
         @toggle-expanded="toggleExpanded" @update-field="updateTaskField" @toggle-menu="toggleTaskMenu"
         @menu-action="runTaskMenuAction"></task-list>

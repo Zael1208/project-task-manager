@@ -9,6 +9,12 @@ Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PA
 
 ### Añadido
 
+- **Pestaña Actuales**: añade la vista situada junto a Todas con los periodos Hoy,
+  Semana, Mes y Año. Una tarea aparece cuando `created_at` o `updated_at` de
+  Tacks cae dentro del periodo; se conservan la búsqueda, los filtros, la
+  jerarquía, la selección del inspector, las etiquetas y la recarga SSE.
+- **Decisión temporal de Actuales**: documentada en
+  [`docs/decisions/005-actuales-por-creacion-o-actualizacion.md`](docs/decisions/005-actuales-por-creacion-o-actualizacion.md).
 - **Comprobación de documentación en la suite** (`tests/project/documentation.test.js`):
   `npm test` verifica que los documentos normativos no llevan cifras, medidas,
   hashes ni fechas, que no quedan tablas de progreso y que ningún identificador

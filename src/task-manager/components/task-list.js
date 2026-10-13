@@ -17,7 +17,7 @@ export const TaskList = {
     tagColor: { type: Function, required: true },
     filterProps: { type: Object, required: true }
   },
-  emits: ['refresh', 'dismiss-error', 'update-search', 'toggle-filters', 'close-filters', 'clear-filters', 'update-statuses', 'update-priorities', 'update-tags', 'update-quick-filter', 'update-active-filter', 'toggle-chips', 'toggle-list-menu', 'set-expanded', 'select', 'toggle-expanded', 'update-field', 'toggle-menu', 'menu-action'],
+  emits: ['refresh', 'dismiss-error', 'update-search', 'toggle-filters', 'close-filters', 'clear-filters', 'update-statuses', 'update-priorities', 'update-tags', 'update-quick-filter', 'update-active-filter', 'update-current-period', 'toggle-chips', 'toggle-list-menu', 'set-expanded', 'select', 'toggle-expanded', 'update-field', 'toggle-menu', 'menu-action'],
   template: `
     <aside class="task-explorer" aria-label="Explorador de tareas">
   <task-filters v-bind="filterProps" @refresh="$emit('refresh')" @dismiss-error="$emit('dismiss-error')"
@@ -25,7 +25,8 @@ export const TaskList = {
     @close-filters="$emit('close-filters')" @clear-filters="$emit('clear-filters')"
     @update-statuses="$emit('update-statuses', $event)" @update-priorities="$emit('update-priorities', $event)"
     @update-tags="$emit('update-tags', $event)" @update-quick-filter="$emit('update-quick-filter', $event)"
-    @update-active-filter="$emit('update-active-filter', $event)" @toggle-chips="$emit('toggle-chips')"
+    @update-active-filter="$emit('update-active-filter', $event)" @update-current-period="$emit('update-current-period', $event)"
+    @toggle-chips="$emit('toggle-chips')"
     @toggle-list-menu="$emit('toggle-list-menu')" @set-expanded="$emit('set-expanded', $event)"></task-filters>
   <div class="task-tree-scroll">
     <div v-show="loading" class="skeleton-stack" aria-label="Cargando tareas">

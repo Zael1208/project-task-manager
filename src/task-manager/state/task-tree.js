@@ -1,5 +1,43 @@
 import { mapTask } from '../../shared/tasks/task-model.js';
 
+const CURRENT_PERIODS = ['today', 'week', 'month', 'year'];
+
+function startOfPeriod(now, period) {
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  if (period === 'week') {
+    const daysSinceMonday = (start.getDay() + 6) % 7;
+    start.setDate(start.getDate() - daysSinceMonday);
+  } else if (period === 'month') {
+    start.setDate(1);
+  } else if (period === 'year') {
+    start.setMonth(0, 1);
+  }
+  return start;
+}
+
+function endOfPeriod(start, period) {
+  const end = new Date(start);
+  if (period === 'today') end.setDate(end.getDate() + 1);
+  if (period === 'week') end.setDate(end.getDate() + 7);
+  if (period === 'month') end.setMonth(end.getMonth() + 1, 1);
+  if (period === 'year') end.setFullYear(end.getFullYear() + 1, 0, 1);
+  return end;
+}
+
+/**
+ * Una tarea es actual si cualquiera de las fechas que TK realmente expone
+ * cae dentro del periodo. No se consultan campos de vencimiento inventados.
+ */
+export function taskInCurrentPeriod(task, period, now = new Date()) {
+  if (!CURRENT_PERIODS.includes(period)) return false;
+  const start = startOfPeriod(now, period).getTime();
+  const end = endOfPeriod(new Date(start), period).getTime();
+  return ['created_at', 'updated_at'].some((field) => {
+    const timestamp = Date.parse(task[field]);
+    return Number.isFinite(timestamp) && timestamp >= start && timestamp < end;
+  });
+}
+
 export const taskTree = {
   computed: {
     mappedTasks() {
@@ -26,7 +64,9 @@ export const taskTree = {
     filteredTaskIds() {
       const query = this.normalizeSearchText(this.taskSearchQuery);
       return new Set(this.mappedTasks.filter((task) =>
-        (this.activeTaskFilter === 'all' || task.status === this.activeTaskFilter) &&
+        (this.activeTaskFilter === 'all' ||
+          (this.activeTaskFilter === 'current' && taskInCurrentPeriod(task, this.currentPeriod, this.currentPeriodNow || new Date())) ||
+          (this.activeTaskFilter !== 'current' && task.status === this.activeTaskFilter)) &&
         (!this.advancedStatuses.length || this.advancedStatuses.includes(task.status)) &&
         (!this.advancedPriorities.length || this.advancedPriorities.includes(task.priority)) &&
         (!this.advancedTags.length || task.chips.some((tag) => this.advancedTags.includes(tag))) &&
@@ -113,6 +153,7 @@ export const taskTree = {
         activeTaskFilter: this.activeTaskFilter,
         quickTagFilter: this.quickTagFilter,
         taskChipsVisible: this.areTaskChipsVisible,
+        currentPeriod: this.currentPeriod,
         visibleCount: this.visibleTasks.length,
         listMenuOpen: this.isListMenuOpen,
         tagColor: this.tagColor

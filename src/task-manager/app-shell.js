@@ -38,7 +38,8 @@ export const AppShell = {
         @close-filters="isAdvancedFiltersOpen = false" @clear-filters="clearAdvancedFilters"
         @update-statuses="advancedStatuses = $event" @update-priorities="advancedPriorities = $event"
         @update-tags="advancedTags = $event" @update-quick-filter="quickTagFilter = $event"
-        @update-active-filter="activeTaskFilter = $event" @toggle-chips="areTaskChipsVisible = !areTaskChipsVisible"
+        @update-active-filter="activeTaskFilter = $event" @update-current-period="currentPeriod = $event"
+        @toggle-chips="areTaskChipsVisible = !areTaskChipsVisible"
         @toggle-list-menu="isListMenuOpen = !isListMenuOpen" @set-expanded="setAllExpanded" @select="loadTaskDetail"
         @toggle-expanded="toggleExpanded" @update-field="updateTaskField" @toggle-menu="toggleTaskMenu"
         @menu-action="runTaskMenuAction"></task-list>
