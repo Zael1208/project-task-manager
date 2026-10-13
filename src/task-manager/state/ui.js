@@ -1,4 +1,5 @@
 import { priorityLabel, statusBadgeClass, statusLabel } from '../../shared/tasks/task-model.js';
+import { notifyError, notifySuccess } from '../notifications/toast-anchor.js';
 
 export const workspaceUi = {
   methods: {
@@ -8,6 +9,7 @@ export const workspaceUi = {
         this.errorMessage = '';
       } else {
         this.errorMessage = error?.message || 'No se pudo completar la operación.';
+        notifyError(this.errorMessage);
       }
     },
     setBusy(key, value) {
@@ -23,10 +25,7 @@ export const workspaceUi = {
       return Boolean(this.busy[key]);
     },
     showToast(message) {
-      this.toastMessage = message;
-      window.setTimeout(() => {
-        if (this.toastMessage === message) this.toastMessage = '';
-      }, 3600);
+      notifySuccess(message);
     },
     normalizeSearchText(value) {
       return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es').trim();
@@ -61,7 +60,6 @@ export const workspaceUi = {
       this.isAdvancedFiltersOpen = false;
       this.isNewTaskOpen = false;
       this.isTagManagerOpen = false;
-      this.deletingTag = null;
     }
   }
 };

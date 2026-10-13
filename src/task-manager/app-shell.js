@@ -3,12 +3,11 @@ import { TagManagerDrawer } from './components/tag-manager-drawer.js';
 import { NewTaskDialog } from './components/new-task-dialog.js';
 import { TaskList } from './components/task-list.js';
 import { TaskInspector } from './components/task-inspector.js';
-import { Toast } from './components/toast.js';
 
 export const AppShell = {
   ...workspaceOptions,
   name: 'AppShell',
-  components: { NewTaskDialog, TagManagerDrawer, TaskInspector, TaskList, Toast },
+  components: { NewTaskDialog, TagManagerDrawer, TaskInspector, TaskList },
   template: `
     <main class="workspace-frame" @click="handleWorkspaceClick">
   <div class="workspace-app">
@@ -55,10 +54,9 @@ export const AppShell = {
 </new-task-dialog>
 <tag-manager-drawer :open="isTagManagerOpen" :tags="tagCatalog" :visible-tags="visibleTags" :colors="colors"
   :search-query="tagSearchQuery" :form-mode="tagFormMode" :draft="tagDraft" :editing-name="editingTagName"
-  :form-error="tagFormError" :deleting-tag="deletingTag" :affected-tasks="affectedTasks" :busy="isBusy"
-  :color-hex="colorHex" @close="isTagManagerOpen = false" @update-search="tagSearchQuery = $event"
+  :form-error="tagFormError" :busy="isBusy" :color-hex="colorHex"
+  @close="isTagManagerOpen = false" @update-search="tagSearchQuery = $event"
   @open-create="openCreateTag" @open-edit="openEditTag" @request-delete="requestDeleteTag"
-  @update-draft="tagDraft = $event" @close-form="closeTagForm" @save="saveTag" @cancel-delete="deletingTag = null"
-  @delete="deleteTag"></tag-manager-drawer>
-<toast :message="toastMessage"></toast>`
+  @update-draft="tagDraft = $event" @close-form="closeTagForm" @save="saveTag"></tag-manager-drawer>
+`
 };

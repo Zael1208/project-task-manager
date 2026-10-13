@@ -126,6 +126,428 @@
   var updateTag = (name, tag) => jsonRequest(`/api/tags/${encodeURIComponent(name)}`, "PUT", tag);
   var deleteTag = (name) => jsonRequest(`/api/tags/${encodeURIComponent(name)}`, "DELETE");
 
+  // node_modules/toast-anchor/dist/index.mjs
+  if (typeof document < "u" && !document.getElementById("__tk_css")) {
+    let i = document.createElement("style");
+    i.id = "__tk_css", i.textContent = "@keyframes __tk_spin{to{transform:rotate(360deg)}}", document.head.appendChild(i);
+  }
+  var g = { success: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>', error: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>', warning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>', info: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>', loading: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:__tk_spin 1s linear infinite"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>' };
+  var m = { position: "bottom-right", duration: 4e3, sound: false, dismissOnClick: false, showProgress: false, maxToasts: 5, theme: { success: { bg: "#10b981", light: "#d1fae5" }, error: { bg: "#ef4444", light: "#fee2e2" }, warning: { bg: "#f59e0b", light: "#fef3c7" }, info: { bg: "#3b82f6", light: "#dbeafe" } }, toast: { bg: "#ffffff", color: "#1e293b", descColor: "#64748b", borderColor: "#f1f5f9", borderWidth: "1px", borderRadius: "14px", shadow: "0 4px 24px rgba(0,0,0,0.08),0 1px 4px rgba(0,0,0,0.04)", padding: "13px 14px", width: "316px", fontSize: "13.5px", fontWeight: "600", descFontSize: "12px", descFontWeight: "400", showIcon: true, showClose: true, closeColor: "#cbd5e1", closeHoverColor: "#94a3b8", progressH: "3px", progressRadius: "0 0 14px 14px", iconSize: "32px", iconRadius: "50%", actionColor: null, actionFontSize: "12px" }, anchored: { position: "top", bg: "#0f172a", color: "#ffffff", borderColor: "transparent", borderWidth: "0px", borderRadius: "10px", shadow: "0 8px 24px rgba(0,0,0,0.2)", padding: "8px 14px", fontSize: "13px", fontWeight: "600", showIcon: true, arrowSize: 10, showArrow: true, gap: 13 }, anchoredConfirm: { position: "top", bg: "#0f172a", color: "#f8fafc", borderColor: "transparent", borderWidth: "0px", borderRadius: "12px", shadow: "0 8px 28px rgba(0,0,0,0.22)", padding: "12px 14px", fontSize: "13px", minWidth: "160px", showIcon: true, confirmBg: "#ef4444", confirmColor: "#ffffff", confirmHoverBg: "#dc2626", cancelBg: "#1e293b", cancelColor: "#94a3b8", cancelHoverBg: "#334155", cancelBorder: "#334155", btnRadius: "8px", btnFontSize: "12px", btnFontWeight: "700", btnPadding: "6px 0", arrowSize: 10, showArrow: true, gap: 13 }, modal: { position: "center", overlayBg: "rgba(15,23,42,0.55)", overlayBlur: "5px", bg: "#ffffff", borderColor: "transparent", borderWidth: "0px", borderRadius: "20px", shadow: "0 25px 60px rgba(0,0,0,0.22)", maxWidth: "420px", padding: "24px", footerBg: "#f8fafc", footerBorder: "#f1f5f9", footerPaddingV: "14px", footerPaddingVB: "18px", titleColor: "#0f172a", titleSize: "17px", titleWeight: "700", titleMargin: "0 0 8px", messageColor: "#64748b", messageSize: "14px", iconSize: "48px", iconRadius: "50%", iconBg: null, iconColor: null, confirmBg: null, confirmColor: "#ffffff", confirmHoverBg: null, confirmRadius: "10px", confirmSize: "13.5px", confirmWeight: "600", confirmPadding: "9px 22px", cancelColor: "#475569", cancelHoverBg: "#f1f5f9", cancelRadius: "10px", cancelSize: "13.5px", cancelWeight: "500", cancelPadding: "9px 18px", cancelBg: "transparent", cancelBorder: "none" } };
+  function Y(i = {}) {
+    let n = ["toast", "anchored", "anchoredConfirm", "modal", "theme"];
+    for (let [r, o] of Object.entries(i)) if (n.includes(r) && o && typeof o == "object") if (r === "theme") for (let [t, e] of Object.entries(o)) m.theme[t] = { ...m.theme[t], ...e };
+    else Object.assign(m[r], o);
+    else m[r] = o;
+  }
+  var k = null;
+  var te = { success: { wave: "sine", sf: 600, ef: 900, gs: 0.15, ge: 0.01, dur: 0.15 }, error: { wave: "sawtooth", sf: 400, ef: 200, gs: 0.15, ge: 0.01, dur: 0.15 }, warning: { wave: "triangle", sf: 600, ef: 380, gs: 0.12, ge: 0.01, dur: 0.13 }, info: { wave: "sine", sf: 800, ef: 300, gs: 0.15, ge: 0.01, dur: 0.1 }, pop: { wave: "sine", sf: 700, ef: 350, gs: 0.12, ge: 0.01, dur: 0.1 } };
+  function C(i = "success") {
+    if (!(typeof window > "u")) try {
+      k || (k = new (window.AudioContext || window.webkitAudioContext)()), k.state === "suspended" && k.resume();
+      let n = te[i] || te.pop, r = k.createOscillator(), o = k.createGain(), t = k.currentTime;
+      r.type = n.wave, r.frequency.setValueAtTime(n.sf, t), r.frequency.exponentialRampToValueAtTime(n.ef, t + n.dur), o.gain.setValueAtTime(n.gs, t), o.gain.exponentialRampToValueAtTime(n.ge, t + n.dur), r.connect(o), o.connect(k.destination), r.start(), r.stop(t + n.dur);
+    } catch {
+    }
+  }
+  var re = { "top-left": "top:1.5rem;left:1.5rem;flex-direction:column", "top-center": "top:1.5rem;left:50%;transform:translateX(-50%);flex-direction:column", "top-right": "top:1.5rem;right:1.5rem;flex-direction:column", "middle-left": "top:50%;left:1.5rem;transform:translateY(-50%);flex-direction:column", "middle-center": "top:50%;left:50%;transform:translate(-50%,-50%);flex-direction:column", "middle-right": "top:50%;right:1.5rem;transform:translateY(-50%);flex-direction:column", "bottom-left": "bottom:1.5rem;left:1.5rem;flex-direction:column-reverse", "bottom-center": "bottom:1.5rem;left:50%;transform:translateX(-50%);flex-direction:column-reverse", "bottom-right": "bottom:1.5rem;right:1.5rem;flex-direction:column-reverse" };
+  var D = /* @__PURE__ */ new Map();
+  var z = /* @__PURE__ */ new Map();
+  var he = 0;
+  function be(i) {
+    if (typeof document > "u") return null;
+    if (D.has(i)) return D.get(i);
+    let n = document.createElement("div");
+    return n.id = `__tk_c_${i.replace(/-/g, "_")}`, n.setAttribute("style", "position:fixed;z-index:9999;display:flex;gap:10px;pointer-events:none;" + (re[i] || re["bottom-right"])), document.body.appendChild(n), D.set(i, n), n;
+  }
+  function x(i) {
+    let n = z.get(i);
+    if (!n) return;
+    clearTimeout(n.timer);
+    let r = n.el;
+    r.style.opacity = "0", r.style.transform = "scale(0.9) translateY(6px)", r.style.maxHeight = r.offsetHeight + "px", setTimeout(() => {
+      r.style.transition = "all 0.32s ease-out", r.style.maxHeight = "0", r.style.padding = "0", r.style.margin = "0", r.style.overflow = "hidden";
+    }, 60), setTimeout(() => {
+      r.remove(), z.delete(i);
+    }, 420);
+  }
+  function L() {
+    [...z.keys()].forEach(x);
+  }
+  function xe() {
+    return `__tk_${++he}`;
+  }
+  function u(i, n = {}) {
+    var Z, ee;
+    if (typeof document > "u") return () => {
+    };
+    let r = m, o = r.toast, t = { type: "success", position: r.position, duration: r.duration, sound: r.sound, dismissOnClick: r.dismissOnClick, showProgress: r.showProgress, description: null, icon: null, action: null, id: null, showIcon: void 0, showClose: void 0, ...n }, e = t.type, d = r.theme[e] || r.theme.success, a = (y) => t[y] !== void 0 ? t[y] : o[y], c = a("bg"), s = a("color"), l = a("descColor"), f = a("borderColor"), p = a("borderWidth"), P = a("borderRadius"), H = a("shadow"), F = a("padding"), O = a("width"), h = a("fontSize"), M = a("fontWeight"), $ = a("descFontSize"), S = a("descFontWeight"), w = a("closeColor"), B = a("closeHoverColor"), v = a("progressH"), ne = a("progressRadius"), ie = t.progressColor || d.bg, se = t.iconBg || d.light, ae = t.iconColor || d.bg, q = a("iconSize"), de = a("iconRadius"), ce = t.actionColor || d.bg, le = a("actionFontSize"), fe = t.icon || g[e] || g.success, j = t.id || xe(), pe = t.showIcon !== void 0 ? t.showIcon : o.showIcon !== void 0 ? o.showIcon : true, me = t.showClose !== void 0 ? t.showClose : o.showClose !== void 0 ? o.showClose : true, J = !!(t.description || t.action), ue = J ? "align-items:flex-start" : "align-items:center", ge = J ? "padding-top:2px" : "";
+    t.sound && C(e);
+    let Q = be(t.position);
+    if (!Q) return () => {
+    };
+    z.size >= r.maxToasts && x(z.keys().next().value);
+    let b = document.createElement("div");
+    b.id = j, b.setAttribute("style", ["pointer-events:auto", "position:relative", "overflow:hidden", "display:flex", ue, "gap:12px", `width:${O}`, `background:${c}`, `border:${p} solid ${f}`, `padding:${F}`, `border-radius:${P}`, `box-shadow:${H}`, "transition:all 0.38s cubic-bezier(0.34,1.56,0.64,1)", "opacity:0", "transform:scale(0.9) translateY(10px)", `cursor:${t.dismissOnClick ? "pointer" : "default"}`, "box-sizing:border-box"].join(";")), b.innerHTML = `
+    ${pe ? `<div style="display:flex;align-items:center;justify-content:center;width:${q};height:${q};min-width:${q};border-radius:${de};background:${se};color:${ae};flex-shrink:0">
+      <div style="width:16px;height:16px;display:flex">${fe}</div>
+    </div>` : ""}
+    <div style="flex:1;min-width:0;${ge}">
+      <p style="font-size:${h};font-weight:${M};color:${s};line-height:1.4;margin:0">${i}</p>
+      ${t.description ? `<p style="font-size:${$};font-weight:${S};color:${l};margin:3px 0 0;line-height:1.5">${t.description}</p>` : ""}
+      ${t.action ? `<button data-tk-action style="margin-top:7px;font-size:${le};font-weight:700;color:${ce};background:none;border:none;cursor:pointer;padding:0;display:block;line-height:1">${t.action.label}</button>` : ""}
+    </div>
+    ${me ? `<button data-tk-close
+      style="flex-shrink:0;background:none;border:none;cursor:pointer;color:${w};padding:2px;line-height:0;border-radius:4px;transition:color 0.15s"
+      title="Dismiss"
+      onmouseenter="this.style.color='${B}'"
+      onmouseleave="this.style.color='${w}'"
+    >
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+      </svg>
+    </button>` : ""}
+    ${t.showProgress && t.duration > 0 ? `<div data-tk-bar style="position:absolute;bottom:0;left:0;height:${v};border-radius:${ne};background:${ie};width:100%;transition:width ${t.duration}ms linear"></div>` : ""}
+  `.trim(), Q.appendChild(b), requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (b.style.opacity = "1", b.style.transform = "scale(1) translateY(0)", t.showProgress && t.duration > 0) {
+        let y = b.querySelector("[data-tk-bar]");
+        y && (y.style.width = "0%");
+      }
+    }));
+    let T = () => x(j), I = null;
+    return t.duration > 0 && (I = setTimeout(T, t.duration)), b.addEventListener("mouseenter", () => clearTimeout(I)), b.addEventListener("mouseleave", () => {
+      t.duration > 0 && (I = setTimeout(T, Math.min(t.duration, 1500)));
+    }), (Z = b.querySelector("[data-tk-close]")) == null || Z.addEventListener("click", (y) => {
+      y.stopPropagation(), T();
+    }), t.dismissOnClick && b.addEventListener("click", T), (ee = b.querySelector("[data-tk-action]")) == null || ee.addEventListener("click", (y) => {
+      var R, oe;
+      y.stopPropagation(), (oe = (R = t.action) == null ? void 0 : R.onClick) == null || oe.call(R), T();
+    }), z.set(j, { el: b, timer: I }), T;
+  }
+  var ye = 0;
+  function E(i, n = {}, r = {}) {
+    let { loading: o = "Loading\u2026", success: t = "Done!", error: e = "Something went wrong" } = n, d = `__tk_p${++ye}`;
+    return u(o, { type: "info", duration: 0, icon: g.loading, sound: false, id: d, ...r }), Promise.resolve(i).then((a) => {
+      x(d);
+      let c = typeof t == "function" ? t(a) : t;
+      u(c, { type: "success", ...r });
+    }).catch((a) => {
+      x(d);
+      let c = typeof e == "function" ? e(a) : e;
+      u(c, { type: "error", ...r });
+    }), () => x(d);
+  }
+  function V(i, n, r, o) {
+    let t = n.getBoundingClientRect(), e = i.getBoundingClientRect(), d = window.scrollX, a = window.scrollY, c, s;
+    switch (r) {
+      case "bottom":
+        c = t.bottom + a + o, s = t.left + d + t.width / 2 - e.width / 2;
+        break;
+      case "left":
+        c = t.top + a + t.height / 2 - e.height / 2, s = t.left + d - e.width - o;
+        break;
+      case "right":
+        c = t.top + a + t.height / 2 - e.height / 2, s = t.right + d + o;
+        break;
+      default:
+        c = t.top + a - e.height - o, s = t.left + d + t.width / 2 - e.width / 2;
+    }
+    i.style.top = `${c}px`, i.style.left = `${s}px`;
+  }
+  function U(i, n, r, o, t) {
+    let e = n / 2, d = t && t !== "0px" ? t : "0px", a = o || "transparent", c = d !== "0px", s = "";
+    if (c) {
+      let f = `${d} solid ${a}`, p = `${d} solid transparent`;
+      switch (i) {
+        case "top":
+          s = `border-top:${p};border-right:${f};border-bottom:${f};border-left:${p};`;
+          break;
+        case "bottom":
+          s = `border-top:${f};border-right:${p};border-bottom:${p};border-left:${f};`;
+          break;
+        case "left":
+          s = `border-top:${f};border-right:${f};border-bottom:${p};border-left:${p};`;
+          break;
+        case "right":
+          s = `border-top:${p};border-right:${p};border-bottom:${f};border-left:${f};`;
+          break;
+      }
+    }
+    let l = `${s}position:absolute;width:${n}px;height:${n}px;background:${r};transform:rotate(45deg);`;
+    switch (i) {
+      case "bottom":
+        return `${l}top:${-e}px;left:50%;margin-left:${-e}px`;
+      case "left":
+        return `${l}top:50%;right:${-e}px;margin-top:${-e}px`;
+      case "right":
+        return `${l}top:50%;left:${-e}px;margin-top:${-e}px`;
+      default:
+        return `${l}bottom:${-e}px;left:50%;margin-left:${-e}px`;
+    }
+  }
+  function X(i) {
+    switch (i) {
+      case "bottom":
+        return "scale(0.88) translateY(-8px)";
+      case "left":
+        return "scale(0.88) translateX(8px)";
+      case "right":
+        return "scale(0.88) translateX(-8px)";
+      default:
+        return "scale(0.88) translateY(8px)";
+    }
+  }
+  function K(i) {
+    switch (i) {
+      case "bottom":
+        return "scale(0.9) translateY(-4px)";
+      case "left":
+        return "scale(0.9) translateX(4px)";
+      case "right":
+        return "scale(0.9) translateX(-4px)";
+      default:
+        return "scale(0.9) translateY(4px)";
+    }
+  }
+  var N = /* @__PURE__ */ new WeakMap();
+  function A(i, n, r = {}) {
+    if (typeof document > "u" || !n) return () => {
+    };
+    let o = { type: "success", duration: 2500, sound: m.sound, icon: null, ...m.anchored, ...r }, t = m.theme[o.type] || m.theme.success, e = o.icon || g[o.type], d = o.position;
+    o.sound && C(o.type);
+    let a = N.get(n);
+    a && a();
+    let c = o.showIcon !== void 0 ? o.showIcon : true, s = document.createElement("div");
+    s.setAttribute("style", ["position:absolute", "z-index:9998", `padding:${o.padding}`, `background:${o.bg}`, `color:${o.color}`, `font-size:${o.fontSize}`, `font-weight:${o.fontWeight}`, `border-radius:${o.borderRadius}`, `border:${o.borderWidth} solid ${o.borderColor}`, `box-shadow:${o.shadow}`, "pointer-events:none", "white-space:nowrap", "transition:opacity 0.3s ease,transform 0.3s cubic-bezier(0.34,1.56,0.64,1)", "opacity:0", `transform:${X(d)}`].join(";")), s.innerHTML = `
+    <div style="display:flex;align-items:center;gap:7px">
+      ${c ? `<div style="width:15px;height:15px;display:flex;flex-shrink:0;color:${t.bg}">${e}</div>` : ""}
+      <span>${i}</span>
+    </div>
+    ${o.showArrow ? `<div style="${U(d, o.arrowSize, o.bg, o.borderColor, o.borderWidth)}"></div>` : ""}
+  `.trim(), document.body.appendChild(s), V(s, n, d, o.gap), requestAnimationFrame(() => requestAnimationFrame(() => {
+      s.style.opacity = "1", s.style.transform = "scale(1) translate(0,0)";
+    }));
+    let l = () => {
+      N.delete(n), s.style.opacity = "0", s.style.transform = K(d), setTimeout(() => s.remove(), 300);
+    };
+    return N.set(n, l), o.duration > 0 && setTimeout(l, o.duration), l;
+  }
+  var G = /* @__PURE__ */ new WeakMap();
+  function _(i, n, r, o, t = {}) {
+    if (typeof document > "u" || !n) return;
+    let e = { confirmLabel: "Yes", cancelLabel: "No", sound: m.sound, ...m.anchoredConfirm, ...t }, d = e.position;
+    e.sound && C("warning");
+    let a = G.get(n);
+    a && a();
+    let c = e.showIcon !== void 0 ? e.showIcon : true, s = document.createElement("div");
+    s.setAttribute("style", ["position:absolute", "z-index:9998", `padding:${e.padding}`, `background:${e.bg}`, `color:${e.color}`, `font-size:${e.fontSize}`, `border-radius:${e.borderRadius}`, `border:${e.borderWidth} solid ${e.borderColor}`, `box-shadow:${e.shadow}`, `min-width:${e.minWidth}`, "pointer-events:auto", "transition:opacity 0.3s ease,transform 0.3s cubic-bezier(0.34,1.56,0.64,1)", "opacity:0", `transform:${X(d)}`].join(";")), s.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+      ${c ? `<div style="width:15px;height:15px;flex-shrink:0;color:#fca5a5">${g.warning}</div>` : ""}
+      <span>${i}</span>
+    </div>
+    <div style="display:flex;gap:7px">
+      <button data-cancel style="
+        flex:1;padding:${e.btnPadding};
+        background:${e.cancelBg};
+        border:1px solid ${e.cancelBorder};
+        color:${e.cancelColor};
+        border-radius:${e.btnRadius};
+        cursor:pointer;
+        font-weight:${e.btnFontWeight};
+        font-size:${e.btnFontSize};
+        transition:background 0.15s,color 0.15s;
+      ">${e.cancelLabel}</button>
+      <button data-confirm style="
+        flex:1;padding:${e.btnPadding};
+        background:${e.confirmBg};
+        border:none;
+        color:${e.confirmColor};
+        border-radius:${e.btnRadius};
+        cursor:pointer;
+        font-weight:${e.btnFontWeight};
+        font-size:${e.btnFontSize};
+        transition:background 0.15s;
+      ">${e.confirmLabel}</button>
+    </div>
+    ${e.showArrow ? `<div style="${U(d, e.arrowSize, e.bg, e.borderColor, e.borderWidth)}"></div>` : ""}
+  `.trim(), document.body.appendChild(s), V(s, n, d, e.gap), requestAnimationFrame(() => requestAnimationFrame(() => {
+      s.style.opacity = "1", s.style.transform = "scale(1) translate(0,0)";
+    }));
+    let l = () => {
+      G.delete(n), s.style.opacity = "0", s.style.transform = K(d), setTimeout(() => s.remove(), 280);
+    };
+    G.set(n, l);
+    let f = s.querySelector("[data-confirm]"), p = s.querySelector("[data-cancel]");
+    f.addEventListener("mouseenter", () => {
+      f.style.background = e.confirmHoverBg;
+    }), f.addEventListener("mouseleave", () => {
+      f.style.background = e.confirmBg;
+    }), p.addEventListener("mouseenter", () => {
+      p.style.background = e.cancelHoverBg;
+    }), p.addEventListener("mouseleave", () => {
+      p.style.background = e.cancelBg;
+    }), f.onclick = () => {
+      l(), r == null || r();
+    }, p.onclick = () => {
+      l(), o == null || o();
+    };
+  }
+  function W(i, n, r = {}) {
+    return new Promise((o) => {
+      if (typeof document > "u") return o(false);
+      let e = { ...m.modal, confirmLabel: "Confirm", cancelLabel: "Cancel", confirmVariant: "danger", icon: null, sound: m.sound, ...r }, d = e.position === "top", a = d ? "flex-start" : "center", c = d ? "padding:5vh 16px 16px" : "padding:16px";
+      e.sound && C("warning");
+      let s = e.confirmVariant !== "primary", l = e.confirmBg || (s ? "#ef4444" : "#3b82f6"), f = e.confirmHoverBg || (s ? "#dc2626" : "#2563eb"), p = e.iconColor || (s ? "#ef4444" : "#3b82f6"), P = e.iconBg || (s ? "#fee2e2" : "#dbeafe"), H = e.icon || g.warning, F = e.padding.trim().split(/\s+/), O = F[1] || F[0], h = document.createElement("div");
+      h.setAttribute("style", ["position:fixed", "inset:0", "z-index:99999", "display:flex", `align-items:${a}`, "justify-content:center", c, `background:${e.overlayBg}`, `backdrop-filter:blur(${e.overlayBlur})`, "-webkit-backdrop-filter:blur(" + e.overlayBlur + ")", "transition:opacity 0.25s ease", "opacity:0"].join(";")), h.innerHTML = `
+      <div data-mb style="
+        width:100%;max-width:${e.maxWidth};
+        background:${e.bg};
+        border-radius:${e.borderRadius};
+        border:${e.borderWidth} solid ${e.borderColor};
+        box-shadow:${e.shadow};
+        overflow:hidden;
+        transition:all 0.32s cubic-bezier(0.34,1.56,0.64,1);
+        transform:scale(0.9) translateY(18px);
+      ">
+        <!-- Body -->
+        <div style="padding:${e.padding}">
+          <div style="
+            width:${e.iconSize};height:${e.iconSize};
+            border-radius:${e.iconRadius};
+            background:${P};
+            display:flex;align-items:center;justify-content:center;
+            margin-bottom:16px;
+            color:${p};
+          ">
+            <div style="width:24px;height:24px">${H}</div>
+          </div>
+          <h3 style="
+            font-size:${e.titleSize};
+            font-weight:${e.titleWeight};
+            color:${e.titleColor};
+            margin:${e.titleMargin};
+            line-height:1.3;
+          ">${i}</h3>
+          <p style="
+            font-size:${e.messageSize};
+            color:${e.messageColor};
+            margin:0;
+            line-height:1.65;
+          ">${n}</p>
+        </div>
+
+        <!-- Footer -->
+        <div style="
+          background:${e.footerBg};
+          padding:${e.footerPaddingV} ${O} ${e.footerPaddingVB};
+          display:flex;gap:10px;justify-content:flex-end;
+          border-top:1px solid ${e.footerBorder};
+        ">
+          <button data-mc style="
+            padding:${e.cancelPadding};
+            font-size:${e.cancelSize};
+            font-weight:${e.cancelWeight};
+            color:${e.cancelColor};
+            background:${e.cancelBg};
+            border:${e.cancelBorder};
+            border-radius:${e.cancelRadius};
+            cursor:pointer;
+            transition:background 0.15s, color 0.15s;
+          ">${e.cancelLabel}</button>
+          <button data-mok style="
+            padding:${e.confirmPadding};
+            font-size:${e.confirmSize};
+            font-weight:${e.confirmWeight};
+            color:${e.confirmColor};
+            background:${l};
+            border:none;
+            border-radius:${e.confirmRadius};
+            cursor:pointer;
+            box-shadow:0 2px 8px ${l}55;
+            transition:background 0.15s, transform 0.1s;
+          ">${e.confirmLabel}</button>
+        </div>
+      </div>
+    `.trim(), document.body.appendChild(h);
+      let M = h.querySelector("[data-mb]"), $ = h.querySelector("[data-mok]"), S = h.querySelector("[data-mc]");
+      $.addEventListener("mouseenter", () => {
+        $.style.background = f, $.style.transform = "translateY(-1px)";
+      }), $.addEventListener("mouseleave", () => {
+        $.style.background = l, $.style.transform = "";
+      }), S.addEventListener("mouseenter", () => {
+        S.style.background = e.cancelHoverBg;
+      }), S.addEventListener("mouseleave", () => {
+        S.style.background = e.cancelBg;
+      }), requestAnimationFrame(() => {
+        h.style.opacity = "1", M.style.transform = "scale(1) translateY(0)";
+      });
+      let w = (v) => {
+        h.style.opacity = "0", M.style.transform = "scale(0.9) translateY(16px)", setTimeout(() => {
+          h.remove(), o(v);
+        }, 280);
+      };
+      S.onclick = () => w(false), $.onclick = () => w(true), h.addEventListener("click", (v) => {
+        v.target === h && w(false);
+      });
+      let B = (v) => {
+        v.key === "Escape" && (w(false), document.removeEventListener("keydown", B)), v.key === "Enter" && (w(true), document.removeEventListener("keydown", B));
+      };
+      document.addEventListener("keydown", B);
+    });
+  }
+  var we = { success: (i, n) => u(i, { type: "success", ...n }), error: (i, n) => u(i, { type: "error", ...n }), warning: (i, n) => u(i, { type: "warning", ...n }), info: (i, n) => u(i, { type: "info", ...n }), notify: u, promise: E, anchored: A, anchoredConfirm: _, modal: W, dismiss: x, dismissAll: L, configure: Y, ICONS: g };
+  var ao = we;
+
+  // src/task-manager/notifications/toast-anchor.js
+  var DARK_STUDIO = {
+    position: "top-right",
+    toast: {
+      bg: "#121c27",
+      color: "#f3f6f8",
+      descColor: "#bac4ce",
+      borderColor: "#344657",
+      borderWidth: "1px",
+      borderRadius: "8px",
+      shadow: "0 30px 90px rgba(0, 0, 0, 0.52)",
+      width: "min(400px, calc(100vw - 36px))"
+    },
+    modal: {
+      overlayBg: "rgba(10, 16, 23, 0.78)",
+      overlayBlur: "5px",
+      bg: "#182431",
+      borderColor: "#344657",
+      borderWidth: "1px",
+      borderRadius: "8px",
+      shadow: "0 30px 90px rgba(0, 0, 0, 0.62)",
+      titleColor: "#f3f6f8",
+      messageColor: "#bac4ce",
+      footerBg: "#121c27",
+      footerBorder: "#253342",
+      cancelColor: "#bac4ce",
+      cancelHoverBg: "#1b2937"
+    },
+    theme: {
+      success: { bg: "#58d392", light: "rgba(88, 211, 146, 0.16)" },
+      error: { bg: "#ff7373", light: "rgba(255, 115, 115, 0.16)" },
+      warning: { bg: "#f2bf59", light: "rgba(242, 191, 89, 0.16)" },
+      info: { bg: "#62a7ff", light: "rgba(98, 167, 255, 0.16)" }
+    }
+  };
+  ao.configure(DARK_STUDIO);
+  function notifySuccess(message) {
+    return ao.success(message);
+  }
+  function notifyError(message) {
+    return ao.error(message);
+  }
+  function confirmAction(title, message, options = {}) {
+    return ao.modal(title, message, {
+      confirmLabel: "Eliminar",
+      cancelLabel: "Cancelar",
+      confirmVariant: "danger",
+      ...options
+    });
+  }
+
   // src/task-manager/state/tag-actions.js
   var tagActions = {
     computed: {
@@ -135,10 +557,6 @@
       visibleTags() {
         const query = this.normalizeSearchText(this.tagSearchQuery);
         return this.tagCatalog.filter((tag) => !query || this.normalizeSearchText(`${tag.name} ${tag.description}`).includes(query));
-      },
-      affectedTasks() {
-        if (!this.deletingTag) return [];
-        return this.mappedTasks.filter((task) => task.chips.some((tag) => this.sameTagName(tag, this.deletingTag.name)));
       }
     },
     methods: {
@@ -188,17 +606,21 @@
           this.closeTagForm();
         }
       },
-      requestDeleteTag(tag) {
-        this.deletingTag = tag;
+      async requestDeleteTag(tag) {
+        if (!tag) return;
+        const affectedCount = this.mappedTasks.filter((task) => task.chips.some((name) => this.sameTagName(name, tag.name))).length;
+        const confirmed = await confirmAction(
+          "Eliminar etiqueta",
+          `Vas a eliminar \u201C${tag.name}\u201D de ${affectedCount} ${affectedCount === 1 ? "tarea" : "tareas"}.`
+        );
+        if (confirmed) await this.deleteTag(tag);
       },
-      async deleteTag() {
-        const tag = this.deletingTag;
+      async deleteTag(tag) {
         if (!tag) return;
         const result = await this.mutate(`tag-delete:${tag.name}`, () => deleteTag(tag.name), "Etiqueta eliminada.");
         if (result) {
           this.advancedTags = this.advancedTags.filter((name) => name !== tag.name);
           if (this.quickTagFilter === tag.name) this.quickTagFilter = "";
-          this.deletingTag = null;
         }
       }
     }
@@ -284,7 +706,10 @@
           this.selectedTaskId = selectedId;
           if (this.detail?.id !== selectedId) this.detail = null;
           this.unavailable = false;
-          this.expandedIds = [...new Set(tasks.map((task) => task.parentId).filter(Boolean))];
+          const parentIds = [...new Set(tasks.map((task) => task.parentId).filter(Boolean))];
+          const hadTreeState = this.expandedIds.length > 0 || this.collapsedIds.length > 0;
+          this.expandedIds = hadTreeState ? this.expandedIds.filter((id) => parentIds.includes(id)) : parentIds;
+          this.collapsedIds = this.collapsedIds.filter((id) => parentIds.includes(id));
           if (selectedId) await this.loadTaskDetail(selectedId, false);
           else this.syncEditDraft();
           return true;
@@ -527,7 +952,8 @@
           if (visited.has(task.id)) return;
           visited.add(task.id);
           if (this.filteredTaskIds.has(task.id)) rows.push(task);
-          if (hasFilter || this.expandedIds.includes(task.id)) {
+          const canTraverse = this.expandedIds.includes(task.id) || hasFilter && !this.collapsedIds.includes(task.id);
+          if (canTraverse) {
             for (const child of childrenByParent.get(task.id) || []) visit(child);
           }
         };
@@ -574,10 +1000,18 @@
     },
     methods: {
       toggleExpanded(id) {
-        this.expandedIds = this.expandedIds.includes(id) ? this.expandedIds.filter((item) => item !== id) : [...this.expandedIds, id];
+        if (this.expandedIds.includes(id)) {
+          this.expandedIds = this.expandedIds.filter((item) => item !== id);
+          if (!this.collapsedIds.includes(id)) this.collapsedIds = [...this.collapsedIds, id];
+          return;
+        }
+        this.expandedIds = [...this.expandedIds, id];
+        this.collapsedIds = this.collapsedIds.filter((item) => item !== id);
       },
       setAllExpanded(expanded) {
-        this.expandedIds = expanded ? this.mappedTasks.filter((task) => task.children).map((task) => task.id) : [];
+        const parentIds = this.mappedTasks.filter((task) => task.children).map((task) => task.id);
+        this.expandedIds = expanded ? parentIds : [];
+        this.collapsedIds = expanded ? [] : parentIds;
         this.isListMenuOpen = false;
       },
       clearAdvancedFilters() {
@@ -609,7 +1043,6 @@
         refreshing: false,
         unavailable: false,
         errorMessage: "",
-        toastMessage: "",
         busy: {},
         activeInspectorTab: "detail",
         activeTaskFilter: "all",
@@ -621,6 +1054,7 @@
         isAdvancedFiltersOpen: false,
         areTaskChipsVisible: true,
         expandedIds: [],
+        collapsedIds: [],
         isListMenuOpen: false,
         openTaskMenuId: "",
         isInspectorMenuOpen: false,
@@ -635,10 +1069,10 @@
         tagFormMode: "",
         editingTagName: "",
         tagDraft: { name: "", description: "", color: "blue" },
-        deletingTag: null,
         tagFormError: "",
         detailRequestSequence: 0,
-        reloadRequestSequence: 0
+        reloadRequestSequence: 0,
+        workspaceEventSource: null
       };
     },
     methods: {
@@ -663,6 +1097,7 @@
           this.errorMessage = "";
         } else {
           this.errorMessage = error?.message || "No se pudo completar la operaci\xF3n.";
+          notifyError(this.errorMessage);
         }
       },
       setBusy(key, value) {
@@ -675,10 +1110,7 @@
         return Boolean(this.busy[key]);
       },
       showToast(message) {
-        this.toastMessage = message;
-        window.setTimeout(() => {
-          if (this.toastMessage === message) this.toastMessage = "";
-        }, 3600);
+        notifySuccess(message);
       },
       normalizeSearchText(value) {
         return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es").trim();
@@ -713,7 +1145,6 @@
         this.isAdvancedFiltersOpen = false;
         this.isNewTaskOpen = false;
         this.isTagManagerOpen = false;
-        this.deletingTag = null;
       }
     }
   };
@@ -731,10 +1162,27 @@
     ],
     mounted() {
       window.addEventListener("keydown", this.handleEscape);
+      this.connectWorkspaceEvents();
       this.reloadWorkspace();
     },
     beforeUnmount() {
       window.removeEventListener("keydown", this.handleEscape);
+      this.disconnectWorkspaceEvents();
+    },
+    methods: {
+      connectWorkspaceEvents() {
+        if (typeof EventSource === "undefined") return;
+        this.disconnectWorkspaceEvents();
+        const source = new EventSource("/api/events");
+        source.addEventListener("workspace.changed", () => {
+          if (!this.loading) this.reloadWorkspace();
+        });
+        this.workspaceEventSource = source;
+      },
+      disconnectWorkspaceEvents() {
+        this.workspaceEventSource?.close();
+        this.workspaceEventSource = null;
+      }
     }
   };
 
@@ -835,21 +1283,10 @@
       draft: { type: Object, required: true },
       editingName: { type: String, required: true },
       formError: { type: String, required: true },
-      deletingTag: { type: Object, default: null },
-      affectedTasks: { type: Array, required: true },
       busy: { type: Function, required: true },
       colorHex: { type: Function, required: true }
     },
-    emits: ["close", "update-search", "open-create", "open-edit", "request-delete", "update-draft", "close-form", "save", "cancel-delete", "delete"],
-    watch: {
-      // La confirmacion de borrado es un dialogo anidado dentro del cajon: al
-      // abrirse el foco entra en ella, y al cancelarse vuelve al control del
-      // cajon desde el que se pidio.
-      deletingTag(value) {
-        if (value) this.enterDialog(this.$refs.confirmDialog);
-        else this.exitDialog();
-      }
-    },
+    emits: ["close", "update-search", "open-create", "open-edit", "request-delete", "update-draft", "close-form", "save"],
     methods: {
       update(field, value) {
         this.$emit("update-draft", { ...this.draft, [field]: value });
@@ -862,7 +1299,7 @@
       <div>
         <h2 id="tag-manager-title">Gestor de etiquetas</h2>
         <p>Cat\xE1logo compartido de Tacks</p>
-      </div><button class="tk-icon-button" type="button" aria-label="Cerrar gestor" @click="$emit('close')">\xD7</button>
+      </div><button class="tk-icon-button" type="button" aria-label="Cerrar gestor" title="Cerrar gestor" @click="$emit('close')">\xD7</button>
     </header>
     <div class="tag-manager-body">
       <div class="tag-manager-toolbar"><input :value="searchQuery" class="tk-input" type="search"
@@ -878,8 +1315,9 @@
             <div v-show="tag.description" class="tag-manager-description">{{ tag.description }}</div>
           </div><span class="tag-manager-uses">{{ tag.uses || 0 }} usos</span>
           <div class="tag-manager-actions"><button class="tk-icon-button tk-icon-button--compact" type="button"
-              :aria-label="'Editar ' + tag.name" @click="$emit('open-edit', tag)">\u270E</button><button
+              :aria-label="'Editar ' + tag.name" :title="'Editar ' + tag.name" @click="$emit('open-edit', tag)">\u270E</button><button
               class="tk-icon-button tk-icon-button--compact" type="button" :aria-label="'Eliminar ' + tag.name"
+              :title="'Eliminar ' + tag.name"
               @click="$emit('request-delete', tag)">\xD7</button></div>
         </article>
         <div v-show="!visibleTags.length" class="tag-manager-empty">No hay etiquetas que coincidan.</div>
@@ -887,7 +1325,7 @@
       <form v-show="formMode" class="tag-manager-form" @submit.prevent="$emit('save')">
         <div class="tag-manager-form-header">
           <strong>{{ formMode === 'edit' ? 'Editar etiqueta' : 'Nueva etiqueta' }}</strong><button
-            class="tk-icon-button" type="button" aria-label="Cerrar formulario" @click="$emit('close-form')">\xD7</button>
+            class="tk-icon-button" type="button" aria-label="Cerrar formulario" title="Cerrar formulario" @click="$emit('close-form')">\xD7</button>
         </div><label class="tag-manager-field"><span class="tag-manager-label">Nombre</span><input :value="draft.name"
             class="tk-input" maxlength="40" required @input="update('name', $event.target.value)" /></label><label
           class="tag-manager-field"><span class="tag-manager-label">Descripci\xF3n</span><input :value="draft.description"
@@ -896,6 +1334,7 @@
           <legend class="tag-manager-label">Color</legend>
           <div class="tag-manager-colors" role="radiogroup"><button v-for="color in colors" :key="color.id"
               class="tag-manager-color" type="button" role="radio" :aria-label="'Color ' + color.id"
+              :title="'Seleccionar color ' + color.id"
               :aria-checked="draft.color === color.id" :style="{ '--tag-color': color.hex }"
               @click="update('color', color.id)"></button></div>
         </fieldset>
@@ -906,21 +1345,6 @@
       </form>
     </div>
     <footer class="tag-manager-footer">Los usos proceden de las tareas reales.</footer>
-    <div v-show="deletingTag" class="tag-manager-confirm">
-      <div class="tag-manager-confirm-card" ref="confirmDialog" tabindex="-1" role="dialog" aria-modal="true"
-        aria-labelledby="tag-manager-confirm-title">
-        <h3 id="tag-manager-confirm-title">Eliminar etiqueta</h3>
-        <p>Vas a eliminar \u201C{{ deletingTag?.name }}\u201D de {{ affectedTasks.length }}
-          {{ affectedTasks.length === 1 ? 'tarea' : 'tareas' }}.</p>
-        <ul class="tag-manager-affected">
-          <li v-for="task in affectedTasks" :key="task.id">{{ task.id }} \xB7 {{ task.title }}</li>
-          <li v-show="!affectedTasks.length">Ninguna tarea afectada.</li>
-        </ul>
-        <div class="tag-manager-confirm-actions"><button class="tk-button tk-button--ghost" type="button"
-            @click="$emit('cancel-delete')">Cancelar</button><button class="tk-button tk-button--danger" type="button"
-            :disabled="busy('tag-delete:' + (deletingTag?.name || ''))" @click="$emit('delete')">Eliminar</button></div>
-      </div>
-    </div>
   </aside>
 </section>`
   };
@@ -1095,28 +1519,28 @@
       @click="$emit('refresh')">Reintentar</button></div>
   <div v-show="errorMessage" class="workspace-notice workspace-notice--error" role="alert"><strong>No se pudo completar
       la operaci\xF3n</strong><span>{{ errorMessage }}</span><button class="tk-icon-button tk-icon-button--compact"
-      type="button" aria-label="Cerrar error" @click="$emit('dismiss-error')">\xD7</button></div>
+      type="button" aria-label="Cerrar error" title="Cerrar error" @click="$emit('dismiss-error')">\xD7</button></div>
   <div v-show="refreshing" class="workspace-notice workspace-notice--loading" role="status"><strong>Actualizando
       datos</strong><span>Se mantiene visible el \xFAltimo estado confirmado.</span></div>
   <div class="task-search-row">
     <label><span class="sr-only">Buscar tareas</span><input :value="taskSearchQuery" class="tk-input" type="search"
         placeholder="Buscar por t\xEDtulo, ID o etiqueta" @input="$emit('update-search', $event.target.value)" /></label>
-    <button class="tk-icon-button" type="button" aria-label="Filtros" :aria-expanded="advancedFiltersOpen"
+    <button class="tk-icon-button" type="button" aria-label="Filtros" title="Mostrar filtros avanzados" :aria-expanded="advancedFiltersOpen"
       @click.stop="$emit('toggle-filters')"><span class="tk-icon">\u2637</span></button>
     <div class="menu-anchor"><button class="tk-icon-button" type="button" aria-label="Opciones del listado"
-        aria-haspopup="menu" :aria-expanded="listMenuOpen" @click.stop="$emit('toggle-list-menu')"><span
+        title="Opciones del listado" aria-haspopup="menu" :aria-expanded="listMenuOpen" @click.stop="$emit('toggle-list-menu')"><span
           class="tk-icon">\u22EE</span></button>
       <div v-show="listMenuOpen" class="tk-dropdown tk-dropdown--anchored is-open" role="menu" @click.stop><button
-          class="tk-dropdown__item" type="button" @click="$emit('set-expanded', true)">Expandir todo</button><button
-          class="tk-dropdown__item" type="button" @click="$emit('set-expanded', false)">Plegar todo</button></div>
+          class="tk-dropdown__item" type="button" title="Expandir todas las tareas" @click="$emit('set-expanded', true)">Expandir todo</button><button
+          class="tk-dropdown__item" type="button" title="Plegar todas las tareas" @click="$emit('set-expanded', false)">Plegar todo</button></div>
     </div>
   </div>
   <section v-show="advancedFiltersOpen" class="task-filter-popover" aria-label="Filtros avanzados" @click.stop>
     <div class="task-filter-popover__header"><strong>Filtros</strong>
       <div class="task-filter-popover__actions"><button v-show="hasAdvancedFilters" class="task-filter-clear"
-          type="button" @click="$emit('clear-filters')"><span class="tk-icon">\u21BB</span><span>Limpiar
+          type="button" title="Limpiar filtros" @click="$emit('clear-filters')"><span class="tk-icon">\u21BB</span><span>Limpiar
             filtros</span></button><button class="tk-icon-button tk-icon-button--compact" type="button"
-          aria-label="Cerrar filtros" @click="$emit('close-filters')">\xD7</button></div>
+          aria-label="Cerrar filtros" title="Cerrar filtros" @click="$emit('close-filters')">\xD7</button></div>
     </div>
     <fieldset>
       <legend>Estado</legend><label
@@ -1141,14 +1565,14 @@
   </section>
   <nav class="tk-tabs task-filter-tabs" aria-label="Filtros r\xE1pidos"><button
       v-for="item in [['all', 'Todas'], ['open', 'Pendientes'], ['in_progress', 'En curso'], ['blocked', 'Bloqueadas'], ['done', 'Hechas']]"
-      :key="item[0]" class="tk-tab" type="button" :aria-selected="activeTaskFilter === item[0]"
+      :key="item[0]" class="tk-tab" type="button" :title="item[1]" :aria-selected="activeTaskFilter === item[0]"
       @click="$emit('update-active-filter', item[0])">{{ item[1] }}</button></nav>
   <div class="tag-manager-filter-controls"><select :value="quickTagFilter" class="tk-select tag-manager-filter"
       aria-label="Filtrar por etiqueta" @change="$emit('update-quick-filter', $event.target.value)">
       <option value="">Todas las etiquetas</option>
       <option v-for="tag in tagCatalog" :key="tag.name" :value="tag.name">{{ tag.name }}</option>
     </select><button class="tk-icon-button tk-icon-button--compact tag-manager-visibility" type="button"
-      aria-label="Mostrar u ocultar etiquetas" :aria-pressed="taskChipsVisible"
+      aria-label="Mostrar u ocultar etiquetas" title="Mostrar u ocultar etiquetas" :aria-pressed="taskChipsVisible"
       @click="$emit('toggle-chips')">\u25C9</button></div>
 </div>`
   };
@@ -1563,26 +1987,11 @@
 </section>`
   };
 
-  // src/task-manager/components/toast.js
-  var Toast = {
-    name: "Toast",
-    props: {
-      message: { type: String, default: "" }
-    },
-    template: `
-    <div class="toast-region" aria-live="polite" aria-atomic="true">
-  <div v-show="message" :class="['tk-toast', 'tk-toast--success', { 'is-visible': message }]">
-    <span class="tk-toast__icon">\u2713</span>
-    <div><strong>Operaci\xF3n completada</strong><span>{{ message }}</span></div>
-  </div>
-</div>`
-  };
-
   // src/task-manager/app-shell.js
   var AppShell = {
     ...workspaceOptions,
     name: "AppShell",
-    components: { NewTaskDialog, TagManagerDrawer, TaskInspector, TaskList, Toast },
+    components: { NewTaskDialog, TagManagerDrawer, TaskInspector, TaskList },
     template: `
     <main class="workspace-frame" @click="handleWorkspaceClick">
   <div class="workspace-app">
@@ -1629,12 +2038,11 @@
 </new-task-dialog>
 <tag-manager-drawer :open="isTagManagerOpen" :tags="tagCatalog" :visible-tags="visibleTags" :colors="colors"
   :search-query="tagSearchQuery" :form-mode="tagFormMode" :draft="tagDraft" :editing-name="editingTagName"
-  :form-error="tagFormError" :deleting-tag="deletingTag" :affected-tasks="affectedTasks" :busy="isBusy"
-  :color-hex="colorHex" @close="isTagManagerOpen = false" @update-search="tagSearchQuery = $event"
+  :form-error="tagFormError" :busy="isBusy" :color-hex="colorHex"
+  @close="isTagManagerOpen = false" @update-search="tagSearchQuery = $event"
   @open-create="openCreateTag" @open-edit="openEditTag" @request-delete="requestDeleteTag"
-  @update-draft="tagDraft = $event" @close-form="closeTagForm" @save="saveTag" @cancel-delete="deletingTag = null"
-  @delete="deleteTag"></tag-manager-drawer>
-<toast :message="toastMessage"></toast>`
+  @update-draft="tagDraft = $event" @close-form="closeTagForm" @save="saveTag"></tag-manager-drawer>
+`
   };
 
   // src/task-manager/main.js
