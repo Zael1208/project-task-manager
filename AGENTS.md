@@ -71,6 +71,11 @@ revisión. Para escribir en tk se usa
 comentarios y descripciones. No se crean nuevos
 registros ODD en archivos Markdown.
 
+El tablero registra **trabajo**: una tarea o una parte de épica. Las **acciones**
+—integrar, retirar una rama, comprobar un cierre— no son tareas y no reciben una
+fila propia: se ven en Git y, como mucho, se anotan como comentario de la tarea a
+la que pertenecen.
+
 ## Mapa
 
 `PRD.md` (requisitos, alcance y estado funcional del producto) · `tk/.tacks/tacks.db`

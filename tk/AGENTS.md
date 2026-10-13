@@ -51,6 +51,11 @@ El ciclo correcto empieza en tk: se crea o selecciona la tarea antes de explorar
 o modificar archivos, se marca `in_progress`, se mantienen `notes` y comentarios
 durante el trabajo, y se cierra inmediatamente tras verificar el resultado.
 
+El tablero registra **trabajo**: una tarea o una parte de épica. Las **acciones**
+—integrar, retirar una rama, comprobar un cierre— no son tareas y no reciben una
+fila propia: se ven en Git y, como mucho, se anotan como comentario de la tarea a
+la que pertenecen.
+
 No se crean nuevos registros ODD en archivos Markdown. La base es local y no se
 sincroniza automáticamente entre Windows y WSL; no se levantan dos instancias
 escribiendo sobre la misma base.
