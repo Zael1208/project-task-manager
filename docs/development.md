@@ -1,13 +1,14 @@
 # Guía de desarrollo
 
 Este documento explica cómo cambiar el proyecto sin romper sus contratos.
-Sustituye al antiguo documento de relevo: el estado vivo está ahora en
-[`PRD.md`](../PRD.md) (sección 14) y en [`CHANGELOG.md`](../CHANGELOG.md).
+Los requisitos, el alcance y el estado funcional están en [`PRD.md`](../PRD.md);
+el trabajo operativo ODD está en `tk`; las decisiones durables están en
+[`decisions/`](decisions/) y los cambios relevantes en [`CHANGELOG.md`](../CHANGELOG.md).
 
 ## Mapa del proyecto
 
 ```text
-PRD.md                        Requisitos, alcance, plan y estado de ejecución
+PRD.md                        Requisitos, alcance y estado funcional del producto
 CHANGELOG.md                  Cambios relevantes, en formato Keep a Changelog
 CONTRATO_FLUJO_GIT_VERSIONADO.md   Flujo de ramas, commits y versionado
 jsconfig.json                 Alcance del proyecto para el servidor de lenguaje
@@ -29,6 +30,7 @@ tests/task-manager/           Suite de Vitest
 tk/                           Binario de terceros, su licencia y su base
 data/                         Base del catálogo de etiquetas
 docs/                         Esta documentación
+  decisions/                    ADRs de decisiones durables
 ```
 
 ## Ruta de incorporación
@@ -45,9 +47,27 @@ Lectura recomendada, en este orden:
    para cargas y escrituras del frontend.
 7. [`known-risks.md`](known-risks.md) antes de ampliar comportamiento.
 8. [`operations.md`](operations.md) antes de entregar.
+9. `./tk/tk --db tk/.tacks/tacks.db --json stats` y `ready --limit 1` para conocer el trabajo ODD actual.
 
 Con esa secuencia se comprende el núcleo sin leer primero las plantillas largas
 ni el CSS.
+
+## ODD en tk
+
+El tablero operativo se consulta desde la raíz con la base explícita:
+
+```bash
+./tk/tk --db tk/.tacks/tacks.db --json stats
+./tk/tk --db tk/.tacks/tacks.db --json ready --limit 1
+./tk/tk --db tk/.tacks/tacks.db --json list --tag ODD
+```
+
+Al comenzar un frente, se actualiza su estado y `notes`. Las decisiones y las
+evidencias se añaden como comentarios. Los ADRs de [`decisions/`](decisions/)
+son la fuente durable de las decisiones; tk solo conserva el enlace y el estado
+operativo. No se registran ramas, hashes ni commits en tk.
+
+No se crean nuevos registros ODD en `odd/tasks/*.md`: el tablero operativo es tk.
 
 ## Cómo realizar un cambio
 
@@ -141,6 +161,7 @@ Se sigue [CONTRATO_FLUJO_GIT_VERSIONADO.md](../CONTRATO_FLUJO_GIT_VERSIONADO.md)
 5. Actualizar `CHANGELOG.md` en `[Sin publicar]`.
 6. Integrar con `git merge --no-ff`.
 7. Etiquetar versiones solo al publicar, y solo si se ha pedido.
+8. Mantener el estado operativo ODD en tk y las decisiones durables en ADRs.
 
 ## Verificación mínima antes de entregar
 
@@ -161,4 +182,5 @@ artefactos con hash idéntico a la línea base de la extracción.
 
 No hay log de CI, ni pruebas de navegador, ni cobertura automatizada del
 servidor. Los recorridos manuales se registran en el `CHANGELOG.md` solo cuando
-cambian el comportamiento.
+cambian el comportamiento. El estado operativo de las tareas no se duplica en
+esta guía ni en archivos ODD Markdown.

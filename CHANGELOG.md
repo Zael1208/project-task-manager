@@ -9,6 +9,12 @@ Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PA
 
 ### Añadido
 
+- **Flujo ODD operativo en tk**: el trabajo entre sesiones se registra en la base
+  local de tk con la etiqueta `ODD`; los ADRs en `docs/decisions/` son la fuente
+  durable de las decisiones y no se crean nuevos registros ODD en Markdown.
+- **Catálogo inicial de etiquetas adoptado**: `data/task-manager.db` usa el
+  nombre elocuente del proyecto y contiene las etiquetas necesarias para el flujo
+  ODD, con verificación de las asociaciones de las tareas mediante la API.
 - **Delimitación del proyecto para herramientas** (`jsconfig.json`): fija el
   alcance en `src/`, `server/` y `tests/` para que el servidor de lenguaje
   resuelva referencias en todo el repositorio y no solo en los ficheros abiertos.
@@ -19,12 +25,11 @@ Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PA
   `CHANGELOG.md` bajo `[Sin publicar]`— y qué es petición explícita que no se
   recorta. No sustituye al contrato: lo enruta. Así las reglas llegan solas al
   agente que trabaja en este repositorio, en lugar de depender de que las lea.
-  Incluye que el `PRD.md` es también el tablero de estado: un agente recién llegado
-  puede responder «qué trabajo está en curso» sin más que mirar sus marcas de
-  `Hecho` / `Pendiente`.
+  Incluye que el `PRD.md` conserva requisitos, alcance y estado funcional, mientras
+  que el trabajo operativo entre sesiones se consulta en el tablero tk.
 - **Skill `tk` para agentes** (`skills/tk/SKILL.md`): describe el uso del gestor de
-  tareas como estado de alto nivel del proyecto —qué es una tarea y una subtarea,
-  cuándo se escribe en tk y cuándo no— y las trampas verificadas del binario
+  tareas como tablero operativo ODD —qué es una tarea y una subtarea, cómo se
+  conserva el relevo y cuándo se escribe en tk— y las trampas verificadas del binario
   (guarda de cierre, ausencia de borrado, `--claim` sin poder elegir nombre,
   prioridad sin validar). Se escribe en el formato estándar de Agent Skills, con
   solo `name` y `description` en el *frontmatter*, de modo que sirve a cualquier

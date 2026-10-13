@@ -8,8 +8,8 @@ Producto local y de un solo usuario: sin cuentas, sin red y sin sincronización.
 
 ## Estado
 
-Proyecto en construcción. El plan y el alcance completos están en
-[`PRD.md`](PRD.md).
+Proyecto en construcción. Los requisitos, el alcance y el estado funcional están en
+[`PRD.md`](PRD.md); el trabajo operativo ODD vive en `tk`.
 
 | Fase | Estado |
 |---|---|
@@ -22,6 +22,18 @@ Proyecto en construcción. El plan y el alcance completos están en
 | F7. Etiquetas sobre base propia | Hecho |
 | F8. Validación de paridad | Pendiente |
 | F9. Documentación | Hecho |
+
+Para consultar el trabajo ODD actual:
+
+```bash
+./tk/tk --db tk/.tacks/tacks.db --json stats
+./tk/tk --db tk/.tacks/tacks.db --json ready --limit 1
+./tk/tk --db tk/.tacks/tacks.db --json list --tag ODD
+```
+
+Las tareas ODD llevan la etiqueta `ODD`; las decisiones durables se documentan
+en [`docs/decisions/`](docs/decisions/). El estado de Git se consulta con Git,
+no en tk.
 
 El gestor **ya es utilizable**: `npm run server` y abre
 <http://localhost:8890/task-manager/app-vue.html>.
@@ -56,7 +68,7 @@ npm test
 ## Estructura
 
 ```text
-PRD.md                   Requisitos, alcance, plan y estado de ejecución
+PRD.md                   Requisitos, alcance y estado funcional del producto
 CHANGELOG.md             Cambios relevantes del proyecto
 CONTRATO_FLUJO_GIT_VERSIONADO.md   Flujo de ramas, commits y versionado
 docs/                    Arquitectura, contratos, desarrollo, operación y riesgos
@@ -66,7 +78,7 @@ server/                  Servidor Node: API y ficheros estáticos
   tasks.js                 Handlers de /api/tk/*
   tags.js                  Handlers de /api/tags* y base de etiquetas
   http.js                  Utilidades HTTP compartidas
-tk/                      Binario tacks, su licencia y la base de tareas
+tk/                      Binarios tacks, reglas locales y base de tareas ODD
 data/                    Base del catálogo de etiquetas
 src/task-manager/        Fuente del frontend (Vue 3, Options API, esbuild)
 src/shared/tasks/        Modelo de tarea compartido y utilidades de presentación
@@ -85,6 +97,7 @@ tests/task-manager/      Suite de Vitest
 | [`docs/development.md`](docs/development.md) | Cómo cambiar cada capa sin romper contratos |
 | [`docs/operations.md`](docs/operations.md) | Comandos, build, pruebas y matriz de validación manual |
 | [`docs/known-risks.md`](docs/known-risks.md) | Deuda confirmada y su cobertura |
+| [`docs/decisions/`](docs/decisions/) | Decisiones durables del proyecto, en formato ADR |
 | [`CHANGELOG.md`](CHANGELOG.md) | Qué ha cambiado y cuándo |
 
 ## Configuración
@@ -178,7 +191,8 @@ datos reales se queda ahí.
 
 El proyecto sigue [`CONTRATO_FLUJO_GIT_VERSIONADO.md`](CONTRATO_FLUJO_GIT_VERSIONADO.md):
 una rama por tarea, commits pequeños con prefijo de tipo, verificación antes de
-integrar, `CHANGELOG.md` al día y etiquetas SemVer solo al publicar.
+integrar, `CHANGELOG.md` al día y etiquetas SemVer solo al publicar. El tablero
+operativo ODD se consulta en `tk`; las decisiones durables se registran en ADRs.
 
 ## Licencia
 
