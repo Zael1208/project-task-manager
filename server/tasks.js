@@ -8,6 +8,7 @@
 // como la presencia de data.error.
 
 const { sendJson, readJson } = require("./http");
+const { publishWorkspaceChanged } = require("./events");
 const { runTk, runTkText, listTasksMerged, normalizeTask } = require("./tk");
 const { normalizeTagName, sameTagName } = require("./tags");
 
@@ -15,6 +16,11 @@ const { normalizeTagName, sameTagName } = require("./tags");
 function sendTkResult(res, result) {
   if (result?.error) return sendJson(res, 200, { error: result.error });
   return sendJson(res, 200, normalizeResult(result));
+}
+
+function sendTkMutationResult(res, result) {
+  sendTkResult(res, result);
+  if (!result?.error) publishWorkspaceChanged("tasks");
 }
 
 /** Aplica a las respuestas con tareas la coherencia de `close_reason`. */
@@ -95,7 +101,7 @@ async function handleTkCreate(req, res) {
   if (Array.isArray(input.tags) && input.tags.length) args.push("-t", input.tags.join(","));
   if (input.parent) args.push("--parent", input.parent);
 
-  sendTkResult(res, await runTk(args));
+  sendTkMutationResult(res, await runTk(args));
 }
 
 async function handleTkClose(req, res) {
@@ -109,7 +115,7 @@ async function handleTkClose(req, res) {
 
   // Si tk rechaza el cierre (por ejemplo, subtareas abiertas), el error se
   // devuelve tal cual. Nunca se reintenta con --force por cuenta propia.
-  sendTkResult(res, await runTk(args));
+  sendTkMutationResult(res, await runTk(args));
 }
 
 async function handleTkUpdate(req, res) {
@@ -156,7 +162,7 @@ async function handleTkUpdate(req, res) {
   if (tagsToAdd.length) args.push("--add-tags", tagsToAdd.join(","));
   if (tagsToRemove.length) args.push("--remove-tags", tagsToRemove.join(","));
 
-  sendTkResult(res, await runTk(args));
+  sendTkMutationResult(res, await runTk(args));
 }
 
 /**
@@ -179,13 +185,14 @@ async function handleTkDep(req, res, action) {
     child_id: input.child_id,
     parent_id: input.parent_id,
   });
+  publishWorkspaceChanged("tasks");
 }
 
 async function handleTkComment(req, res) {
   const input = await readJson(req, res);
   if (!input) return;
   if (!input.id || !input.body) return sendJson(res, 400, { error: "Falta id o body." });
-  sendTkResult(res, await runTk(["--json", "comment", input.id, input.body]));
+  sendTkMutationResult(res, await runTk(["--json", "comment", input.id, input.body]));
 }
 
 module.exports = {

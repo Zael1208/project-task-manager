@@ -11,8 +11,8 @@ Rama: `feature/ui-sse-toast-anchor` · Estrategia: `ask-on-risk` · Runner: `npm
 
 ## Tasks
 
-- **T1** — S1-S2 · inline · done · commit pendiente de registrar. Corregir plegado en todas las pestañas y añadir `title` a los botones del selector; pruebas de estado y componentes en GREEN.
-- **T2** — S3 · inline/delegated según superficies · pending · commit pendiente. Diseñar e implementar SSE en server y cliente; probar stream, eventos, reconexión y recarga segura.
+- **T1** — S1-S2 · inline · done · commit `f2187b8`. Corregir plegado en todas las pestañas y añadir `title` a los botones del selector; pruebas de estado y componentes en GREEN.
+- **T2** — S3 · inline · done · commit pendiente de registrar. Diseñar e implementar SSE en server y cliente; probar stream, eventos y recarga segura. La reconexión queda a cargo del comportamiento nativo de `EventSource`.
 - **T3** — S4 · inline/delegated según superficies · pending · commit pendiente. Integrar Toast Anchor con tema Dark Studio para toasts y confirmaciones; probar variantes y cancelación.
 - **T4** — S1-S4 · inline · pending · commit pendiente. Actualizar documentación, CHANGELOG y artefactos de build; ejecutar suite, build y verificación final.
 
@@ -31,4 +31,5 @@ Rama: `feature/ui-sse-toast-anchor` · Estrategia: `ask-on-risk` · Runner: `npm
 - **L3** — Investigación del enlace proporcionado: Toast Anchor es una librería vanilla sin dependencias con `toast.success/error/warning/info`, `toast.modal()` basado en Promise y configuración global de estilos. Se usará su API sin copiar su implementación al repositorio.
 - **L4** — Decisión pendiente del usuario: determinar si SSE debe detectar también cambios externos hechos mediante el CLI `tk` o si solo debe emitir eventos para mutaciones HTTP de esta aplicación. No se implementará esta parte hasta resolver el alcance.
 - **L5** — El usuario decidió: “Solo cambios de esta aplicación”. SSE emitirá eventos después de mutaciones HTTP confirmadas por este servidor y no observará cambios externos del CLI `tk` en esta unidad.
-- **L6** — T1 RED observado con `npx vitest run tests/task-manager/state/task-tree.test.js tests/task-manager/state/task-actions.test.js`: fallaron el plegado filtrado y la conservación de un colapso tras recarga. Tras añadir `collapsedIds`, respetar el estado explícito y añadir tooltips, GREEN observado con `npx vitest run tests/task-manager/components/task-filters.test.js tests/task-manager/state/task-tree.test.js tests/task-manager/state/task-actions.test.js`: 3 ficheros, 15 pruebas correctas.
+- **L6** — T1 RED observado con `npx vitest run tests/task-manager/state/task-tree.test.js tests/task-manager/state/task-actions.test.js`: fallaron el plegado filtrado y la conservación de un colapso tras recarga. Tras añadir `collapsedIds`, respetar el estado explícito y añadir tooltips, GREEN observado con `npx vitest run tests/task-manager/components/task-filters.test.js tests/task-manager/state/task-tree.test.js tests/task-manager/state/task-actions.test.js`: 3 ficheros, 15 pruebas correctas. Commit: `f2187b8`.
+- **L7** — T2 RED observado con `npx vitest run tests/server/api.test.js tests/task-manager/state/workspace.test.js`: `/api/events` devolvía 404 y no existía la conexión EventSource. GREEN observado después con 2 ficheros y 14 pruebas correctas: el stream publica `workspace.changed` para tareas y etiquetas, y el cliente recarga y cierra el EventSource correctamente. La selección y las respuestas obsoletas siguen protegidas por `reloadRequestSequence`.

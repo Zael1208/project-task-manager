@@ -13,6 +13,7 @@ const path = require("node:path");
 const { DatabaseSync } = require("node:sqlite");
 
 const { sendJson, readJson } = require("./http");
+const { publishWorkspaceChanged } = require("./events");
 const { runTk, listTasksMerged, PROJECT_ROOT } = require("./tk");
 
 const DATA_DIR = process.env.DATA_DIR || path.join(PROJECT_ROOT, "data");
@@ -168,6 +169,7 @@ async function handleTagCreate(req, res) {
       now
     );
     sendJson(res, 201, tag);
+    publishWorkspaceChanged("tags");
   } catch (err) {
     sendJson(res, 409, { error: `No se pudo crear la etiqueta: ${err.message}` });
   }
@@ -229,6 +231,7 @@ async function handleTagUpdate(req, res, oldName) {
       );
     }
     sendJson(res, 200, { ...tag, uses: tasks.length });
+    publishWorkspaceChanged("tags");
   } catch {
     const note = await restoreTagUpdates(updated, tag.name, oldName);
     sendJson(res, 500, { error: `No se pudieron guardar los metadatos.${note}` });
@@ -255,6 +258,7 @@ async function handleTagDelete(req, res, name) {
   try {
     if (existing) db.prepare("DELETE FROM tag_metadata WHERE name = ?").run(existing.name);
     sendJson(res, 200, { ok: true, affected: tasks.length });
+    publishWorkspaceChanged("tags");
   } catch {
     const note = await restoreTagUpdates(updated, "", existing?.name || name);
     sendJson(res, 500, { error: `No se pudieron eliminar los metadatos.${note}` });

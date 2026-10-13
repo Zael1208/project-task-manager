@@ -21,9 +21,26 @@ export const workspaceOptions = {
   ],
   mounted() {
     window.addEventListener('keydown', this.handleEscape);
+    this.connectWorkspaceEvents();
     this.reloadWorkspace();
   },
   beforeUnmount() {
     window.removeEventListener('keydown', this.handleEscape);
+    this.disconnectWorkspaceEvents();
+  },
+  methods: {
+    connectWorkspaceEvents() {
+      if (typeof EventSource === 'undefined') return;
+      this.disconnectWorkspaceEvents();
+      const source = new EventSource('/api/events');
+      source.addEventListener('workspace.changed', () => {
+        if (!this.loading) this.reloadWorkspace();
+      });
+      this.workspaceEventSource = source;
+    },
+    disconnectWorkspaceEvents() {
+      this.workspaceEventSource?.close();
+      this.workspaceEventSource = null;
+    }
   }
 };

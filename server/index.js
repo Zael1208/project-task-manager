@@ -15,6 +15,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const { contentTypeFor, sendJson } = require("./http");
+const { connectSse } = require("./events");
 const tk = require("./tk");
 const tasks = require("./tasks");
 const tags = require("./tags");
@@ -80,6 +81,8 @@ function serveStatic(req, res) {
 
 // Rutas exactas: metodo + ruta completa.
 const EXACT_ROUTES = new Map([
+  ["GET /api/events", (req, res) => connectSse(req, res)],
+
   // Catalogo de etiquetas
   ["GET /api/tags", (req, res) => tags.handleTagList(req, res)],
   ["POST /api/tags", (req, res) => tags.handleTagCreate(req, res)],

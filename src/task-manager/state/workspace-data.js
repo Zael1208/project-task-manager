@@ -49,7 +49,8 @@ export const workspaceData = {
       deletingTag: null,
       tagFormError: '',
       detailRequestSequence: 0,
-      reloadRequestSequence: 0
+      reloadRequestSequence: 0,
+      workspaceEventSource: null
     };
   },
   methods: {

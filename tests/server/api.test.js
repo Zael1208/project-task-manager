@@ -56,6 +56,20 @@ async function createTask(title, extra = {}) {
   return created.body.id;
 }
 
+async function readSseEvent(reader, eventName) {
+  const decoder = new TextDecoder();
+  let buffer = '';
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) throw new Error(`El stream SSE terminó antes de ${eventName}.`);
+    buffer += decoder.decode(value, { stream: true });
+    const blocks = buffer.split('\n\n');
+    buffer = blocks.pop();
+    const block = blocks.find((candidate) => candidate.includes(`event: ${eventName}`));
+    if (block) return block;
+  }
+}
+
 beforeAll(async () => {
   tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'task-manager-test-'));
   process.env.TACKS_DB = path.join(tempDir, 'tacks.db');
@@ -105,6 +119,36 @@ describe('servidor: arranque y estaticos', () => {
 
   it('devuelve 404 en una ruta de API desconocida', async () => {
     expect((await request('/api/tk/no-existe')).status).toBe(404);
+  });
+});
+
+describe('servidor: eventos', () => {
+  it('publica por SSE las mutaciones confirmadas de tareas', async () => {
+    const stream = await fetch(`${baseUrl}/api/events`);
+    expect(stream.status).toBe(200);
+    expect(stream.headers.get('content-type')).toContain('text/event-stream');
+
+    const reader = stream.body.getReader();
+    await createTask('Tarea SSE');
+
+    const block = await readSseEvent(reader, 'workspace.changed');
+    const data = JSON.parse(block.split('\n').find((line) => line.startsWith('data: ')).slice(6));
+    expect(data).toEqual({ resource: 'tasks' });
+    await reader.cancel();
+  });
+
+  it('publica por SSE los cambios confirmados del catalogo de etiquetas', async () => {
+    const stream = await fetch(`${baseUrl}/api/events`);
+    expect(stream.status).toBe(200);
+    const reader = stream.body.getReader();
+
+    const created = await post('/api/tags', { name: 'SSE', description: '', color: 'blue' });
+    expect(created.status).toBe(201);
+
+    const block = await readSseEvent(reader, 'workspace.changed');
+    const data = JSON.parse(block.split('\n').find((line) => line.startsWith('data: ')).slice(6));
+    expect(data).toEqual({ resource: 'tags' });
+    await reader.cancel();
   });
 });
 
