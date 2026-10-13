@@ -28,6 +28,8 @@ export const workspaceData = {
       busy: {},
       activeInspectorTab: 'detail',
       activeTaskFilter: 'all',
+      currentPeriod: 'today',
+      currentPeriodNow: null,
       taskSearchQuery: '',
       quickTagFilter: '',
       advancedStatuses: [],

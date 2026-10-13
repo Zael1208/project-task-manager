@@ -12,13 +12,14 @@ export const TaskFilters = {
     advancedTags: { type: Array, required: true },
     tagCatalog: { type: Array, required: true },
     activeTaskFilter: { type: String, required: true },
+    currentPeriod: { type: String, required: true },
     quickTagFilter: { type: String, required: true },
     taskChipsVisible: { type: Boolean, required: true },
     visibleCount: { type: Number, required: true },
     listMenuOpen: { type: Boolean, required: true },
     tagColor: { type: Function, required: true }
   },
-  emits: ['refresh', 'dismiss-error', 'update-search', 'toggle-filters', 'close-filters', 'clear-filters', 'update-statuses', 'update-priorities', 'update-tags', 'update-quick-filter', 'update-active-filter', 'toggle-chips', 'toggle-list-menu', 'set-expanded'],
+  emits: ['refresh', 'dismiss-error', 'update-search', 'toggle-filters', 'close-filters', 'clear-filters', 'update-statuses', 'update-priorities', 'update-tags', 'update-quick-filter', 'update-active-filter', 'update-current-period', 'toggle-chips', 'toggle-list-menu', 'set-expanded'],
   methods: {
     toggleValue(values, value, checked, eventName) {
       this.$emit(eventName, checked ? [...values, value] : values.filter((item) => item !== value));
@@ -77,9 +78,13 @@ export const TaskFilters = {
     <p class="task-filter-popover__summary">{{ visibleCount }} {{ visibleCount === 1 ? 'resultado' : 'resultados' }}</p>
   </section>
   <nav class="tk-tabs task-filter-tabs" aria-label="Filtros rápidos"><button
-      v-for="item in [['all', 'Todas'], ['open', 'Pendientes'], ['in_progress', 'En curso'], ['blocked', 'Bloqueadas'], ['done', 'Hechas']]"
+      v-for="item in [['all', 'Todas'], ['current', 'Actuales'], ['open', 'Pendientes'], ['in_progress', 'En curso'], ['blocked', 'Bloqueadas'], ['done', 'Hechas']]"
       :key="item[0]" class="tk-tab" type="button" :title="item[1]" :aria-selected="activeTaskFilter === item[0]"
       @click="$emit('update-active-filter', item[0])">{{ item[1] }}</button></nav>
+  <nav v-show="activeTaskFilter === 'current'" class="tk-tabs current-period-tabs" aria-label="Periodo de tareas actuales"><button
+      v-for="item in [['today', 'Hoy'], ['week', 'Semana'], ['month', 'Mes'], ['year', 'Año']]"
+      :key="item[0]" class="tk-tab" type="button" :title="item[1]" :aria-pressed="currentPeriod === item[0]"
+      @click="$emit('update-current-period', item[0])">{{ item[1] }}</button></nav>
   <div class="tag-manager-filter-controls"><select :value="quickTagFilter" class="tk-select tag-manager-filter"
       aria-label="Filtrar por etiqueta" @change="$emit('update-quick-filter', $event.target.value)">
       <option value="">Todas las etiquetas</option>

@@ -141,6 +141,11 @@
       .task-filter-tabs {
         padding: 0;
       }
+      .current-period-tabs {
+        min-height: 40px;
+        gap: 20px;
+        border-bottom: 0;
+      }
       .tk-tab {
         position: relative;
         flex: 0 0 auto;
@@ -155,10 +160,12 @@
       .tk-tab:hover {
         color: var(--tk-color-text-secondary);
       }
-      .tk-tab[aria-selected="true"] {
+      .tk-tab[aria-selected="true"],
+      .tk-tab[aria-pressed="true"] {
         color: var(--tk-color-text-primary);
       }
-      .tk-tab[aria-selected="true"]::after {
+      .tk-tab[aria-selected="true"]::after,
+      .tk-tab[aria-pressed="true"]::after {
         position: absolute;
         right: 0;
         bottom: -1px;
