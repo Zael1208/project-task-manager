@@ -9,6 +9,20 @@ Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PA
 
 ### Añadido
 
+- **Comprobación de documentación en la suite** (`tests/project/documentation.test.js`):
+  `npm test` verifica que los documentos normativos no llevan cifras, medidas,
+  hashes ni fechas, que no quedan tablas de progreso y que ningún identificador
+  citado —requisito o riesgo— está sin definir en su registro, y que el contrato de
+  documentación declara la parcela de todos los documentos. Se puede ejecutar sola
+  con `npm run docs:check`.
+- **Contrato de documentación** (`CONTRATO_DOCUMENTACION.md`): fija la misión y la
+  frontera de cada documento y el dueño único de cada dato —estado del trabajo en
+  `tk`, entrega en Git y `CHANGELOG.md`, requisitos en el PRD, decisiones en ADR,
+  diseño en `docs/architecture.md`, riesgos en `docs/known-risks.md`—, y prohíbe en
+  los documentos normativos los recuentos, los tamaños, las fechas de verificación,
+  las tablas de progreso y los identificadores citados desde otro documento. Es el
+  hermano del contrato de Git: aquel gobierna las operaciones, este qué contiene
+  cada documento.
 - **Flujo ODD operativo en tk**: el trabajo entre sesiones se registra en la base
   local de tk con la etiqueta `ODD`; los ADRs en `docs/decisions/` son la fuente
   durable de las decisiones y no se crean nuevos registros ODD en Markdown.
@@ -59,6 +73,16 @@ Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PA
 
 ### Cambiado
 
+- **La guardia de tk rechaza métricas**: además del estado de Git y del del proceso
+  de revisión, `npm run odd:tk` rechaza recuentos, ratios, fechas y rutas ajenas o
+  efímeras en títulos, notas, comentarios y descripciones. El motivo está en el
+  contrato: el tablero no es un documento vivo y ya lleva su propia marca de tiempo.
+- **El PRD deja de duplicar estado**: `PRD.md` pasa a contener solo requisitos,
+  alcance y criterios de aceptación. Las cifras, las verificaciones, el progreso y
+  las decisiones dejan de copiarse allí: el estado del trabajo vive en el tablero
+  `tk`, el de la entrega en Git y `CHANGELOG.md`, y las decisiones en
+  `docs/decisions/` y `docs/architecture.md`. El mismo criterio se aplica al README
+  y a la documentación de desarrollo, que dejan de repetir recuentos.
 - **Árbol y selector de tareas**: el plegado explícito se conserva en todas las
   pestañas y recargas, y los botones de filtros, expansión, etiquetas y gestión de
   etiquetas exponen tooltips `title` coherentes.

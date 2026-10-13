@@ -146,7 +146,7 @@ const NESTED_TASK_KEYS = ["children", "blockers", "dependents"];
  * con `-s open` la base conserva el motivo anterior, de modo que una tarea
  * abierta puede seguir diciendo "done".
  *
- * La base pertenece a tk y no se toca (D-5). Lo que se hace es no propagar la
+ * La base pertenece a tk y no se toca. Lo que se hace es no propagar la
  * incoherencia: el motivo solo se presenta cuando la tarea esta cerrada.
  *
  * Muta el objeto recibido, que siempre viene de un `JSON.parse` recien hecho en

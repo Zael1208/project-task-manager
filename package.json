@@ -13,6 +13,7 @@
     "watch": "npm run build -- --watch",
     "test": "vitest run",
     "test:watch": "vitest",
+    "docs:check": "vitest run tests/project/documentation.test.js",
     "odd:tk": "node scripts/odd-tk.cjs"
   },
   "devDependencies": {

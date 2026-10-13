@@ -25,7 +25,13 @@ const FORBIDDEN_METADATA = [
   /presupuesto\s+(?:de\s+contexto|nativo)/i,
   /\bcandidat\w+/i,
   // Residuos de la limpieza anterior de estado de Git.
-  /unidad de trabajo registrada|sin unidad de trabajo/i
+  /unidad de trabajo|completad[ao] en\./i,
+  // Métricas: el tablero no es un documento, y ya lleva su propia marca de
+  // tiempo, así que un recuento, un ratio o una fecha no aportan nada.
+  /(?<![\d.,])\d+\s*(?:pruebas|ficheros|archivos|tareas|comentarios|campos|filas|l[ií]neas|lineas|endpoints|rutas)\b/i,
+  /\b\d{1,3}\/\d{1,3}\b(?![\/\d])/,
+  // Rutas ajenas al proyecto o efímeras.
+  /\/tmp\/|[A-Za-z]:\\|app\.asar/
 ];
 
 function findForbiddenMetadata(values) {
