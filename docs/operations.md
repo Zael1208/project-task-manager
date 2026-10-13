@@ -81,9 +81,9 @@ componentes y responsive.
 
 ## Pruebas automatizadas
 
-La suite vive en `tests/task-manager/` y ejecuta módulos ES directamente.
+La suite vive en `tests/` y ejecuta módulos ES directamente.
 
-Cobertura actual (12 archivos, 77 pruebas):
+Cobertura actual (19 archivos, 95 pruebas):
 
 - **Cliente HTTP**: JSON válido, red, JSON inválido, error HTTP y capacidad TK
   deshabilitada.
@@ -93,6 +93,10 @@ Cobertura actual (12 archivos, 77 pruebas):
   jerarquías cíclicas, que si no desaparecerían del listado.
 - **Acciones**: selección tras recarga, descarte de respuestas obsoletas, busy,
   normalización de prioridad y mutación confirmada con recarga fallida.
+- **SSE** (`server/api.test.js`, `state/workspace.test.js`): canal de eventos para
+  mutaciones HTTP confirmadas y cambios externos del CLI `tk`, recarga del
+  workspace, aviso informativo de cambios externos, ausencia de duplicación de
+  mutaciones propias y cierre del `EventSource`.
 - **Foco de diálogos** (`components/dialog-focus.test.js`): entrar guardando el
   origen, devolver el foco al cerrar, no devolverlo a un elemento que ya no está
   en la página, filtrar los elementos no visibles y envolver el tabulador en los
@@ -100,17 +104,21 @@ Cobertura actual (12 archivos, 77 pruebas):
 - **Estado de la interfaz** (`state/ui.test.js`) y **despacho del inspector**
   (`state/inspector.test.js`): el diccionario busy no acumula claves y una acción
   desconocida avisa en vez de no hacer nada.
-- **Componentes** (`tests/task-manager/components/`, 30 pruebas): **montan Vue de
+- **Componentes** (`tests/task-manager/components/`): **montan Vue de
   verdad** sobre jsdom y comprueban el sobre `action` llegando a su destino, los
   cinco `v-model` del inspector, los eventos de intención del gestor de etiquetas,
   el contrato `modelValue` del selector —incluido que no muta el array que
   recibe— y el foco de los diálogos: que entre al abrirse, envuelva con el
   tabulador y vuelva al cerrarse.
-- **Servidor** (`tests/server/api.test.js`, 11 pruebas de integración): levanta el
+- **Servidor** (`tests/server/api.test.js`, 16 pruebas de integración): levanta el
   servidor de verdad en un puerto libre y sobre una base vacía que `tk` crea sola,
   y recorre el arranque, los estáticos, el bloqueo de rutas, la validación de
   prioridad, el ciclo completo de una tarea, el cruce de `blocked`, el guardián de
   cierre, la coherencia de `close_reason` y la cascada del catálogo de etiquetas.
+- **Guardias del repositorio** (`tests/odd/tk-safe.test.js`,
+  `tests/project/dependencies.test.js`): la escritura en `tk` rechaza estado de Git
+  en notas y comentarios, y `package.json` no declara dependencias de ejecución ni
+  rangos en las de desarrollo (RNF-01).
 
 [`tests/task-manager/helpers/workspace-fixture.js`](../tests/task-manager/helpers/workspace-fixture.js)
 ensambla los mismos mixins en un objeto JavaScript, sin montar Vue ni DOM. Es el
@@ -169,6 +177,8 @@ Para una sesión local:
 ### Matriz funcional mínima
 
 - Carga inicial, recarga y aviso cuando `tk` no está disponible.
+- Cambiar una tarea con `tk` en otra terminal o agente y comprobar que el listado
+  se actualiza sin refrescar manualmente y que aparece el aviso informativo.
 - Selección, expansión, búsqueda y filtros combinados.
 - Cambio de prioridad y estado; cierre de tarea.
 - Cierre rechazado por subtareas abiertas.

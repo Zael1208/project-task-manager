@@ -18,3 +18,7 @@ tk/tk binary
 tk/tk.exe binary
 tk/LICENSE -text
 tk/README.md -text
+
+# Toast Anchor vendorizado: la licencia se conserva byte a byte, con el mismo
+# criterio que las de tacks, para poder compararla con la que publica el autor.
+public/vendor/toast-anchor.LICENSE -text

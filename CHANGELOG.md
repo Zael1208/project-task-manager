@@ -9,6 +9,29 @@ Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PA
 
 ### Añadido
 
+- **Flujo ODD operativo en tk**: el trabajo entre sesiones se registra en la base
+  local de tk con la etiqueta `ODD`; los ADRs en `docs/decisions/` son la fuente
+  durable de las decisiones y no se crean nuevos registros ODD en Markdown.
+- **Actualización local mediante SSE**: el servidor publica `workspace.changed`
+  después de mutaciones HTTP confirmadas y al detectar cambios externos en la base
+  de tareas del CLI `tk`; la interfaz recarga el workspace y avisa de las
+  actualizaciones externas mediante `EventSource`.
+- **Notificaciones y confirmaciones Dark Studio**: la interfaz adopta Toast Anchor
+  —vendorizado en `public/vendor/toast-anchor.mjs` con su licencia, para no
+  declarar dependencias npm de ejecución (RNF-01)— para éxitos, errores y
+  confirmaciones, con `toast.modal()` para eliminar etiquetas; los avisos de
+  cambios externos y remotos aparecen abajo a la derecha y detallan
+  cada tarea afectada sin duplicar el aviso del navegador originador.
+- **Catálogo inicial de etiquetas adoptado**: `data/task-manager.db` usa el
+  nombre elocuente del proyecto y contiene las etiquetas necesarias para el flujo
+  ODD, con verificación de las asociaciones de las tareas mediante la API.
+- **Flujo correcto de tk**: antes de explorar o modificar archivos se crea o
+  selecciona la tarea, se marca `in_progress`, se actualizan relevo y evidencias
+  durante el trabajo, y se cierra después de verificar el resultado. El flujo no
+  depende de Engram para conocer el estado.
+- **Guardia de escritura ODD para tk**: `npm run odd:tk` centraliza las escrituras
+  y rechaza hashes, ramas y operaciones de Git en notas, comentarios y
+  descripciones; las consultas Git permanecen fuera del tablero operativo.
 - **Delimitación del proyecto para herramientas** (`jsconfig.json`): fija el
   alcance en `src/`, `server/` y `tests/` para que el servidor de lenguaje
   resuelva referencias en todo el repositorio y no solo en los ficheros abiertos.
@@ -19,12 +42,11 @@ Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PA
   `CHANGELOG.md` bajo `[Sin publicar]`— y qué es petición explícita que no se
   recorta. No sustituye al contrato: lo enruta. Así las reglas llegan solas al
   agente que trabaja en este repositorio, en lugar de depender de que las lea.
-  Incluye que el `PRD.md` es también el tablero de estado: un agente recién llegado
-  puede responder «qué trabajo está en curso» sin más que mirar sus marcas de
-  `Hecho` / `Pendiente`.
+  Incluye que el `PRD.md` conserva requisitos, alcance y estado funcional, mientras
+  que el trabajo operativo entre sesiones se consulta en el tablero tk.
 - **Skill `tk` para agentes** (`skills/tk/SKILL.md`): describe el uso del gestor de
-  tareas como estado de alto nivel del proyecto —qué es una tarea y una subtarea,
-  cuándo se escribe en tk y cuándo no— y las trampas verificadas del binario
+  tareas como tablero operativo ODD —qué es una tarea y una subtarea, cómo se
+  conserva el relevo y cuándo se escribe en tk— y las trampas verificadas del binario
   (guarda de cierre, ausencia de borrado, `--claim` sin poder elegir nombre,
   prioridad sin validar). Se escribe en el formato estándar de Agent Skills, con
   solo `name` y `description` en el *frontmatter*, de modo que sirve a cualquier
@@ -33,6 +55,9 @@ Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PA
 
 ### Cambiado
 
+- **Árbol y selector de tareas**: el plegado explícito se conserva en todas las
+  pestañas y recargas, y los botones de filtros, expansión, etiquetas y gestión de
+  etiquetas exponen tooltips `title` coherentes.
 - **La página sirve el build de producción de Vue** (`vue.global.prod.js`) en vez
   del de desarrollo: la carga útil pasa de 591 KB a 166 KB y desaparecen los avisos
   de desarrollo. El build de desarrollo se conserva en `public/vendor/` para

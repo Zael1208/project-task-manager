@@ -1,3 +1,8 @@
+function createClientId() {
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+  return `tm-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
+
 const COLORS = [
   { id: 'blue', hex: '#62a7ff' },
   { id: 'purple', hex: '#b58bff' },
@@ -10,6 +15,7 @@ const COLORS = [
 export const workspaceData = {
   data() {
     return {
+      clientId: createClientId(),
       tasks: [],
       tags: [],
       detail: null,
@@ -19,7 +25,6 @@ export const workspaceData = {
       refreshing: false,
       unavailable: false,
       errorMessage: '',
-      toastMessage: '',
       busy: {},
       activeInspectorTab: 'detail',
       activeTaskFilter: 'all',
@@ -31,6 +36,7 @@ export const workspaceData = {
       isAdvancedFiltersOpen: false,
       areTaskChipsVisible: true,
       expandedIds: [],
+      collapsedIds: [],
       isListMenuOpen: false,
       openTaskMenuId: '',
       isInspectorMenuOpen: false,
@@ -45,10 +51,10 @@ export const workspaceData = {
       tagFormMode: '',
       editingTagName: '',
       tagDraft: { name: '', description: '', color: 'blue' },
-      deletingTag: null,
       tagFormError: '',
       detailRequestSequence: 0,
-      reloadRequestSequence: 0
+      reloadRequestSequence: 0,
+      workspaceEventSource: null
     };
   },
   methods: {

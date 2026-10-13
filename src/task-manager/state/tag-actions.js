@@ -3,6 +3,7 @@ import {
   deleteTag as requestTagDelete,
   updateTag as requestTagUpdate
 } from '../api/tk-client.js';
+import { confirmAction } from '../notifications/toast-anchor.js';
 
 export const tagActions = {
   computed: {
@@ -13,10 +14,6 @@ export const tagActions = {
       const query = this.normalizeSearchText(this.tagSearchQuery);
       return this.tagCatalog.filter((tag) => !query || this.normalizeSearchText(`${tag.name} ${tag.description}`).includes(query));
     },
-    affectedTasks() {
-      if (!this.deletingTag) return [];
-      return this.mappedTasks.filter((task) => task.chips.some((tag) => this.sameTagName(tag, this.deletingTag.name)));
-    }
   },
   methods: {
     tagColor(name) {
@@ -65,17 +62,21 @@ export const tagActions = {
         this.closeTagForm();
       }
     },
-    requestDeleteTag(tag) {
-      this.deletingTag = tag;
+    async requestDeleteTag(tag) {
+      if (!tag) return;
+      const affectedCount = this.mappedTasks.filter((task) => task.chips.some((name) => this.sameTagName(name, tag.name))).length;
+      const confirmed = await confirmAction(
+        'Eliminar etiqueta',
+        `Vas a eliminar “${tag.name}” de ${affectedCount} ${affectedCount === 1 ? 'tarea' : 'tareas'}.`
+      );
+      if (confirmed) await this.deleteTag(tag);
     },
-    async deleteTag() {
-      const tag = this.deletingTag;
+    async deleteTag(tag) {
       if (!tag) return;
       const result = await this.mutate(`tag-delete:${tag.name}`, () => requestTagDelete(tag.name), 'Etiqueta eliminada.');
       if (result) {
         this.advancedTags = this.advancedTags.filter((name) => name !== tag.name);
         if (this.quickTagFilter === tag.name) this.quickTagFilter = '';
-        this.deletingTag = null;
       }
     }
   }

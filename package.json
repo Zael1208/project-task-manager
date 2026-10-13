@@ -12,7 +12,8 @@
     "build": "esbuild src/task-manager/main.js --bundle --format=iife --target=es2020 --outfile=public/task-manager/app-vue.js",
     "watch": "npm run build -- --watch",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "odd:tk": "node scripts/odd-tk.cjs"
   },
   "devDependencies": {
     "esbuild": "0.28.1",

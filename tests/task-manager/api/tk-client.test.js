@@ -1,7 +1,8 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ApiError, listTasks } from '../../../src/task-manager/api/tk-client.js';
+import { ApiError, listTasks, setClientId, updateTask } from '../../../src/task-manager/api/tk-client.js';
 
 afterEach(() => {
+  setClientId('');
   vi.unstubAllGlobals();
 });
 
@@ -12,6 +13,18 @@ describe('tk-client', () => {
 
     await expect(listTasks()).resolves.toEqual(tasks);
     expect(fetch).toHaveBeenCalledWith('/api/tk/list', {});
+  });
+
+  it('sends the browser client id with API mutations', async () => {
+    const response = { ok: true, status: 200, json: vi.fn().mockResolvedValue({ id: 'tk-1' }) };
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(response));
+    setClientId('browser-a');
+
+    await expect(updateTask('tk-1', { status: 'in_progress' })).resolves.toEqual({ id: 'tk-1' });
+
+    expect(fetch).toHaveBeenCalledWith('/api/tk/update', expect.objectContaining({
+      headers: { 'content-type': 'application/json', 'x-client-id': 'browser-a' }
+    }));
   });
 
   it('normalizes network failures', async () => {

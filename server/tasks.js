@@ -8,6 +8,7 @@
 // como la presencia de data.error.
 
 const { sendJson, readJson } = require("./http");
+const { publishWorkspaceChanged } = require("./events");
 const { runTk, runTkText, listTasksMerged, normalizeTask } = require("./tk");
 const { normalizeTagName, sameTagName } = require("./tags");
 
@@ -15,6 +16,20 @@ const { normalizeTagName, sameTagName } = require("./tags");
 function sendTkResult(res, result) {
   if (result?.error) return sendJson(res, 200, { error: result.error });
   return sendJson(res, 200, normalizeResult(result));
+}
+
+function requestClientId(req) {
+  return String(req.headers["x-client-id"] || "");
+}
+
+function taskChange(result, action) {
+  if (!result?.id) return [];
+  return [{ id: result.id, action, title: result.title || "Sin título" }];
+}
+
+async function sendTkMutationResult(req, res, result, action = "actualizada") {
+  if (!result?.error) await publishWorkspaceChanged("tasks", "http", taskChange(result, action), requestClientId(req));
+  sendTkResult(res, result);
 }
 
 /** Aplica a las respuestas con tareas la coherencia de `close_reason`. */
@@ -95,7 +110,7 @@ async function handleTkCreate(req, res) {
   if (Array.isArray(input.tags) && input.tags.length) args.push("-t", input.tags.join(","));
   if (input.parent) args.push("--parent", input.parent);
 
-  sendTkResult(res, await runTk(args));
+  await sendTkMutationResult(req, res, await runTk(args), "creada");
 }
 
 async function handleTkClose(req, res) {
@@ -109,7 +124,7 @@ async function handleTkClose(req, res) {
 
   // Si tk rechaza el cierre (por ejemplo, subtareas abiertas), el error se
   // devuelve tal cual. Nunca se reintenta con --force por cuenta propia.
-  sendTkResult(res, await runTk(args));
+  await sendTkMutationResult(req, res, await runTk(args), "cerrada");
 }
 
 async function handleTkUpdate(req, res) {
@@ -156,7 +171,7 @@ async function handleTkUpdate(req, res) {
   if (tagsToAdd.length) args.push("--add-tags", tagsToAdd.join(","));
   if (tagsToRemove.length) args.push("--remove-tags", tagsToRemove.join(","));
 
-  sendTkResult(res, await runTk(args));
+  await sendTkMutationResult(req, res, await runTk(args), changes.status === "done" ? "cerrada" : "actualizada");
 }
 
 /**
@@ -173,6 +188,8 @@ async function handleTkDep(req, res, action) {
   const result = await runTkText(["dep", action, input.child_id, input.parent_id]);
   if (result?.error) return sendJson(res, 200, { error: result.error });
 
+  const updatedTask = await runTk(["--json", "show", input.child_id]);
+  await publishWorkspaceChanged("tasks", "http", taskChange(updatedTask, "actualizada"), requestClientId(req));
   sendJson(res, 200, {
     ok: true,
     message: result.message,
@@ -185,10 +202,16 @@ async function handleTkComment(req, res) {
   const input = await readJson(req, res);
   if (!input) return;
   if (!input.id || !input.body) return sendJson(res, 400, { error: "Falta id o body." });
-  sendTkResult(res, await runTk(["--json", "comment", input.id, input.body]));
+  await sendTkMutationResult(req, res, await runTk(["--json", "comment", input.id, input.body]));
+}
+
+async function getTaskSnapshot() {
+  const tasks = await listTasksMerged();
+  return Array.isArray(tasks) ? tasks : null;
 }
 
 module.exports = {
+  getTaskSnapshot,
   handleTkShow,
   handleTkActiveCount,
   handleTkList,

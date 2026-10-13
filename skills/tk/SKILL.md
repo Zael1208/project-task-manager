@@ -1,80 +1,108 @@
 ---
 name: tk
-description: "Estado de alto nivel del proyecto en el gestor de tareas tk (tacks): qué es una tarea y una subtarea, cuándo se escribe en tk y cuándo no, y las trampas verificadas del binario. Úsala cuando se pida registrar, consultar o actualizar tareas del proyecto."
+description: "Estado operativo ODD del proyecto en el gestor de tareas tk (tacks): cómo registrar frentes, subtareas, relevo, decisiones y evidencias sin duplicar el tablero en Markdown."
 ---
 
-# tk — el estado de alto nivel del proyecto
+# tk — tablero operativo ODD
 
-`tk` es el gestor de tareas del proyecto: un binario de terceros (tacks) con una
-base SQLite local. Aquí se usa para **una sola cosa**: dejar registrado en qué
-estado está el trabajo, de forma que se pueda supervisar de un vistazo.
-
-No es un registro del día a día. Todo lo demás sigue donde siempre: el estado
-vivo en `PRD.md` y `CHANGELOG.md`, los contratos y las decisiones en `docs/`, los
-pasos de la sesión en la lista de tareas del propio agente, y la memoria
-persistente en su sitio.
+`tk` es el tablero operativo del proyecto. Se usa para que el trabajo sobreviva
+entre sesiones y pueda supervisarse de un vistazo. No sustituye a Git, a los ADRs,
+al PRD, a la documentación estable ni a Engram.
 
 ## Dónde está
 
 | Qué | Dónde |
 |---|---|
-| Binario | `tk/tk.exe` (Windows), `tk/tk` (Linux) |
-| Base de tareas | `tk/.tacks/tacks.db` — **no se versiona** |
-| Vista | `npm run server`, en el 8890 |
+| Binario Windows | `tk/tk.exe` |
+| Binario Linux/WSL | `tk/tk` |
+| Base de tareas | `tk/.tacks/tacks.db` — no se versiona |
+| Catálogo de etiquetas | `data/task-manager.db` — no se versiona |
+| Vista | `npm run server`, en el puerto 8890 |
 
-Se invoca siempre con `--json` y con `--db` explícito, para no depender del
-directorio de trabajo:
+Las consultas y escrituras pasan por la guardia `odd:tk`, que conserva `--json` y
+`--db` explícito y rechaza estado de Git en textos de tk:
 
 ```bash
-tk/tk.exe --db tk/.tacks/tacks.db --json stats
+npm run odd:tk -- stats
+npm run odd:tk -- ready --limit 1
+npm run odd:tk -- list --tag ODD
 ```
 
-## Cómo funciona (verificado en tk 0.2.4)
+## Etiquetas
 
-- **Jerarquía.** Una tarea de nivel superior es un bloque del proyecto; una
-  subtarea (`--parent`) es un frente de trabajo, y puede cruzar varias sesiones.
-  Los ID son `tk-XXXX` y `tk-XXXX.N`. `--parent none` promueve a nivel superior.
-- **La primera subtarea etiqueta el padre como `epic`** automáticamente. No está
-  verificado que la etiqueta se retire al promover la última subtarea.
-- **No hay borrado.** Lo máximo es cerrar, con motivo: `done`, `duplicate`,
-  `absorbed`, `stale` o `superseded`.
-- **No hay reabrir.** Se usa `update <id> -s open`; el motivo de cierre anterior
-  se conserva en la base.
-- **Cerrar con subtareas abiertas falla.** Requiere `--force`, que no se usa. Es
-  la garantía de que un bloque no se da por terminado con trabajo vivo dentro.
-- **`--claim` fija `assignee = "agent"`**, sin poder elegir nombre: no sirve para
-  saber qué agente hizo qué.
-- **La prioridad no está validada** por el binario: acepta cualquier entero.
-- **`blocked` no se almacena**: se calcula.
-- **`notes` se sobrescribe** (contexto vivo); los comentarios son *append-only*
-  (historial).
-- **`dep add` y `dep remove` no devuelven JSON**: el éxito se decide por código
+Todo trabajo del registro ODD lleva `ODD`. Una tarea de nivel superior lleva
+también `epic`. Cada tarea recibe además un único tipo principal:
+
+| Etiqueta | Uso |
+|---|---|
+| `docs` | Documentación, ADRs, registros e informes |
+| `feat` | Capacidad o integración nueva |
+| `fix` | Corrección de un defecto |
+| `refactor` | Reorganización sin cambio de comportamiento |
+| `test` | Pruebas, guardas y verificaciones |
+| `style` | Presentación visual |
+| `improvement` | Mejora de lectura o uso |
+| `chore` | Configuración, dependencias y tareas administrativas |
+
+Ejemplos:
+
+```bash
+npm run odd:tk -- create -t ODD,epic,chore "Nombre del frente"
+npm run odd:tk -- create -t ODD,docs --parent tk-XXXX "Nombre de la subtarea"
+```
+
+## Qué se registra
+
+Se escribe poco, solo cuando cambia el estado de alto nivel:
+
+- **Tarea de nivel superior**: un frente visible del proyecto.
+- **Subtarea**: una unidad de trabajo que puede atravesar sesiones.
+- **`notes`**: relevo actual; se sobrescribe y contiene qué falta y cuál es el
+  siguiente paso.
+- **Comentarios**: petición literal, decisiones y evidencias append-only.
+- **Dependencias**: bloqueos entre tareas que tk debe mostrar.
+
+El estado de Git no se registra en tk: se consulta siempre con Git. No se
+registran ramas, hashes, commits pendientes ni equivalentes en títulos,
+descripciones, notas o comentarios.
+
+Las decisiones durables se documentan en `docs/decisions/` y se enlazan desde
+un comentario de tk. Los detalles estables de arquitectura viven en `docs/` y
+los requisitos del producto en `PRD.md`.
+
+No se crean nuevos registros ODD en `odd/tasks/*.md`. Los documentos Markdown
+anteriores, si existieran, serían historia congelada, no el tablero actual.
+
+## Ritmo de actualización
+
+La tarea debe existir y reflejar el estado real mientras se trabaja, no solo al
+final:
+
+1. Crear o seleccionar la tarea tk antes de explorar o modificar archivos.
+2. Marcarla `in_progress` antes de ejecutar la unidad de trabajo.
+3. Actualizar `notes` cuando cambie el relevo o el siguiente paso.
+4. Añadir comentarios cuando aparezcan decisiones, bloqueos o evidencias.
+5. Cerrar la tarea inmediatamente después de observar su resultado y sus
+   verificaciones.
+
+Engram puede conservar contexto adicional, pero el relevo operativo debe quedar
+en tk para que el proyecto no dependa de la memoria de una sesión.
+
+## Trampas verificadas de tk 0.2.4
+
+- La primera subtarea etiqueta automáticamente el padre como `epic`.
+- No hay borrado. Una tarea se cierra con `done`, `duplicate`, `absorbed`,
+  `stale` o `superseded`.
+- No hay reapertura dedicada: se usa `update <id> -s open`.
+- Cerrar con subtareas abiertas falla sin `--force`; no se usa `--force`.
+- `--claim` fija `assignee = "agent"` y no permite elegir nombre.
+- La prioridad no está validada por el binario; se usan solo los valores 0 a 3.
+- `blocked` se calcula a partir de dependencias; no se almacena como estado
+  permanente.
+- `notes` sobrescribe el relevo; los comentarios son append-only.
+- `dep add` y `dep remove` no devuelven JSON: el éxito se determina por el código
   de salida.
 
-## Cómo usarlo
-
-**Se escribe poco.** Solo cuando cambia el estado de alto nivel: nace una tarea,
-se cierra, queda esperando una decisión, o cambia una decisión importante. Si el
-estado no cambia, no se escribe nada — el silencio es correcto.
-
-**El criterio de entrada es la vista:** si no se quiere ver de un vistazo en el
-tablero, no entra.
-
-- **Tarea de nivel superior**: un bloque del proyecto («crear el frontend»).
-- **Subtarea**: un frente de ese bloque, de los que salen cinco o seis. No se
-  crean por trabajo derivado menor; eso es un paso de la sesión, no una tarea.
-- **Hallazgo incidental**: lo que se ve roto mientras se hace otra cosa va como
-  nota o comentario en la tarea donde se vio. Solo pasa a subtarea si puede
-  impedir cerrar el padre.
-- **`notes` es el relevo** entre sesiones: ahí va qué falta y de quién, porque se
-  sobrescribe y siempre refleja el estado actual. Los comentarios son el registro
-  de cómo se llegó hasta ahí.
-- **El cierre lo valida el usuario.** El agente propone; no cierra por su cuenta.
-
-**Para leer el estado**, `stats` y `ready --limit 1` bastan. `prime` vuelca el
-_backlog_ entero y es caro.
-
-**Lo que no se hace sin orden explícita:** repriorizar, reorganizar el árbol de
-padres, cerrar en bloque, o crear tareas que nadie ha pedido.
-
-**Regla de oro:** si no cabe en una línea, ese detalle no pertenecía a tk.
+El cierre de una tarea se hace con la unidad de trabajo verificada. No se cierra
+una tarea con trabajo pendiente ni se deja abierta una tarea cuyo trabajo ya está
+listo para cerrar. El cierre lo valida el usuario.

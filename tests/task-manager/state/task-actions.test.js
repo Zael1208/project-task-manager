@@ -61,6 +61,20 @@ describe('task actions', () => {
     expect(api.showTask).toHaveBeenCalledWith('tk-1');
   });
 
+  it('preserves an explicitly collapsed parent after reload', async () => {
+    api.listTasks.mockResolvedValue([
+      { id: 'parent', title: 'Padre' },
+      { id: 'child', title: 'Hija', parent_id: 'parent' }
+    ]);
+    const workspace = createWorkspace({ expandedIds: ['parent'], collapsedIds: [] });
+
+    workspace.toggleExpanded('parent');
+    await workspace.reloadWorkspace();
+
+    expect(workspace.expandedIds).toEqual([]);
+    expect(workspace.collapsedIds).toEqual(['parent']);
+  });
+
   it('discards an obsolete workspace reload response', async () => {
     const firstResponse = deferred();
     api.listTasks

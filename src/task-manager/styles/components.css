@@ -1350,49 +1350,6 @@
         color: var(--tk-color-text-muted);
         font-size: 13px;
       }
-      .tag-manager-confirm {
-        position: absolute;
-        z-index: 1;
-        inset: 0;
-        display: grid;
-        place-items: center;
-        padding: 20px;
-        background: rgba(3, 7, 12, 0.48);
-      }
-      .tag-manager-confirm-card {
-        width: min(440px, 100%);
-        padding: 20px;
-        border: 1px solid var(--tk-color-border-default);
-        border-radius: 8px;
-        background: var(--tk-color-surface-raised);
-        box-shadow: 0 30px 90px rgba(0, 0, 0, 0.52);
-      }
-      .tag-manager-confirm-card h3 {
-        margin: 0 0 8px;
-        font-size: 18px;
-      }
-      .tag-manager-confirm-card p {
-        margin: 0;
-        color: var(--tk-color-text-secondary);
-      }
-      .tag-manager-affected {
-        max-height: 150px;
-        margin: 12px 0;
-        padding: 0;
-        overflow: auto;
-        color: var(--tk-color-text-muted);
-        font-size: 13px;
-        list-style: none;
-      }
-      .tag-manager-affected li {
-        padding: 4px 0;
-      }
-      .tag-manager-confirm-actions {
-        display: flex;
-        justify-content: flex-end;
-        gap: 8px;
-        margin-top: 16px;
-      }
       .tag-manager-chip-input {
         position: relative;
         display: flex;

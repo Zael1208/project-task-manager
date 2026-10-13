@@ -207,6 +207,6 @@ con DOM (TM-R4), y esa es la vía para cerrarlo de verdad.
 | TM-R5 | **Cubierto**: «does not treat a 404 without a JSON body as a disabled capability» |
 | TM-R6 | **Cubierto**: «warns instead of staying silent when the action type is unknown» |
 | TM-R7 | **Cubierto**: «removes the busy key when the operation ends instead of storing false» |
-| TM-R8 | **Cubierto**: `tests/server/api.test.js`, 11 pruebas de integración contra un servidor real y una base desechable |
+| TM-R8 | **Cubierto**: `tests/server/api.test.js`, 16 pruebas de integración contra un servidor real y una base desechable |
 | TM-R9 | Fallo simulado a mitad del renombrado en cascada |
 | TM-R11 | **Cubierto**: `dialog-focus.test.js` prueba entrar, devolver el foco y envolver el tabulador. Falta el montaje real de Vue |
