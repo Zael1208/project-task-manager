@@ -1,4 +1,4 @@
-import toast from 'toast-anchor';
+import toast from '../../../public/vendor/toast-anchor.mjs';
 
 const DARK_STUDIO = {
   position: 'bottom-right',

@@ -22,8 +22,5 @@
   },
   "engines": {
     "node": ">=22.5.0"
-  },
-  "dependencies": {
-    "toast-anchor": "^1.0.9"
   }
 }

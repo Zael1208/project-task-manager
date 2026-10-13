@@ -14,7 +14,7 @@ vi.mock('../../../src/task-manager/api/tk-client.js', () => ({
   deleteTag: api.deleteTag,
   updateTag: vi.fn()
 }));
-vi.mock('toast-anchor', () => ({ default: toast }));
+vi.mock('../../../public/vendor/toast-anchor.mjs', () => ({ default: toast }));
 
 import { createWorkspace } from '../helpers/workspace-fixture.js';
 

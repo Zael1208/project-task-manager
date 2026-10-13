@@ -8,7 +8,7 @@ const toast = vi.hoisted(() => ({
   modal: vi.fn()
 }));
 
-vi.mock('toast-anchor', () => ({ default: toast }));
+vi.mock('../../../public/vendor/toast-anchor.mjs', () => ({ default: toast }));
 
 import { confirmAction, notifyError, notifyInfo, notifySuccess } from '../../../src/task-manager/notifications/toast-anchor.js';
 

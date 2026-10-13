@@ -134,7 +134,7 @@
     }
   };
 
-  // node_modules/toast-anchor/dist/index.mjs
+  // public/vendor/toast-anchor.mjs
   if (typeof document < "u" && !document.getElementById("__tk_css")) {
     let i = document.createElement("style");
     i.id = "__tk_css", i.textContent = "@keyframes __tk_spin{to{transform:rotate(360deg)}}", document.head.appendChild(i);
@@ -2085,3 +2085,11 @@
   // src/task-manager/main.js
   globalThis.Vue.createApp(AppShell).mount("#app");
 })();
+/**
+ * toast-anchor v1.0.9
+ * (c) 2026 Akash Prajapati
+ * @license MIT
+ * Vendorizado desde node_modules/toast-anchor/dist/index.mjs (build ESM) para no
+ * declarar dependencias de ejecución, según RNF-01 del PRD. La licencia completa
+ * acompaña al fichero en toast-anchor.LICENSE.
+ */
