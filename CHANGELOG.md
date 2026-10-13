@@ -28,7 +28,8 @@ Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PA
 - **Flujo correcto de tk**: antes de explorar o modificar archivos se crea o
   selecciona la tarea, se marca `in_progress`, se actualizan relevo y evidencias
   durante el trabajo, y se cierra después de verificar el resultado. El flujo no
-  depende de Engram para conocer el estado.
+  depende de Engram para conocer el estado. El tablero registra trabajo, no
+  acciones: integrar o retirar una rama no son tareas y no reciben una fila.
 - **Guardia de escritura ODD para tk**: `npm run odd:tk` centraliza las escrituras
   y rechaza el estado de Git **y el del proceso de revisión** —hashes, ramas,
   identificadores de revisión, códigos de parada, presupuestos internos y
