@@ -1,3 +1,8 @@
+function createClientId() {
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+  return `tm-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
+
 const COLORS = [
   { id: 'blue', hex: '#62a7ff' },
   { id: 'purple', hex: '#b58bff' },
@@ -10,6 +15,7 @@ const COLORS = [
 export const workspaceData = {
   data() {
     return {
+      clientId: createClientId(),
       tasks: [],
       tags: [],
       detail: null,

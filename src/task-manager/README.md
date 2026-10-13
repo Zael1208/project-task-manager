@@ -26,7 +26,7 @@ Las pruebas unitarias no necesitan servidor ni escriben en ninguna base de datos
 La comprobación manual contra el servidor sí opera sobre la base TK configurada:
 use una copia desechable cuando pruebe mutaciones.
 
-La suite contiene 12 archivos y 77 pruebas. La de `dialog-focus.test.js` cubre el
+La suite contiene 16 archivos y 88 pruebas. La de `dialog-focus.test.js` cubre el
 algoritmo de foco de los diálogos, no el montaje de Vue.
 
 ## Mapa del módulo

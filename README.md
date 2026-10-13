@@ -180,7 +180,7 @@ git status --short
 
 El build produce `app-vue.js` y `app-vue.css` de forma reproducible. La suite
 cubre el cliente HTTP, el mapper, el árbol, las acciones de estado, el foco de los
-diálogos y la integración del servidor (12 archivos, 77 pruebas).
+diálogos y la integración del servidor (16 archivos, 88 pruebas).
 
 Las de servidor levantan una instancia real sobre una base desechable, así que no
 tocan tus datos. Al probar mutaciones a mano, usa también una copia: `tk` **no

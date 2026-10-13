@@ -1,5 +1,5 @@
 import { priorityLabel, statusBadgeClass, statusLabel } from '../../shared/tasks/task-model.js';
-import { notifyError, notifySuccess } from '../notifications/toast-anchor.js';
+import { notifyError, notifyInfo, notifySuccess } from '../notifications/toast-anchor.js';
 
 export const workspaceUi = {
   methods: {
@@ -26,6 +26,15 @@ export const workspaceUi = {
     },
     showToast(message) {
       notifySuccess(message);
+    },
+    showWorkspaceChangeToast(changes = []) {
+      if (!Array.isArray(changes) || !changes.length) {
+        notifyInfo('Cambios externos detectados. No se pudo identificar la tarea. La lista se ha recargado.');
+        return;
+      }
+      changes.forEach((change) => {
+        notifyInfo(`Tarea ${change.id} ${change.action}: “${change.title}”. La lista se ha recargado.`);
+      });
     },
     normalizeSearchText(value) {
       return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase('es').trim();

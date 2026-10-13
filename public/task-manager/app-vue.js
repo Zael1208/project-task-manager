@@ -1,4 +1,63 @@
 (() => {
+  // src/task-manager/api/tk-client.js
+  var clientId = "";
+  function setClientId(value) {
+    clientId = String(value || "");
+  }
+  var ApiError = class extends Error {
+    /**
+     * @param {string} message Mensaje seguro para presentar al usuario.
+     * @param {boolean} unavailable La capacidad TK no existe en este anfitrion.
+     */
+    constructor(message, unavailable = false) {
+      super(message);
+      this.name = "ApiError";
+      this.unavailable = unavailable;
+    }
+  };
+  async function apiRequest(path, options = {}) {
+    let response;
+    const requestOptions = { ...options };
+    if (clientId) {
+      requestOptions.headers = { ...options.headers || {}, "x-client-id": clientId };
+    }
+    try {
+      response = await fetch(path, requestOptions);
+    } catch (error) {
+      throw new ApiError(error?.message || "No se pudo conectar con el servidor.");
+    }
+    let data;
+    try {
+      data = await response.json();
+    } catch {
+      throw new ApiError("El servidor devolvi\xF3 una respuesta no v\xE1lida.");
+    }
+    if (!response.ok || data?.error) {
+      const unavailable = response.status === 404 && String(data?.error || "").includes("capacidad de tareas no esta disponible");
+      throw new ApiError(data?.error || `La operaci\xF3n fall\xF3 (${response.status}).`, unavailable);
+    }
+    return data;
+  }
+  function jsonRequest(path, method, body) {
+    return apiRequest(path, {
+      method,
+      headers: body === void 0 ? void 0 : { "content-type": "application/json" },
+      body: body === void 0 ? void 0 : JSON.stringify(body)
+    });
+  }
+  var listTasks = () => apiRequest("/api/tk/list");
+  var listTags = () => apiRequest("/api/tags");
+  var showTask = (id) => apiRequest(`/api/tk/show/${encodeURIComponent(id)}`);
+  var createTask = (task) => jsonRequest("/api/tk/create", "POST", task);
+  var updateTask = (id, changes) => jsonRequest("/api/tk/update", "POST", { id, changes });
+  var closeTask = (id) => jsonRequest("/api/tk/close", "POST", { id, reason: "done" });
+  var addTaskDependency = (childId, parentId) => jsonRequest("/api/tk/dep", "POST", { child_id: childId, parent_id: parentId });
+  var removeTaskDependency = (childId, parentId) => jsonRequest("/api/tk/dep-remove", "POST", { child_id: childId, parent_id: parentId });
+  var addTaskComment = (id, body) => jsonRequest("/api/tk/comment", "POST", { id, body });
+  var createTag = (tag) => jsonRequest("/api/tags", "POST", tag);
+  var updateTag = (name, tag) => jsonRequest(`/api/tags/${encodeURIComponent(name)}`, "PUT", tag);
+  var deleteTag = (name) => jsonRequest(`/api/tags/${encodeURIComponent(name)}`, "DELETE");
+
   // src/task-manager/state/inspector.js
   var inspectorState = {
     computed: {
@@ -74,57 +133,6 @@
       }
     }
   };
-
-  // src/task-manager/api/tk-client.js
-  var ApiError = class extends Error {
-    /**
-     * @param {string} message Mensaje seguro para presentar al usuario.
-     * @param {boolean} unavailable La capacidad TK no existe en este anfitrion.
-     */
-    constructor(message, unavailable = false) {
-      super(message);
-      this.name = "ApiError";
-      this.unavailable = unavailable;
-    }
-  };
-  async function apiRequest(path, options = {}) {
-    let response;
-    try {
-      response = await fetch(path, options);
-    } catch (error) {
-      throw new ApiError(error?.message || "No se pudo conectar con el servidor.");
-    }
-    let data;
-    try {
-      data = await response.json();
-    } catch {
-      throw new ApiError("El servidor devolvi\xF3 una respuesta no v\xE1lida.");
-    }
-    if (!response.ok || data?.error) {
-      const unavailable = response.status === 404 && String(data?.error || "").includes("capacidad de tareas no esta disponible");
-      throw new ApiError(data?.error || `La operaci\xF3n fall\xF3 (${response.status}).`, unavailable);
-    }
-    return data;
-  }
-  function jsonRequest(path, method, body) {
-    return apiRequest(path, {
-      method,
-      headers: body === void 0 ? void 0 : { "content-type": "application/json" },
-      body: body === void 0 ? void 0 : JSON.stringify(body)
-    });
-  }
-  var listTasks = () => apiRequest("/api/tk/list");
-  var listTags = () => apiRequest("/api/tags");
-  var showTask = (id) => apiRequest(`/api/tk/show/${encodeURIComponent(id)}`);
-  var createTask = (task) => jsonRequest("/api/tk/create", "POST", task);
-  var updateTask = (id, changes) => jsonRequest("/api/tk/update", "POST", { id, changes });
-  var closeTask = (id) => jsonRequest("/api/tk/close", "POST", { id, reason: "done" });
-  var addTaskDependency = (childId, parentId) => jsonRequest("/api/tk/dep", "POST", { child_id: childId, parent_id: parentId });
-  var removeTaskDependency = (childId, parentId) => jsonRequest("/api/tk/dep-remove", "POST", { child_id: childId, parent_id: parentId });
-  var addTaskComment = (id, body) => jsonRequest("/api/tk/comment", "POST", { id, body });
-  var createTag = (tag) => jsonRequest("/api/tags", "POST", tag);
-  var updateTag = (name, tag) => jsonRequest(`/api/tags/${encodeURIComponent(name)}`, "PUT", tag);
-  var deleteTag = (name) => jsonRequest(`/api/tags/${encodeURIComponent(name)}`, "DELETE");
 
   // node_modules/toast-anchor/dist/index.mjs
   if (typeof document < "u" && !document.getElementById("__tk_css")) {
@@ -499,7 +507,7 @@
 
   // src/task-manager/notifications/toast-anchor.js
   var DARK_STUDIO = {
-    position: "top-right",
+    position: "bottom-right",
     toast: {
       bg: "#121c27",
       color: "#f3f6f8",
@@ -538,6 +546,9 @@
   }
   function notifyError(message) {
     return ao.error(message);
+  }
+  function notifyInfo(message) {
+    return ao.info(message);
   }
   function confirmAction(title, message, options = {}) {
     return ao.modal(title, message, {
@@ -1023,6 +1034,10 @@
   };
 
   // src/task-manager/state/workspace-data.js
+  function createClientId() {
+    if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+    return `tm-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+  }
   var COLORS = [
     { id: "blue", hex: "#62a7ff" },
     { id: "purple", hex: "#b58bff" },
@@ -1034,6 +1049,7 @@
   var workspaceData = {
     data() {
       return {
+        clientId: createClientId(),
         tasks: [],
         tags: [],
         detail: null,
@@ -1112,6 +1128,15 @@
       showToast(message) {
         notifySuccess(message);
       },
+      showWorkspaceChangeToast(changes = []) {
+        if (!Array.isArray(changes) || !changes.length) {
+          notifyInfo("Cambios externos detectados. No se pudo identificar la tarea. La lista se ha recargado.");
+          return;
+        }
+        changes.forEach((change) => {
+          notifyInfo(`Tarea ${change.id} ${change.action}: \u201C${change.title}\u201D. La lista se ha recargado.`);
+        });
+      },
       normalizeSearchText(value) {
         return String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es").trim();
       },
@@ -1162,6 +1187,7 @@
     ],
     mounted() {
       window.addEventListener("keydown", this.handleEscape);
+      setClientId(this.clientId);
       this.connectWorkspaceEvents();
       this.reloadWorkspace();
     },
@@ -1173,9 +1199,20 @@
       connectWorkspaceEvents() {
         if (typeof EventSource === "undefined") return;
         this.disconnectWorkspaceEvents();
-        const source = new EventSource("/api/events");
-        source.addEventListener("workspace.changed", () => {
-          if (!this.loading) this.reloadWorkspace();
+        const source = new EventSource(`/api/events?clientId=${encodeURIComponent(this.clientId)}`);
+        source.addEventListener("workspace.changed", (event) => {
+          let change;
+          try {
+            change = JSON.parse(event.data);
+          } catch {
+            return;
+          }
+          this.reloadWorkspace();
+          const isExternal = change.resource === "tasks" && change.source === "external";
+          const isRemoteHttp = change.resource === "tasks" && change.source === "http" && change.originClientId && change.originClientId !== this.clientId;
+          if (isExternal || isRemoteHttp) {
+            this.showWorkspaceChangeToast?.(change.changes || []);
+          }
         });
         this.workspaceEventSource = source;
       },

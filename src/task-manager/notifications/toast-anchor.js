@@ -1,7 +1,7 @@
 import toast from 'toast-anchor';
 
 const DARK_STUDIO = {
-  position: 'top-right',
+  position: 'bottom-right',
   toast: {
     bg: '#121c27',
     color: '#f3f6f8',
@@ -43,6 +43,10 @@ export function notifySuccess(message) {
 
 export function notifyError(message) {
   return toast.error(message);
+}
+
+export function notifyInfo(message) {
+  return toast.info(message);
 }
 
 export function confirmAction(title, message, options = {}) {

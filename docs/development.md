@@ -19,7 +19,7 @@ server/                       Servidor Node: API y ficheros estáticos
   tags.js                       Handlers de /api/tags* y base de etiquetas
   tk.js                         Única frontera con el CLI tk
   http.js                       Utilidades HTTP compartidas
-  events.js                     Canal SSE y difusión de cambios confirmados
+  events.js                     Canal SSE y detección de cambios externos
 src/task-manager/             Fuente del frontend (Vue 3, Options API)
   api/tk-client.js              Única frontera fetch del frontend
   notifications/                Adapter único de Toast Anchor Dark Studio
@@ -183,7 +183,7 @@ que recorrerlos a mano. Están en `tests/server/`, fuera del árbol del frontend
 
 ## Evidencia
 
-La suite automatizada contiene 12 archivos y 77 pruebas. El build reproduce los
+La suite automatizada contiene 16 archivos y 88 pruebas. El build reproduce los
 artefactos con hash idéntico a la línea base de la extracción.
 
 No hay log de CI, ni pruebas de navegador, ni cobertura automatizada del
