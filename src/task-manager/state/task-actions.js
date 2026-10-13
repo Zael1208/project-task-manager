@@ -40,7 +40,12 @@ export const taskActions = {
         this.selectedTaskId = selectedId;
         if (this.detail?.id !== selectedId) this.detail = null;
         this.unavailable = false;
-        this.expandedIds = [...new Set(tasks.map((task) => task.parentId).filter(Boolean))];
+        const parentIds = [...new Set(tasks.map((task) => task.parentId).filter(Boolean))];
+        const hadTreeState = this.expandedIds.length > 0 || this.collapsedIds.length > 0;
+        this.expandedIds = hadTreeState
+          ? this.expandedIds.filter((id) => parentIds.includes(id))
+          : parentIds;
+        this.collapsedIds = this.collapsedIds.filter((id) => parentIds.includes(id));
         if (selectedId) await this.loadTaskDetail(selectedId, false);
         else this.syncEditDraft();
         return true;

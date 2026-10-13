@@ -48,12 +48,20 @@ describe('task-tree state', () => {
     expect(workspace.visibleTasks.map((task) => task.id)).toEqual(['tk-a', 'tk-b']);
   });
 
-  it('expands and collapses every parent task', () => {
-    const workspace = createWorkspace({ tasks });
+  it('expands and collapses parent tasks in every status tab', () => {
+    const statuses = ['open', 'in_progress', 'blocked', 'done'];
+    const statusTasks = statuses.flatMap((status) => [
+      mapTask({ id: `parent-${status}`, title: `Padre ${status}`, status }),
+      mapTask({ id: `child-${status}`, title: `Hija ${status}`, parent_id: `parent-${status}`, status })
+    ]);
 
-    workspace.setAllExpanded(true);
-    expect(workspace.expandedIds).toEqual(['tk-1']);
-    workspace.setAllExpanded(false);
-    expect(workspace.expandedIds).toEqual([]);
+    for (const status of statuses) {
+      const workspace = createWorkspace({ tasks: statusTasks, activeTaskFilter: status });
+
+      workspace.setAllExpanded(true);
+      expect(workspace.visibleTasks.map((task) => task.id)).toContain(`child-${status}`);
+      workspace.toggleExpanded(`parent-${status}`);
+      expect(workspace.visibleTasks.map((task) => task.id)).toEqual([`parent-${status}`]);
+    }
   });
 });

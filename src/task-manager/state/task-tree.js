@@ -72,7 +72,9 @@ export const taskTree = {
         if (visited.has(task.id)) return;
         visited.add(task.id);
         if (this.filteredTaskIds.has(task.id)) rows.push(task);
-        if (hasFilter || this.expandedIds.includes(task.id)) {
+        const canTraverse = this.expandedIds.includes(task.id) ||
+          (hasFilter && !this.collapsedIds.includes(task.id));
+        if (canTraverse) {
           for (const child of childrenByParent.get(task.id) || []) visit(child);
         }
       };
@@ -119,10 +121,18 @@ export const taskTree = {
   },
   methods: {
     toggleExpanded(id) {
-      this.expandedIds = this.expandedIds.includes(id) ? this.expandedIds.filter((item) => item !== id) : [...this.expandedIds, id];
+      if (this.expandedIds.includes(id)) {
+        this.expandedIds = this.expandedIds.filter((item) => item !== id);
+        if (!this.collapsedIds.includes(id)) this.collapsedIds = [...this.collapsedIds, id];
+        return;
+      }
+      this.expandedIds = [...this.expandedIds, id];
+      this.collapsedIds = this.collapsedIds.filter((item) => item !== id);
     },
     setAllExpanded(expanded) {
-      this.expandedIds = expanded ? this.mappedTasks.filter((task) => task.children).map((task) => task.id) : [];
+      const parentIds = this.mappedTasks.filter((task) => task.children).map((task) => task.id);
+      this.expandedIds = expanded ? parentIds : [];
+      this.collapsedIds = expanded ? [] : parentIds;
       this.isListMenuOpen = false;
     },
     clearAdvancedFilters() {

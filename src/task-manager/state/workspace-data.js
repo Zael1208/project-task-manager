@@ -31,6 +31,7 @@ export const workspaceData = {
       isAdvancedFiltersOpen: false,
       areTaskChipsVisible: true,
       expandedIds: [],
+      collapsedIds: [],
       isListMenuOpen: false,
       openTaskMenuId: '',
       isInspectorMenuOpen: false,
