@@ -1,327 +1,368 @@
-# Contrato operativo de Git, CHANGELOG y versionado
+# ROOT-10 Contrato operativo de Git, CHANGELOG y versionado — v2
 
-## 1. Propósito
+## ROOT-11 1. Propósito
 
-Este documento define el flujo que debe seguir el agente de IA al trabajar en un proyecto Git local de uso personal.
+Este contrato define un flujo de Git seguro, ágil y proporcional al riesgo para proyectos de uso personal gestionados con ayuda de agentes de IA.
 
-Objetivos:
+Sus objetivos son:
 
-- Mantener `main` estable y utilizable.
-- Aislar cada tarea en una rama breve.
-- Hacer los cambios trazables y reversibles.
-- Registrar las modificaciones relevantes en `CHANGELOG.md`.
-- Aplicar versionado semántico mediante etiquetas Git.
-- Evitar cambios accidentales, pérdida de trabajo y regresiones.
+- proteger el trabajo existente;
+- mantener `main` estable cuando el proyecto lo requiera;
+- evitar commits, ramas y comprobaciones innecesarias;
+- conservar cambios trazables y recuperables;
+- pedir autorización antes de las operaciones que dejan una huella persistente;
+- adaptar el proceso al tamaño y riesgo de cada tarea.
 
-## 2. Alcance y prioridad
+La seguridad no debe convertir cada modificación en un procedimiento pesado. El agente debe aplicar la mínima ceremonia compatible con un resultado fiable.
 
-Estas reglas se aplican a todas las operaciones Git del proyecto, salvo que el usuario indique expresamente otra cosa.
+## ROOT-12 2. Alcance y prioridad
 
-Si existe una instrucción específica del usuario, prevalece sobre este contrato. Si una operación puede destruir trabajo, sobrescribir cambios o alterar el historial, el agente debe detenerse y pedir autorización explícita.
+Estas reglas se aplican a las operaciones Git del proyecto, salvo instrucción expresa del usuario.
 
-## 3. Modelo de ramas
+Las instrucciones concretas del usuario prevalecen sobre este contrato.
 
-El flujo estándar utiliza únicamente:
+Cuando exista una duda entre conservar y eliminar trabajo, se conserva el trabajo y se informa al usuario.
 
-- `main`: rama principal, estable y verificable.
-- `feature/<nombre>`: nueva funcionalidad o mejora.
-- `fix/<nombre>`: corrección de errores.
-- `docs/<nombre>`: documentación.
-- `refactor/<nombre>`: reorganización interna sin cambio funcional intencionado.
+## ROOT-13 3. Modos de trabajo
 
-No se utilizará `develop` por defecto. Solo se añadirá si el usuario lo solicita o si el proyecto necesita mantener una línea de desarrollo separada de la versión estable.
+El agente clasificará la tarea de forma práctica, sin interrumpir al usuario salvo que la clasificación cambie una decisión importante.
 
-## 4. Inicio obligatorio de una tarea
+### ROOT-14 3.1. Tarea pequeña
 
-Antes de modificar archivos, el agente debe:
+Ejemplos:
 
-1. Identificar el directorio raíz del repositorio.
-2. Ejecutar `git status --short --branch`.
-3. Comprobar la rama actual.
-4. Detectar cambios previos del usuario.
-5. No sobrescribir, descartar ni ocultar cambios previos sin permiso.
-6. Actualizar `main` solo si existe un remoto configurado y el usuario lo permite o lo ha solicitado.
-7. Crear una rama específica para la tarea.
+- corrección de texto o documentación;
+- cambio visual localizado;
+- ajuste menor de configuración;
+- corrección sencilla y acotada.
 
-Ejemplo:
+Reglas:
+
+- no es obligatorio crear una rama;
+- no es obligatorio actualizar `CHANGELOG.md`;
+- no es obligatorio crear varios commits;
+- se permite trabajar en la rama actual si no es `main` o si el usuario lo ha autorizado;
+- normalmente bastará con un único commit, si el usuario lo autoriza.
+
+### ROOT-15 3.2. Tarea normal
+
+Ejemplos:
+
+- una funcionalidad completa;
+- una corrección que afecta a varios archivos;
+- una mejora interna con pruebas o cambios coordinados.
+
+Reglas:
+
+- se recomienda una rama de tarea si la rama actual es `main`;
+- todos los cambios coherentes pueden formar un único commit;
+- solo se dividirán en varios commits si existe una razón clara;
+- la integración en `main` se hará únicamente con autorización.
+
+### ROOT-16 3.3. Tarea compleja o de riesgo
+
+Ejemplos:
+
+- cambios incompatibles;
+- migraciones o cambios de estructura importantes;
+- operaciones que afectan a muchos componentes;
+- trabajo que pueda dificultar la recuperación o revisión.
+
+Reglas:
+
+- se utilizará una rama específica;
+- se podrán hacer comprobaciones intermedias cuando aporten seguridad real;
+- los commits podrán separarse por unidades funcionales independientes;
+- la integración, publicación y etiquetado requerirán autorización explícita.
+
+## ROOT-17 4. Estado inicial y protección del trabajo
+
+Al comenzar una tarea, el agente hará una comprobación breve:
 
 ```powershell
 git status --short --branch
-git switch main
-git switch -c feature/nombre-de-la-tarea
 ```
 
-Si hay cambios sin confirmar, el agente debe informar de ellos y decidir con el usuario si se mantienen, se incorporan a la tarea o se separan.
+Esta comprobación sirve para conocer la rama y detectar cambios previos. No es necesario repetirla después de cada paso.
 
-## 5. Trabajo y commits
+El agente debe:
 
-Los commits deben ser pequeños, coherentes y relacionados con una sola intención.
+- conservar los cambios previos del usuario;
+- no sobrescribirlos ni mezclarlos silenciosamente con la tarea actual;
+- informar si los cambios previos afectan a los archivos que debe modificar;
+- detenerse solo si no puede continuar con seguridad.
 
-Los mensajes de commit y de etiqueta anotada se escriben en **inglés**. El resto
-—código, comentarios, documentación, `CHANGELOG.md` e interfaz— sigue en español
-de España. Los commits anteriores en español se conservan tal cual: no se reescribe
-el historial ya publicado.
+No se actualizará `main` desde un remoto automáticamente. El `pull`, el `fetch` con finalidad de integrar cambios y cualquier sincronización remota requieren que el usuario lo solicite o lo autorice.
 
-Formato recomendado:
+## ROOT-18 5. Ramas
+
+Las ramas son una herramienta, no un trámite obligatorio.
+
+Se recomienda trabajar con:
+
+- `main`: línea estable, cuando el proyecto la utilice;
+- `feature/<nombre>`: funcionalidad o mejora;
+- `fix/<nombre>`: corrección;
+- `docs/<nombre>`: documentación;
+- `refactor/<nombre>`: reorganización interna.
+
+El agente puede trabajar en la rama actual cuando:
+
+- la tarea es pequeña;
+- no se está en `main`, o el usuario ha autorizado trabajar directamente en `main`;
+- no existe riesgo razonable de mezclar trabajos distintos.
+
+Si está en `main` y la tarea es normal o compleja, debe proponer o crear una rama local antes de modificar, salvo que el usuario indique otra cosa.
+
+Crear una rama local no equivale a integrar, publicar ni subir cambios.
+
+No se utilizará `develop` por defecto.
+
+## ROOT-19 6. Modificación y commits
+
+El agente puede modificar archivos, ejecutar pruebas y revisar diferencias sin crear commits.
+
+### ROOT-20 6.1. Unidad de commit
+
+Un commit debe representar una unidad coherente de trabajo. No se creará un commit por cada archivo, paso intermedio o modificación menor.
+
+Por defecto, una tarea completa puede quedar en un único commit aunque afecte a varios archivos.
+
+Se crearán varios commits solo cuando exista una razón clara, por ejemplo:
+
+- separar cambios independientes;
+- facilitar una revisión concreta;
+- mantener una recuperación útil en una tarea compleja;
+- separar una corrección de una refactorización no relacionada.
+
+No se harán commits intermedios únicamente para demostrar actividad o cumplir una regla formal.
+
+### ROOT-21 6.2. Confirmación de commits
+
+La skill `commit-preparation` aplica la confirmación configurada en
+`strict_confirmation` del perfil. Si se omite o vale `true` (el valor
+predeterminado), el agente debe obtener confirmación explícita antes de cada
+commit local. Con `false` explícito, puede ejecutar el commit local después de
+presentar el informe y la propuesta descritos abajo, sin una pregunta adicional
+de confirmación por commit.
+
+Cuando la tarea esté lista, debe informar brevemente de:
+
+- qué cambios incluirá, después de revisar la documentación viva del proyecto
+  (`CHANGELOG.md` según §9 ([[ROOT-24]]), `README`, documentos de estado y listas de
+  funciones): lo que haya dejado de describir la realidad se corrige **antes**
+  del commit, no después;
+- cualquier problema o hallazgo aparecido durante el análisis y la preparación
+  que requiera una decisión suya: se dice **antes** del commit y no después, en
+  una frase clara de qué es y por qué le afecta;
+- cuántos commits propone crear;
+- el mensaje o mensajes previstos;
+- las pruebas realizadas.
+
+Con confirmación estricta, después debe pedir autorización explícita. La opción
+`false` solo omite esa pregunta para commits locales; no amplía ninguna otra
+autorización.
+
+La autorización puede ser:
+
+- para un commit concreto;
+- para todos los commits coherentes de la tarea actual.
+
+Con confirmación estricta, si el usuario autoriza los commits coherentes de la
+tarea actual, no es necesario volver a pedir permiso para cada commit previsto,
+siempre que no cambie sustancialmente el alcance.
+
+La autorización no se hereda automáticamente a tareas posteriores.
+
+Formato recomendado para los mensajes:
 
 ```text
 tipo: descripción breve
 ```
 
-Tipos habituales:
+Tipos habituales: `feat`, `fix`, `docs`, `refactor`, `test`, `build` y `chore`.
 
-- `feat`: nueva funcionalidad.
-- `fix`: corrección.
-- `docs`: documentación.
-- `refactor`: reorganización interna.
-- `test`: pruebas.
-- `build`: compilación o dependencias.
-- `chore`: mantenimiento.
+Los mensajes de commit y de etiqueta se escribirán en inglés. El resto del proyecto seguirá el idioma que corresponda al proyecto, normalmente español de España.
 
-Ejemplos:
+## ROOT-22 7. Verificación proporcional
 
-```powershell
-git add archivo.js archivo.css
-git commit -m "feat: add status filter"
+La verificación debe ser suficiente para confiar en el resultado, no una lista fija que se repite mecánicamente.
 
-git add README.md
-git commit -m "docs: document the installation flow"
-```
+Al terminar una tarea, el agente debe:
 
-El agente no debe crear commits gigantes que mezclen funcionalidades, refactorizaciones y documentación no relacionada.
+- revisar los cambios realizados;
+- ejecutar las pruebas, comprobaciones o compilación disponibles y relevantes;
+- comprobar que no ha introducido secretos o archivos temporales evidentes;
+- informar de cualquier verificación no realizada.
 
-## 6. Verificación antes de integrar
+No es obligatorio ejecutar pruebas inexistentes ni revisar manualmente todo el historial del repositorio.
 
-Antes de fusionar una rama, el agente debe:
+Para una tarea pequeña bastará normalmente con revisar el diff y ejecutar una comprobación localizada, si existe.
 
-- Revisar `git diff main...HEAD`.
-- Ejecutar las pruebas disponibles.
-- Ejecutar la comprobación o compilación del proyecto si existe.
-- Revisar que no haya archivos temporales o secretos.
-- Confirmar que el `CHANGELOG.md` refleja los cambios relevantes.
-- Revisar que no haya regresiones conocidas.
+Para una tarea normal se ejecutará la validación principal del proyecto.
 
-Comandos mínimos:
+Para una tarea compleja se añadirán comprobaciones específicas cuando reduzcan un riesgo real.
 
-```powershell
-git diff main...HEAD
-git status --short
-```
+## ROOT-23 8. Integración en `main`
 
-Si falla una prueba o existe una duda relevante, no se debe integrar la rama como si estuviera terminada.
+Modificar una rama y fusionarla en `main` son decisiones distintas.
 
-## 7. Integración en `main`
+El agente no integrará automáticamente una rama en `main` salvo que el usuario lo haya solicitado o autorizado expresamente.
 
-Cuando la tarea esté verificada:
+Antes de integrar, debe comprobar de forma breve:
 
-```powershell
-git switch main
-git merge --no-ff feature/nombre-de-la-tarea
-```
+- que la tarea está terminada;
+- que las pruebas relevantes son correctas;
+- que no hay cambios del usuario que vayan a perderse;
+- que la rama que se va a integrar es la correcta.
 
-El uso de `--no-ff` conserva explícitamente la integración de la tarea en el historial.
+El uso de `--no-ff` no es obligatorio. Se elegirá la estrategia que mantenga un historial claro y sencillo para ese repositorio.
 
-Después de fusionar:
+Tras una integración autorizada, se comprobará el estado final. No es necesario eliminar inmediatamente la rama si puede ser útil para recuperar o revisar el trabajo.
 
-1. Ejecutar de nuevo las pruebas principales.
-2. Comprobar `git status`.
-3. Revisar el commit resultante.
-4. Eliminar la rama local solo cuando ya no sea necesaria.
+## ROOT-24 9. CHANGELOG.md
 
-```powershell
-git branch -d feature/nombre-de-la-tarea
-git status --short --branch
-```
+`CHANGELOG.md` se actualizará solo cuando el cambio tenga valor para el usuario, para una versión publicada o para el mantenimiento futuro del proyecto.
 
-Nunca se debe borrar una rama que contenga trabajo no integrado sin autorización.
+No se actualizará por cambios puramente internos, correcciones tipográficas menores o cada commit.
 
-## 8. CHANGELOG.md
-
-El proyecto debe mantener un archivo `CHANGELOG.md` en la raíz.
-
-Formato recomendado:
+Cuando corresponda, se anotará primero en `[Sin publicar]`:
 
 ```markdown
-# Registro de cambios
-
 ## [Sin publicar]
 
 ### Añadido
-- Nueva funcionalidad todavía no publicada.
+- Nueva funcionalidad.
 
 ### Modificado
-- Cambio relevante en el comportamiento.
+- Cambio relevante.
 
 ### Corregido
 - Error solucionado.
-
-## [0.1.0] - 2026-08-18
-
-### Añadido
-- Primera versión funcional.
 ```
 
-Reglas:
+El agente puede proponer actualizarlo, pero no debe convertirlo en una obligación automática de toda tarea.
 
-- Las modificaciones se anotan primero en `[Sin publicar]`.
-- Al publicar una versión, el contenido de `[Sin publicar]` se pasa a la nueva versión.
-- No se anotan cambios puramente internos si no afectan al usuario, salvo que tengan valor técnico o de mantenimiento.
-- No se debe afirmar que una característica existe si no está verificada en el código.
-- Las fechas deben usar el formato ISO `AAAA-MM-DD`.
+## ROOT-25 10. Versionado y etiquetas
 
-## 9. Versionado semántico
+El versionado semántico se aplicará cuando el proyecto utilice versiones publicadas o el usuario solicite una versión.
 
-Las versiones deben seguir el formato:
+No se cambiará el número de versión por haber realizado muchos cambios.
 
-```text
-MAJOR.MINOR.PATCH
-```
+Orientación:
 
-Ejemplos:
-
-- `0.1.0`: primera versión de desarrollo.
-- `0.1.1`: corrección compatible.
-- `0.2.0`: nueva funcionalidad compatible.
-- `1.0.0`: primera versión estable.
-- `2.0.0`: cambio incompatible con versiones anteriores.
-
-Reglas de incremento:
-
-| Cambio | Incremento |
+| Cambio | Incremento habitual |
 |---|---|
 | Corrección compatible | `PATCH` |
-| Nueva funcionalidad compatible | `MINOR` |
+| Funcionalidad compatible | `MINOR` |
 | Cambio incompatible | `MAJOR` |
 
-Mientras el proyecto esté por debajo de `1.0.0`, la API y el comportamiento pueden cambiar con mayor libertad, pero el agente debe documentar los cambios importantes.
+Crear una etiqueta, preparar una release o publicar una versión requiere autorización explícita, aunque los cambios ya estén committeados.
 
-## 10. Publicación de una versión
+Las etiquetas anotadas utilizarán el prefijo `v`, por ejemplo `v0.2.0`.
 
-Una versión solo se publica desde `main`, después de verificar el proyecto.
+## ROOT-26 11. Operaciones que requieren autorización explícita
 
-Proceso:
+El agente debe pedir autorización explícita antes de:
 
-1. Revisar el estado del repositorio.
-2. Decidir el siguiente número de versión.
-3. Actualizar `CHANGELOG.md`.
-4. Actualizar archivos de versión si el proyecto los tiene.
-5. Ejecutar pruebas y compilación.
-6. Crear un commit de versión.
-7. Crear una etiqueta anotada.
-8. Verificar la etiqueta.
+- fusionar una rama en `main`;
+- hacer `push`, `fetch` con finalidad de integrar cambios o cualquier otra
+  operación remota;
+- crear una etiqueta o publicar una versión;
+- ejecutar `reset`, `clean`, `rebase`, `filter-repo` u otra operación que pueda eliminar o reescribir trabajo;
+- sobrescribir, descartar u ocultar cambios del usuario;
+- eliminar una rama que contenga trabajo no integrado.
 
-Ejemplo:
+La confirmación del commit local sigue `strict_confirmation`: omitido o `true`
+requiere confirmación explícita; `false` permite omitir solo esa pregunta tras
+presentar el informe. Nunca autoriza `push`, `fetch` para integrar, merge, tag,
+publicación ni operaciones destructivas. La autorización para una operación
+concreta no autoriza automáticamente las demás.
 
-```powershell
-git switch main
-git status --short
+## ROOT-27 12. Operaciones permitidas durante el trabajo
 
-git add CHANGELOG.md package.json
-git commit -m "chore: prepare release 0.2.0"
+Salvo que el usuario indique lo contrario, el agente puede:
 
-git tag -a v0.2.0 -m "Release 0.2.0"
-git show --stat --oneline v0.2.0
-```
+- leer el estado, historial y diferencias;
+- crear una rama local de tarea cuando el flujo lo aconseje;
+- modificar archivos dentro del alcance solicitado;
+- ejecutar pruebas, linters, compilaciones y comprobaciones locales;
+- preparar una propuesta de commit sin ejecutarlo;
+- dejar cambios sin commit para que el usuario los revise.
 
-La etiqueta debe llevar el prefijo `v`: `v0.1.0`, `v1.0.0`, etc.
+## ROOT-28 13. Informe final
 
-## 11. Versiones preliminares
-
-Cuando sea necesario identificar una versión no definitiva, se pueden usar sufijos:
-
-```text
-0.3.0-alpha.1
-0.3.0-beta.1
-0.3.0-rc.1
-```
-
-- `alpha`: todavía experimental.
-- `beta`: funcional, pero en validación.
-- `rc`: candidata a publicación.
-
-No se debe presentar una versión preliminar como estable.
-
-## 12. Operaciones que requieren confirmación
-
-El agente debe pedir confirmación antes de:
-
-- Ejecutar `git reset` si puede eliminar cambios.
-- Usar `git reset --hard`.
-- Ejecutar `git clean`.
-- Sobrescribir cambios del usuario.
-- Reescribir historial con `rebase` o `filter-repo`.
-- Forzar un `push`.
-- Eliminar ramas con trabajo no integrado.
-- Crear o publicar una versión que el usuario no haya solicitado.
-- Subir cambios a un remoto.
-
-## 13. Operaciones que no deben hacerse automáticamente
-
-El agente no debe:
-
-- Trabajar directamente en `main` si la tarea implica cambios relevantes.
-- Crear `develop` por costumbre.
-- Hacer `push` sin autorización.
-- Cambiar el número de versión solo porque ha realizado muchos cambios.
-- Marcar como corregido algo que no haya comprobado.
-- Modificar el historial para ocultar errores.
-- Eliminar cambios previos del usuario.
-
-## 14. Informe final obligatorio
-
-Al terminar una tarea, el agente debe informar de:
-
-- Rama utilizada.
-- Cambios realizados.
-- Pruebas ejecutadas y resultado.
-- Commit o commits creados.
-- Si se integró en `main`.
-- Si se actualizó `CHANGELOG.md`.
-- Si se creó una etiqueta de versión.
-- Estado final de `git status`.
-- Cualquier aspecto no verificado.
-
-Formato breve recomendado:
+El informe final debe ser breve y centrarse en el resultado:
 
 ```text
-Estado: completado
-Rama: feature/nombre-de-la-tarea
-Integración: sí/no
-Versión: v0.2.0 / no creada
-CHANGELOG: actualizado/no actualizado
+Estado: completado / parcial / bloqueado
+Rama: nombre de la rama
+Cambios: resumen breve
+Commit: creado / no creado / pendiente de autorización
 Pruebas: OK / fallan / no disponibles
-Árbol de trabajo: limpio / contiene cambios
+Integración: no realizada / realizada con autorización
+CHANGELOG: actualizado / no aplicaba
+Estado del árbol: limpio / contiene cambios pendientes
 ```
 
-## 15. Flujo resumido
+No es necesario informar de cada comando ejecutado.
+
+## ROOT-29 14. Flujo operativo resumido
+
+### ROOT-30 Tarea pequeña
 
 ```text
 comprobar estado
     ↓
-crear rama de tarea
+modificar y verificar
     ↓
-trabajar y hacer commits pequeños
+confirmar según `strict_confirmation` (true por defecto)
     ↓
-verificar pruebas y diferencias
-    ↓
-actualizar CHANGELOG
-    ↓
-integrar en main
-    ↓
-verificar regresiones
-    ↓
-crear etiqueta SemVer si corresponde
+crear commit conforme a la confirmación configurada
 ```
 
-## 16. Principio rector
+### ROOT-31 Tarea normal
 
-Cada cambio debe ser:
+```text
+comprobar estado
+    ↓
+crear rama si procede
+    ↓
+trabajar sin interrupciones innecesarias
+    ↓
+verificar al terminar
+    ↓
+confirmar según `strict_confirmation` (true por defecto)
+    ↓
+integrar solo si se solicita
+```
 
-1. Identificable.
-2. Revisable.
-3. Reversible.
-4. Verificable.
-5. Explicable en el historial y en el `CHANGELOG.md`.
+### ROOT-32 Tarea compleja
 
-Si el agente no puede cumplir una de estas condiciones, debe declarar la limitación antes de continuar.
+```text
+comprobar estado y riesgos
+    ↓
+crear rama específica
+    ↓
+trabajar por unidades coherentes
+    ↓
+verificar los puntos críticos
+    ↓
+confirmar commit según `strict_confirmation`; autorizar integración por separado
+    ↓
+publicar o etiquetar solo si se solicita
+```
 
+## ROOT-33 15. Principio rector
+
+Git debe aportar seguridad y trazabilidad sin convertirse en una carga operativa.
+
+El agente aplicará estas prioridades, en este orden:
+
+1. no perder ni sobrescribir trabajo;
+2. entregar una modificación verificable;
+3. mantener un historial comprensible;
+4. pedir autorización para las operaciones persistentes relevantes;
+5. evitar ramas, commits, comprobaciones y documentación que no aporten valor real.
+
+Cuando una regla entre en conflicto con la agilidad, el agente debe explicar brevemente el riesgo y proponer la opción más sencilla que lo controle.
