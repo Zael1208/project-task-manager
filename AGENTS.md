@@ -5,7 +5,9 @@ Reglas que deben valer **en cada turno** dentro de este repositorio. Esto es un
 
 ## Flujo de trabajo (contrato vinculante)
 
-Contrato completo: `CONTRATO_FLUJO_GIT_VERSIONADO.md`.
+Contratos completos: `CONTRATO_FLUJO_GIT_VERSIONADO.md` (Git, CHANGELOG y
+versionado) y `CONTRATO_DOCUMENTACION.md` (qué escribe cada documento y dónde vive
+cada dato).
 
 - **Rama antes de tocar ficheros.** `main` es estable; cada tarea va en una rama
   `feature/`, `fix/`, `docs/` o `refactor/`. **No se trabaja directamente en `main`.**
@@ -29,7 +31,7 @@ Contrato completo: `CONTRATO_FLUJO_GIT_VERSIONADO.md`.
 
 | Comando | Qué hace | Nota |
 |---|---|---|
-| `npm test` | suite de vitest (99 pruebas, 19 ficheros) | bajo el sandbox de DSH necesita permiso ampliado: vitest lanza workers con tuberías y falla con `EPERM` en `spawn` |
+| `npm test` | suite de vitest (`tests/`), con las guardias de dependencias, de tk y de documentación | bajo el sandbox de DSH necesita permiso ampliado: vitest lanza workers con tuberías y falla con `EPERM` en `spawn` |
 | `npm run build` | esbuild → `public/task-manager/app-vue.js` y `.css` | los artefactos están **versionados**: si el build los cambia, se versionan con el cambio |
 | `npm run server` | servidor local en el 8890 | `npm run dev` lo arranca con `--watch` |
 
@@ -78,7 +80,7 @@ la que pertenecen.
 
 ## Mapa
 
-`PRD.md` (requisitos, alcance y estado funcional del producto) · `tk/.tacks/tacks.db`
+`PRD.md` (requisitos, alcance y criterios de aceptación) · `CONTRATO_DOCUMENTACION.md` (dónde vive cada dato) · `tk/.tacks/tacks.db`
 (estado operativo ODD, no versionado) · `docs/architecture.md` · `docs/contracts.md` ·
 `docs/operations.md` · `docs/development.md` · `docs/known-risks.md` · `docs/decisions/` ·
 `CONTRATO_FLUJO_GIT_VERSIONADO.md` · `CHANGELOG.md` · `README.md`

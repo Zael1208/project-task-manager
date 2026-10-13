@@ -35,8 +35,8 @@ public/task-manager/app-vue.html
   │  fetch /api/tk/*  y  /api/tags*
   ▼
 server/index.js                            (enrutado y estaticos)
-  -> server/tasks.js                       (14 endpoints de tareas)
-  -> server/tags.js                        (5 endpoints de etiquetas)
+  -> server/tasks.js                       (handlers de tareas)
+  -> server/tags.js                        (handlers de etiquetas)
        -> server/tk.js                     (unica frontera con el CLI)
             -> tk/tk.exe (Windows)  ──►  tk/.tacks/tacks.db
                tk/tk     (Linux)

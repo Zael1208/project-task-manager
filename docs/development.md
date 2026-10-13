@@ -1,16 +1,18 @@
 # Guía de desarrollo
 
 Este documento explica cómo cambiar el proyecto sin romper sus contratos.
-Los requisitos, el alcance y el estado funcional están en [`PRD.md`](../PRD.md);
-el trabajo operativo ODD está en `tk`; las decisiones durables están en
-[`decisions/`](decisions/) y los cambios relevantes en [`CHANGELOG.md`](../CHANGELOG.md).
+Los requisitos y el alcance están en [`PRD.md`](../PRD.md); el trabajo operativo
+ODD, en `tk`; las decisiones durables, en [`decisions/`](decisions/) y
+[`architecture.md`](architecture.md); y los cambios relevantes, en
+[`CHANGELOG.md`](../CHANGELOG.md).
 
 ## Mapa del proyecto
 
 ```text
-PRD.md                        Requisitos, alcance y estado funcional del producto
+PRD.md                        Requisitos, alcance y criterios de aceptación
 CHANGELOG.md                  Cambios relevantes, en formato Keep a Changelog
 CONTRATO_FLUJO_GIT_VERSIONADO.md   Flujo de ramas, commits y versionado
+CONTRATO_DOCUMENTACION.md     Qué escribe cada documento y dónde vive cada dato
 jsconfig.json                 Alcance del proyecto para el servidor de lenguaje
 README.md                     Punto de entrada: comandos, configuración, estructura
 server/                       Servidor Node: API y ficheros estáticos
@@ -196,7 +198,8 @@ que recorrerlos a mano. Están en `tests/server/`, fuera del árbol del frontend
 
 ## Evidencia
 
-La suite automatizada contiene 19 archivos y 99 pruebas. El build reproduce los
+La suite automatizada cubre la lógica, los componentes montados, el servidor y las
+guardias del repositorio. El build reproduce los
 artefactos con hash idéntico a la línea base de la extracción.
 
 No hay log de CI, ni pruebas de navegador, ni cobertura automatizada del

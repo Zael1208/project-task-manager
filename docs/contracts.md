@@ -139,8 +139,8 @@ copian arrays de etiquetas.
 
 ## Cliente HTTP
 
-Todos los métodos usan JSON y rutas relativas al mismo origen. Hay 19 endpoints
-HTTP JSON y un canal SSE (`/api/events`) documentado abajo.
+Todos los métodos usan JSON y rutas relativas al mismo origen, más un canal SSE
+(`/api/events`) documentado abajo.
 
 | Método del cliente | HTTP | Ruta | Cuerpo |
 |---|---|---|---|

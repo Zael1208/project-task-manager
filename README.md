@@ -8,20 +8,9 @@ Producto local y de un solo usuario: sin cuentas, sin red y sin sincronización.
 
 ## Estado
 
-Proyecto en construcción. Los requisitos, el alcance y el estado funcional están en
-[`PRD.md`](PRD.md); el trabajo operativo ODD vive en `tk`.
-
-| Fase | Estado |
-|---|---|
-| F1. Esqueleto | Hecho |
-| F2. Dependencia externa (`tk`) | Hecho |
-| F3. Datos | Hecho — 30 tareas reales copiadas como banco de pruebas |
-| F4. Frontend | Hecho |
-| F5. Pipeline (build y pruebas) | Hecho |
-| F6. Servidor | Hecho |
-| F7. Etiquetas sobre base propia | Hecho |
-| F8. Validación de paridad | Pendiente |
-| F9. Documentación | Hecho |
+El estado no se copia aquí: lo que hay que cumplir está en [`PRD.md`](PRD.md), lo
+entregado en [`CHANGELOG.md`](CHANGELOG.md) y en el historial de Git, y el trabajo
+en curso en el tablero `tk`.
 
 Para consultar el trabajo ODD actual:
 
@@ -91,9 +80,11 @@ tests/task-manager/      Suite de Vitest
 
 | Documento | Contenido |
 |---|---|
-| [`PRD.md`](PRD.md) | Requisitos, alcance, decisiones, plan por fases y criterios de aceptación |
+| [`PRD.md`](PRD.md) | Requisitos, alcance y criterios de aceptación |
+| [`CONTRATO_DOCUMENTACION.md`](CONTRATO_DOCUMENTACION.md) | Dónde vive cada dato y qué escribe cada documento |
+| [`CONTRATO_FLUJO_GIT_VERSIONADO.md`](CONTRATO_FLUJO_GIT_VERSIONADO.md) | Ramas, commits, verificación, integración y versionado |
 | [`docs/architecture.md`](docs/architecture.md) | Piezas, fronteras, flujos y las dos bases de datos |
-| [`docs/contracts.md`](docs/contracts.md) | Modelos de datos, los 19 endpoints, eventos y claves busy |
+| [`docs/contracts.md`](docs/contracts.md) | Modelos de datos, endpoints, eventos y claves busy |
 | [`docs/development.md`](docs/development.md) | Cómo cambiar cada capa sin romper contratos |
 | [`docs/operations.md`](docs/operations.md) | Comandos, build, pruebas y matriz de validación manual |
 | [`docs/known-risks.md`](docs/known-risks.md) | Deuda confirmada y su cobertura |
@@ -183,7 +174,7 @@ git status --short
 
 El build produce `app-vue.js` y `app-vue.css` de forma reproducible. La suite
 cubre el cliente HTTP, el mapper, el árbol, las acciones de estado, el foco de los
-diálogos y la integración del servidor (19 archivos, 99 pruebas).
+diálogos y la integración del servidor.
 
 Las de servidor levantan una instancia real sobre una base desechable, así que no
 tocan tus datos. Al probar mutaciones a mano, usa también una copia: `tk` **no

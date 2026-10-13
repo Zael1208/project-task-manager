@@ -23,7 +23,7 @@ const tags = require("./tags");
 const PROJECT_ROOT = tk.PROJECT_ROOT;
 const PUBLIC_DIR = path.join(PROJECT_ROOT, "public");
 
-// D-8: 8890 por defecto. ChatVoiceAgent usa 8792 y `tk serve` usa 3000, asi
+// 8890 por defecto. ChatVoiceAgent usa 8792 y `tk serve` usa 3000, asi
 // que un valor distinto permite tener ambos levantados a la vez.
 // Con PORT=0 el sistema elige un puerto libre: es lo que usan las pruebas de
 // integracion para no chocar con una instancia ya en marcha.

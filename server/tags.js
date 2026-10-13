@@ -6,7 +6,7 @@
 //
 // La base es un archivo SQLite propio (data/task-manager.db) y NO vive dentro
 // de tacks.db: esa base pertenece a un binario de terceros y no conviene que
-// nuestros datos dependan de su ciclo de vida (decision D-5 del PRD).
+// nuestros datos dependan de su ciclo de vida.
 
 const fs = require("node:fs");
 const path = require("node:path");

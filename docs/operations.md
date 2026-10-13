@@ -83,7 +83,7 @@ componentes y responsive.
 
 La suite vive en `tests/` y ejecuta módulos ES directamente.
 
-Cobertura actual (19 archivos, 99 pruebas):
+Cobertura de la suite:
 
 - **Cliente HTTP**: JSON válido, red, JSON inválido, error HTTP y capacidad TK
   deshabilitada.
@@ -240,19 +240,19 @@ referencia 1440, 1180, 720 y 390 caen dentro de alguno de ellos.
 | 2026-09-19 | Manual (navegador) | Recorrido funcional de la aplicación | Correcto, verificado por Alfredo |
 | 2026-09-19 | Automatizada | Foco y tabulador en diálogos (`dialog-focus.test.js`) | 10 pruebas en verde; cubre el algoritmo, no el montaje de Vue |
 | 2026-09-19 | Manual (navegador) | Foco de los diálogos modales (TM-R11): entrada, tabulador y retorno | Correcto, verificado por Alfredo. Cubre el cableado de Vue que la prueba automática no alcanza |
-| 2026-09-19 | Manual (API) | Validación de prioridad 0-3 (QA-2) | Rechazados con 400: 5, −1, 99, 4, «abc» y 1,5. Aceptados 0, 1, 2 y 3. `update` con 7, rechazado |
-| 2026-09-19 | Manual (API) | Coherencia de `close_reason` al reabrir (QA-3) | La API devuelve `null` en una tarea abierta mientras `tk` conserva `done` en la base |
-| 2026-09-19 | Manual (navegador) | Marca visible (QA-5) | Título y cabecera pasan a «Gestor de tareas»; el bundle servido ya no contiene los nombres anteriores |
+| 2026-09-19 | Manual (API) | Validación de prioridad 0-3 | Rechazados con 400: 5, −1, 99, 4, «abc» y 1,5. Aceptados 0, 1, 2 y 3. `update` con 7, rechazado |
+| 2026-09-19 | Manual (API) | Coherencia de `close_reason` al reabrir | La API devuelve `null` en una tarea abierta mientras `tk` conserva `done` en la base |
+| 2026-09-19 | Manual (navegador) | Marca visible | Título y cabecera pasan a «Gestor de tareas»; el bundle servido ya no contiene los nombres anteriores |
 | 2026-09-19 | Manual (API) | Sin regresión en el backlog real | 30 tareas, 23 etiquetas y los mismos conteos por estado que antes del cambio |
-| 2026-09-19 | Manual (navegador) | Cierre de QA-2, QA-3 y QA-5: prioridad, motivo de cierre y marca | Correcto, verificado por Alfredo |
+| 2026-09-19 | Manual (navegador) | Cierre de prioridad, motivo de cierre y marca | Correcto, verificado por Alfredo |
 | 2026-09-19 | Automatizada | Resolución de TM-R1 y TM-R2 | 2 pruebas nuevas; **se comprobó que fallan sin el arreglo**, de modo que no pasan por casualidad |
 | 2026-09-19 | Automatizada | Resolución de TM-R3, TM-R5, TM-R6 y TM-R7 | 5 pruebas nuevas; **se comprobó que fallan sin los arreglos**: 5 fallos con el código anterior |
 | 2026-09-19 | Automatizada | Integración del servidor (TM-R8) | 11 pruebas nuevas contra un servidor real y una base desechable |
 | 2026-09-19 | Automatizada | Componentes montados (TM-R4) | 30 pruebas nuevas con jsdom y el Vue vendorizado; **se comprobó que la de Escape por capas falla** al revertir la corrección |
 
 **Límites de esta evidencia:** no hay log de CI. El recorrido en navegador cubre
-el camino funcional principal, el foco de los diálogos y los cambios de QA-2,
-QA-3 y QA-5, pero no demuestra que se hayan revisado de forma individualizada las
+el camino funcional principal, el foco de los diálogos y los cambios de prioridad,
+motivo de cierre y marca, pero no demuestra que se hayan revisado de forma individualizada las
 cuatro anchuras de referencia ni el resto del detalle de accesibilidad —el foco
 visible, por ejemplo—. La prueba de foco cubre el algoritmo y su cableado se ha
 verificado a mano, pero **no hay ninguna prueba que lo proteja de una regresión

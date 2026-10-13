@@ -16,7 +16,7 @@ describe('guardia de escritura ODD para tk', () => {
   });
 
   it('permite evidencia funcional sin estado de Git', () => {
-    expect(validateCommand('update', ['tk-1', '--notes', 'Tests 17/90 y build correctos'])).toEqual({
+    expect(validateCommand('update', ['tk-1', '--notes', 'La suite y el build correctos'])).toEqual({
       ok: true,
       message: ''
     });
@@ -50,11 +50,45 @@ describe('guardia de escritura ODD para tk', () => {
   it('permite describir el trabajo sin hablar del proceso de revisión', () => {
     expect(validateCommand('comment', [
       'tk-1',
-      'El cambio se divide en unidades menores; suite 19/96 y comprobación del repositorio correctas.'
+      'El cambio se divide en unidades menores; la comprobación del repositorio es correcta.'
     ])).toEqual({ ok: true, message: '' });
   });
 
   it('revisa también el título de una tarea nueva', () => {
     expect(textValuesForCommand('create', ['RDD pendiente', '-p', '1', '-d', 'Trabajo normal'])).toContain('RDD pendiente');
+  });
+
+  it('rechaza recuentos y métricas', () => {
+    const prohibidos = [
+      '19 archivos y 99 pruebas en verde',
+      'el contrato ocupa 206 líneas',
+      'npm test 16/85',
+      'se conservaron 27 tareas y 55 comentarios',
+      '3 ficheros tocados'
+    ];
+
+    for (const texto of prohibidos) {
+      expect(findForbiddenMetadata([texto]), texto).not.toEqual([]);
+    }
+  });
+
+  it('rechaza rutas ajenas y el texto roto de saneados anteriores', () => {
+    const prohibidos = [
+      'copia reconstruida en /tmp/tablero',
+      'traída de C:\\PROJECT-CHAT-VOICE-AGENT',
+      'T1 completada en.',
+      'quedan unidad de trabajo revisables'
+    ];
+
+    for (const texto of prohibidos) {
+      expect(findForbiddenMetadata([texto]), texto).not.toEqual([]);
+    }
+  });
+
+  it('permite describir el trabajo sin cifras', () => {
+    expect(validateCommand('comment', [
+      'tk-1',
+      'La suite queda en verde y el build correcto; la tarea se cierra tras comprobarlo.'
+    ])).toEqual({ ok: true, message: '' });
   });
 });

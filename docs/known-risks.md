@@ -22,7 +22,7 @@ Vue de verdad con jsdom. Se comprueban el sobre `action` llegando a su destino,
 los cinco `v-model` del inspector, los eventos de intención del gestor de
 etiquetas, el contrato `modelValue` del selector de etiquetas —incluido que no
 muta el array que recibe—, y el foco de los diálogos: que entre al abrirse,
-envuelva con el tabulador y vuelva al cerrarse. Son 30 pruebas en
+envuelva con el tabulador y vuelva al cerrarse, en
 `tests/task-manager/components/`.
 
 **Lo que sigue sin cubrirse:** jsdom **no tiene motor de composición**. No calcula
@@ -87,17 +87,17 @@ No queda ninguno. TM-R6 y TM-R7 están resueltos: véase más abajo.
 
 | ID | Riesgo | Cómo se resolvió |
 |---|---|---|
-| RX-1 | Divergencia de datos entre el proyecto nuevo y el de origen | Se copió la base canónica y el origen no usaba la que el servidor esperaba. Decisión D-10. |
+| RX-1 | Divergencia de datos entre el proyecto nuevo y el de origen | Se copió la base canónica y el origen no usaba la que el servidor esperaba. El origen tenía **tres bases divergentes**: la canónica vivía dentro de un `.zip` —la ruta que el servidor calcula no existía, así que `tk init` habría creado una vacía—, la del paquete Electron se quedó en una rama anterior con la épica `tk-e285` superada por `tk-87ef`, y la del repositorio estaba vacía. Se copió la del zip y la rama antigua se descartó. |
 | RX-5 | Traer solo los artefactos generados y quedarse sin fuente mantenible | Se trajo la fuente, el pipeline y las pruebas. |
 | RX-7 | Perder la licencia o la atribución de `tk` al copiar el binario | `tk/LICENSE` y `tk/README.md` viajan con el binario, verificado por hash. |
 | RX-8 | Arrastrar dependencias ocultas del anfitrión | El servidor no lee ninguna variable ni ruta del proyecto de origen. |
-| RX-2 | La prioridad no estaba validada y un valor ≥ 4 se mostraba como «Sin prioridad» | La API valida 0-3 al crear y al actualizar, y rechaza el resto con 400. Decisión QA-2. |
-| RX-3 | Al reabrir, `close_reason` conservaba el valor anterior | El servidor solo presenta el motivo cuando la tarea está cerrada. Decisión QA-3. |
-| TM-R10 | La marca visible era la del producto de origen | La cabecera y el título pasan a «Gestor de tareas». Decisión QA-5. |
+| RX-2 | La prioridad no estaba validada y un valor ≥ 4 se mostraba como «Sin prioridad» | La API valida 0-3 al crear y al actualizar, y rechaza el resto con 400. |
+| RX-3 | Al reabrir, `close_reason` conservaba el valor anterior | El servidor solo presenta el motivo cuando la tarea está cerrada. |
+| TM-R10 | La marca visible era la del producto de origen | La cabecera y el título pasan a «Gestor de tareas». |
 
 **Nota sobre RX-3:** la corrección es de presentación, no de almacenamiento.
-`tk` no ofrece ninguna bandera para limpiar `close_reason` y su base no se toca
-(D-5), así que **el valor obsoleto sigue en la base**: consultándola con el CLI
+`tk` no ofrece ninguna bandera para limpiar `close_reason` y su base no se toca,
+así que **el valor obsoleto sigue en la base**: consultándola con el CLI
 se ve. La API es la que no lo propaga. Es una limitación deliberada y conviene
 tenerla presente si algún día se lee `tacks.db` por otra vía.
 
@@ -207,6 +207,6 @@ con DOM (TM-R4), y esa es la vía para cerrarlo de verdad.
 | TM-R5 | **Cubierto**: «does not treat a 404 without a JSON body as a disabled capability» |
 | TM-R6 | **Cubierto**: «warns instead of staying silent when the action type is unknown» |
 | TM-R7 | **Cubierto**: «removes the busy key when the operation ends instead of storing false» |
-| TM-R8 | **Cubierto**: `tests/server/api.test.js`, 16 pruebas de integración contra un servidor real y una base desechable |
+| TM-R8 | **Cubierto**: `tests/server/api.test.js`, pruebas de integración contra un servidor real y una base desechable |
 | TM-R9 | Fallo simulado a mitad del renombrado en cascada |
 | TM-R11 | **Cubierto**: `dialog-focus.test.js` prueba entrar, devolver el foco y envolver el tabulador. Falta el montaje real de Vue |
