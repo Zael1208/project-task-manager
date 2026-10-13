@@ -37,6 +37,7 @@ export const taskActions = {
         const selectedId = preferredId && tasks.some((task) => task.id === preferredId) ? preferredId : (tasks[0]?.id || '');
         this.tasks = tasks;
         this.tags = tags;
+        this.reconcileUiPreferences(tags);
         this.selectedTaskId = selectedId;
         if (this.detail?.id !== selectedId) this.detail = null;
         this.unavailable = false;

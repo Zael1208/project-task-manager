@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { workspaceOptions } from '../../../src/task-manager/state/workspace.js';
 
 const OriginalEventSource = globalThis.EventSource;
+const OriginalWindow = globalThis.window;
 
 class FakeEventSource {
   static instances = [];
@@ -30,6 +31,29 @@ afterEach(() => {
   FakeEventSource.instances = [];
   if (OriginalEventSource) globalThis.EventSource = OriginalEventSource;
   else delete globalThis.EventSource;
+  if (OriginalWindow) globalThis.window = OriginalWindow;
+  else delete globalThis.window;
+});
+
+describe('workspace lifecycle', () => {
+  it('restaura las preferencias antes de iniciar la carga', () => {
+    const order = [];
+    globalThis.window = {
+      addEventListener: () => order.push('listener'),
+      removeEventListener: () => {}
+    };
+    const workspace = {
+      clientId: 'origin',
+      handleEscape: vi.fn(),
+      restoreUiPreferences: () => order.push('restore'),
+      connectWorkspaceEvents: () => order.push('connect'),
+      reloadWorkspace: () => order.push('reload')
+    };
+
+    workspaceOptions.mounted.call(workspace);
+
+    expect(order).toEqual(['listener', 'restore', 'connect', 'reload']);
+  });
 });
 
 describe('workspace SSE', () => {

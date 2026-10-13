@@ -39,8 +39,8 @@ export const TaskFilters = {
   <div class="task-search-row">
     <label><span class="sr-only">Buscar tareas</span><input :value="taskSearchQuery" class="tk-input" type="search"
         placeholder="Buscar por título, ID o etiqueta" @input="$emit('update-search', $event.target.value)" /></label>
-    <button class="tk-icon-button" type="button" aria-label="Filtros" title="Mostrar filtros avanzados" :aria-expanded="advancedFiltersOpen"
-      @click.stop="$emit('toggle-filters')"><span class="tk-icon">☷</span></button>
+    <button class="tk-icon-button task-filter-button" type="button" aria-label="Filtros" title="Mostrar filtros avanzados" :aria-expanded="advancedFiltersOpen"
+      @click.stop="$emit('toggle-filters')"><span class="tk-icon">☷</span><span v-if="hasAdvancedFilters" class="advanced-filter-indicator" aria-hidden="true"></span></button>
     <div class="menu-anchor"><button class="tk-icon-button" type="button" aria-label="Opciones del listado"
         title="Opciones del listado" aria-haspopup="menu" :aria-expanded="listMenuOpen" @click.stop="$emit('toggle-list-menu')"><span
           class="tk-icon">⋮</span></button>

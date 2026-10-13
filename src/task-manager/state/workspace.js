@@ -20,14 +20,30 @@ export const workspaceOptions = {
     tagActions,
     inspectorState
   ],
+  watch: {
+    activeInspectorTab() { this.scheduleUiPreferencesPersistence(); },
+    activeTaskFilter() { this.scheduleUiPreferencesPersistence(); },
+    currentPeriod() { this.scheduleUiPreferencesPersistence(); },
+    selectedTaskId() { this.scheduleUiPreferencesPersistence(); },
+    advancedStatuses() { this.scheduleUiPreferencesPersistence(); },
+    advancedPriorities() { this.scheduleUiPreferencesPersistence(); },
+    advancedTags() { this.scheduleUiPreferencesPersistence(); },
+    quickTagFilter() { this.scheduleUiPreferencesPersistence(); },
+    taskSearchQuery() { this.scheduleUiPreferencesPersistence(); },
+    expandedIds() { this.scheduleUiPreferencesPersistence(); },
+    collapsedIds() { this.scheduleUiPreferencesPersistence(); },
+    areTaskChipsVisible() { this.scheduleUiPreferencesPersistence(); }
+  },
   mounted() {
     window.addEventListener('keydown', this.handleEscape);
+    this.restoreUiPreferences();
     setClientId(this.clientId);
     this.connectWorkspaceEvents();
     this.reloadWorkspace();
   },
   beforeUnmount() {
     window.removeEventListener('keydown', this.handleEscape);
+    this.cancelUiPreferencesPersistence();
     this.disconnectWorkspaceEvents();
   },
   methods: {

@@ -34,6 +34,10 @@ describe('task-tree state', () => {
 
     expect([...workspace.filteredTaskIds]).toEqual(['tk-1']);
     expect(workspace.visibleTasks.map((task) => task.id)).toEqual(['tk-1']);
+    expect(workspace.hasAdvancedFilters).toBe(true);
+
+    workspace.clearAdvancedFilters();
+    expect(workspace.hasAdvancedFilters).toBe(false);
   });
 
   it('shows tasks that form a parent cycle instead of hiding them', () => {

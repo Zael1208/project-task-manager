@@ -48,6 +48,17 @@ describe('TaskFilters', () => {
     expect(container.querySelector('button[aria-label="Mostrar u ocultar etiquetas"]').title).toBe('Mostrar u ocultar etiquetas');
   });
 
+  it('muestra el indicador solo cuando hay filtros avanzados activos', () => {
+    const inactive = mountFilters({ hasAdvancedFilters: false });
+    expect(inactive.container.querySelector('.advanced-filter-indicator')).toBeNull();
+
+    const active = mountFilters({ hasAdvancedFilters: true });
+    const indicator = active.container.querySelector('.advanced-filter-indicator');
+    expect(indicator).not.toBeNull();
+    expect(indicator.getAttribute('aria-hidden')).toBe('true');
+    expect(active.container.querySelector('button[aria-label="Filtros"] .tk-icon')).not.toBeNull();
+  });
+
   it('emite la pestaña y el periodo elegidos con selección accesible', () => {
     const updateFilter = vi.fn();
     const updatePeriod = vi.fn();

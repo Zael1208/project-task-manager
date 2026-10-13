@@ -86,9 +86,12 @@ pero la colaboración real se resuelve sobre la instancia combinada. Antes de
 renombrar un método o dato hay que buscar su uso en todos los mixins y en
 `app-shell.js`.
 
-El ciclo de vida raíz registra `Escape`, abre `EventSource('/api/events')` y lanza
-`reloadWorkspace()` al montar. Al desmontar cierra el EventSource y retira el
-listener.
+El ciclo de vida raíz registra `Escape`, restaura las preferencias locales
+compatibles antes de abrir `EventSource('/api/events')` y lanzar
+`reloadWorkspace()` al montar. La selección restaurada se valida contra las
+tareas devueltas y su detalle se carga mediante la API existente. Al desmontar
+cierra el EventSource, cancela la escritura pendiente de preferencias y retira
+el listener.
 
 ## Servidor
 

@@ -714,6 +714,7 @@
           const selectedId = preferredId && tasks.some((task) => task.id === preferredId) ? preferredId : tasks[0]?.id || "";
           this.tasks = tasks;
           this.tags = tags;
+          this.reconcileUiPreferences(tags);
           this.selectedTaskId = selectedId;
           if (this.detail?.id !== selectedId) this.detail = null;
           this.unavailable = false;
@@ -1077,6 +1078,60 @@
     { id: "orange", hex: "#ff9a55" },
     { id: "red", hex: "#ff7373" }
   ];
+  var UI_PREFERENCES_STORAGE_KEY = "project-task-manager.ui-preferences.v1";
+  var UI_PREFERENCES_VERSION = 1;
+  var ACTIVE_TASK_FILTERS = ["all", "current", "open", "in_progress", "blocked", "done"];
+  var CURRENT_PERIODS2 = ["today", "week", "month", "year"];
+  var INSPECTOR_TABS = ["detail", "edit", "subtasks", "dependencies", "comments"];
+  var TASK_STATUSES = ["open", "in_progress", "done", "blocked"];
+  var TASK_PRIORITIES = ["0", "1", "2", "3"];
+  var PERSISTED_FIELDS = [
+    "activeTaskFilter",
+    "currentPeriod",
+    "activeInspectorTab",
+    "selectedTaskId",
+    "advancedStatuses",
+    "advancedPriorities",
+    "advancedTags",
+    "quickTagFilter",
+    "taskSearchQuery",
+    "expandedIds",
+    "collapsedIds",
+    "areTaskChipsVisible"
+  ];
+  function getStorage() {
+    try {
+      return globalThis.localStorage || null;
+    } catch {
+      return null;
+    }
+  }
+  function validString(value, maxLength = 200) {
+    return typeof value === "string" && value.length <= maxLength;
+  }
+  function validStringArray(value, allowedValues = null) {
+    if (!Array.isArray(value)) return [];
+    return [...new Set(value.filter((item) => validString(item) && (!allowedValues || allowedValues.includes(item))))];
+  }
+  function normalizePreferences(value) {
+    const source = value && typeof value === "object" && !Array.isArray(value) ? value : {};
+    const expandedIds = validStringArray(source.expandedIds);
+    const collapsedIds = validStringArray(source.collapsedIds).filter((id) => !expandedIds.includes(id));
+    return {
+      activeTaskFilter: ACTIVE_TASK_FILTERS.includes(source.activeTaskFilter) ? source.activeTaskFilter : "all",
+      currentPeriod: CURRENT_PERIODS2.includes(source.currentPeriod) ? source.currentPeriod : "today",
+      activeInspectorTab: INSPECTOR_TABS.includes(source.activeInspectorTab) ? source.activeInspectorTab : "detail",
+      selectedTaskId: validString(source.selectedTaskId) ? source.selectedTaskId : "",
+      advancedStatuses: validStringArray(source.advancedStatuses, TASK_STATUSES),
+      advancedPriorities: validStringArray(source.advancedPriorities, TASK_PRIORITIES),
+      advancedTags: validStringArray(source.advancedTags),
+      quickTagFilter: validString(source.quickTagFilter, 40) ? source.quickTagFilter : "",
+      taskSearchQuery: validString(source.taskSearchQuery, 500) ? source.taskSearchQuery : "",
+      expandedIds,
+      collapsedIds,
+      areTaskChipsVisible: typeof source.areTaskChipsVisible === "boolean" ? source.areTaskChipsVisible : true
+    };
+  }
   var workspaceData = {
     data() {
       return {
@@ -1121,6 +1176,7 @@
         tagFormError: "",
         detailRequestSequence: 0,
         reloadRequestSequence: 0,
+        uiPreferencesPersistTimer: null,
         workspaceEventSource: null
       };
     },
@@ -1133,6 +1189,53 @@
       },
       emptyTagDraft() {
         return { name: "", description: "", color: "blue" };
+      },
+      getUiPreferencesStorage() {
+        return getStorage();
+      },
+      readUiPreferences() {
+        const storage = this.getUiPreferencesStorage();
+        if (!storage) return null;
+        try {
+          const parsed = JSON.parse(storage.getItem(UI_PREFERENCES_STORAGE_KEY));
+          if (parsed?.version !== UI_PREFERENCES_VERSION) return null;
+          return normalizePreferences(parsed);
+        } catch {
+          return null;
+        }
+      },
+      restoreUiPreferences() {
+        const preferences = this.readUiPreferences();
+        if (!preferences) return false;
+        for (const field of PERSISTED_FIELDS) this[field] = preferences[field];
+        return true;
+      },
+      reconcileUiPreferences(tags = []) {
+        const availableTags = new Set(tags.map((tag) => tag?.name).filter((name) => validString(name, 40)));
+        this.advancedTags = this.advancedTags.filter((tag) => availableTags.has(tag));
+        if (this.quickTagFilter && !availableTags.has(this.quickTagFilter)) this.quickTagFilter = "";
+      },
+      persistUiPreferences() {
+        const storage = this.getUiPreferencesStorage();
+        if (!storage) return;
+        const preferences = { version: UI_PREFERENCES_VERSION };
+        for (const field of PERSISTED_FIELDS) preferences[field] = this[field];
+        try {
+          storage.setItem(UI_PREFERENCES_STORAGE_KEY, JSON.stringify(preferences));
+        } catch {
+        }
+      },
+      scheduleUiPreferencesPersistence() {
+        if (this.uiPreferencesPersistTimer) clearTimeout(this.uiPreferencesPersistTimer);
+        this.uiPreferencesPersistTimer = setTimeout(() => {
+          this.uiPreferencesPersistTimer = null;
+          this.persistUiPreferences();
+        }, 150);
+      },
+      cancelUiPreferencesPersistence() {
+        if (!this.uiPreferencesPersistTimer) return;
+        clearTimeout(this.uiPreferencesPersistTimer);
+        this.uiPreferencesPersistTimer = null;
       }
     }
   };
@@ -1218,14 +1321,54 @@
       tagActions,
       inspectorState
     ],
+    watch: {
+      activeInspectorTab() {
+        this.scheduleUiPreferencesPersistence();
+      },
+      activeTaskFilter() {
+        this.scheduleUiPreferencesPersistence();
+      },
+      currentPeriod() {
+        this.scheduleUiPreferencesPersistence();
+      },
+      selectedTaskId() {
+        this.scheduleUiPreferencesPersistence();
+      },
+      advancedStatuses() {
+        this.scheduleUiPreferencesPersistence();
+      },
+      advancedPriorities() {
+        this.scheduleUiPreferencesPersistence();
+      },
+      advancedTags() {
+        this.scheduleUiPreferencesPersistence();
+      },
+      quickTagFilter() {
+        this.scheduleUiPreferencesPersistence();
+      },
+      taskSearchQuery() {
+        this.scheduleUiPreferencesPersistence();
+      },
+      expandedIds() {
+        this.scheduleUiPreferencesPersistence();
+      },
+      collapsedIds() {
+        this.scheduleUiPreferencesPersistence();
+      },
+      areTaskChipsVisible() {
+        this.scheduleUiPreferencesPersistence();
+      }
+    },
     mounted() {
       window.addEventListener("keydown", this.handleEscape);
+      this.restoreUiPreferences();
       setClientId(this.clientId);
       this.connectWorkspaceEvents();
       this.reloadWorkspace();
     },
     beforeUnmount() {
       window.removeEventListener("keydown", this.handleEscape);
+      this.cancelUiPreferencesPersistence();
       this.disconnectWorkspaceEvents();
     },
     methods: {
@@ -1596,8 +1739,8 @@
   <div class="task-search-row">
     <label><span class="sr-only">Buscar tareas</span><input :value="taskSearchQuery" class="tk-input" type="search"
         placeholder="Buscar por t\xEDtulo, ID o etiqueta" @input="$emit('update-search', $event.target.value)" /></label>
-    <button class="tk-icon-button" type="button" aria-label="Filtros" title="Mostrar filtros avanzados" :aria-expanded="advancedFiltersOpen"
-      @click.stop="$emit('toggle-filters')"><span class="tk-icon">\u2637</span></button>
+    <button class="tk-icon-button task-filter-button" type="button" aria-label="Filtros" title="Mostrar filtros avanzados" :aria-expanded="advancedFiltersOpen"
+      @click.stop="$emit('toggle-filters')"><span class="tk-icon">\u2637</span><span v-if="hasAdvancedFilters" class="advanced-filter-indicator" aria-hidden="true"></span></button>
     <div class="menu-anchor"><button class="tk-icon-button" type="button" aria-label="Opciones del listado"
         title="Opciones del listado" aria-haspopup="menu" :aria-expanded="listMenuOpen" @click.stop="$emit('toggle-list-menu')"><span
           class="tk-icon">\u22EE</span></button>
