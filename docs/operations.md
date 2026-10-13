@@ -93,6 +93,9 @@ Cobertura de la suite:
   jerarquías cíclicas, que si no desaparecerían del listado.
 - **Acciones**: selección tras recarga, descarte de respuestas obsoletas, busy,
   normalización de prioridad y mutación confirmada con recarga fallida.
+- **Preferencias de interfaz** (`state/ui-preferences.test.js`): valores iniciales,
+  validación y restauración, selección y árbol, filtros de etiquetas, debounce y
+  tolerancia a almacenamiento corrupto o bloqueado.
 - **SSE** (`server/api.test.js`, `state/workspace.test.js`): canal de eventos para
   mutaciones HTTP confirmadas y cambios externos del CLI `tk`, recarga del
   workspace, aviso informativo de cambios externos, ausencia de duplicación de

@@ -9,6 +9,10 @@ Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PA
 
 ### Añadido
 
+- **Persistencia de preferencias de interfaz**: conserva en `localStorage` la
+  selección, los filtros, la búsqueda, la visibilidad de etiquetas y el estado
+  del árbol; valida y restaura el estado compatible sin guardar tareas ni borradores.
+  El botón de filtros avanzados muestra un indicador ámbar cuando hay filtros activos.
 - **Pestaña Actuales**: añade la vista situada junto a Todas con los periodos Hoy,
   Semana, Mes y Año. Una tarea aparece cuando `created_at` o `updated_at` de
   Tacks cae dentro del periodo; se conservan la búsqueda, los filtros, la

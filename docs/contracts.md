@@ -137,6 +137,21 @@ TagDraft = {
 Antes de enviar, las acciones recortan texto, convierten prioridad a número y
 copian arrays de etiquetas.
 
+## Preferencias de interfaz
+
+La interfaz guarda las preferencias locales en `localStorage` con la clave
+`project-task-manager.ui-preferences.v1`. El valor es un objeto JSON con
+`version: 1` y puede contener `activeTaskFilter`, `currentPeriod`,
+`activeInspectorTab`, `selectedTaskId`, `advancedStatuses`,
+`advancedPriorities`, `advancedTags`, `quickTagFilter`, `taskSearchQuery`,
+`expandedIds`, `collapsedIds` y `areTaskChipsVisible`.
+
+Solo se guardan esos campos. La lectura valida la versión, los valores
+enumerados, los tipos y los arrays antes de aplicarlos; un estado ilegible o
+incompatible conserva los valores iniciales. La ausencia o el bloqueo de
+`localStorage` no impide usar la interfaz. Las tareas y los borradores nunca
+forman parte de este estado.
+
 ## Cliente HTTP
 
 Todos los métodos usan JSON y rutas relativas al mismo origen, más un canal SSE

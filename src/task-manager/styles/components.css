@@ -58,6 +58,37 @@
         background: transparent;
         color: var(--tk-color-text-secondary);
       }
+      .task-filter-button {
+        position: relative;
+      }
+      .advanced-filter-indicator {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        width: 7px;
+        height: 7px;
+        border: 1px solid var(--tk-color-surface-inset);
+        border-radius: 50%;
+        background: var(--tk-color-warning);
+        content: "";
+        animation: tk-filter-indicator-pulse 2.4s ease-in-out infinite;
+      }
+      @keyframes tk-filter-indicator-pulse {
+        0%,
+        100% {
+          opacity: 0.72;
+          transform: scale(0.92);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .advanced-filter-indicator {
+          animation: none;
+        }
+      }
       .tk-input,
       .tk-textarea,
       .tk-select {
