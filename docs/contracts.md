@@ -159,18 +159,29 @@ HTTP JSON y un canal SSE (`/api/events`) documentado abajo.
 
 ### Eventos SSE
 
-La interfaz abre `EventSource('/api/events')`. El servidor mantiene la conexión
-abierta y publica el evento `workspace.changed` después de cada mutación HTTP
-confirmada por esta aplicación:
+La interfaz abre `EventSource('/api/events?clientId=...')` y envía el mismo
+identificador en la cabecera `X-Client-Id` de sus peticiones HTTP. El servidor
+mantiene la conexión abierta y publica el evento `workspace.changed` después de
+cada mutación HTTP confirmada por esta aplicación y cuando detecta una escritura
+externa en la base `tacks.db`:
 
 ```text
 event: workspace.changed
-data: {"resource":"tasks"|"tags"}
+data: {"resource":"tasks"|"tags","source":"http"|"external","originClientId":"browser-a","changes":[{"id":"tk-123","action":"actualizada","title":"Preparar informe"}]}
 ```
 
-El cliente vuelve a consultar `/api/tk/list` y `/api/tags` cuando recibe el evento.
-No se observan cambios externos realizados directamente con el CLI `tk` y la
-reconexión la gestiona el comportamiento nativo de `EventSource`.
+`changes` contiene una entrada por tarea afectada (`creada`, `actualizada`,
+`cerrada` o `eliminada`) en los eventos de tareas. `originClientId` solo aparece
+cuando la mutación HTTP procede de un navegador identificado. El cliente vuelve a
+consultar `/api/tk/list` y `/api/tags` cuando recibe el evento; el navegador
+originador conserva su confirmación local y los demás navegadores muestran un
+aviso por tarea en la esquina inferior derecha, con ID, acción, título y
+confirmación de recarga. Los eventos externos no tienen originador y se avisan en
+todos los navegadores. El servidor vigila la base y sus sidecars `-wal`/`-shm` con
+`fs.watchFile`, agrupa escrituras próximas de SQLite y evita volver a publicar como
+externas las firmas producidas por sus propias mutaciones HTTP. La interfaz
+recarga y avisa aunque el evento llegue mientras la carga inicial siga en curso.
+La reconexión la gestiona el comportamiento nativo de `EventSource`.
 
 Endpoints adicionales que la interfaz todavía no consume, disponibles para
 paneles y futuras vistas:

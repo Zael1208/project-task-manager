@@ -13,10 +13,13 @@ Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PA
   local de tk con la etiqueta `ODD`; los ADRs en `docs/decisions/` son la fuente
   durable de las decisiones y no se crean nuevos registros ODD en Markdown.
 - **Actualización local mediante SSE**: el servidor publica `workspace.changed`
-  después de mutaciones HTTP confirmadas y la interfaz recarga tareas y etiquetas
-  mediante `EventSource`, sin observar cambios externos del CLI `tk`.
+  después de mutaciones HTTP confirmadas y al detectar cambios externos en la base
+  de tareas del CLI `tk`; la interfaz recarga el workspace y avisa de las
+  actualizaciones externas mediante `EventSource`.
 - **Notificaciones y confirmaciones Dark Studio**: la interfaz adopta Toast Anchor
-  para éxitos, errores y confirmaciones, con `toast.modal()` para eliminar etiquetas.
+  para éxitos, errores y confirmaciones, con `toast.modal()` para eliminar etiquetas;
+  los avisos de cambios externos y remotos aparecen abajo a la derecha y detallan
+  cada tarea afectada sin duplicar el aviso del navegador originador.
 - **Catálogo inicial de etiquetas adoptado**: `data/task-manager.db` usa el
   nombre elocuente del proyecto y contiene las etiquetas necesarias para el flujo
   ODD, con verificación de las asociaciones de las tareas mediante la API.

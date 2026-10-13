@@ -83,7 +83,7 @@ componentes y responsive.
 
 La suite vive en `tests/task-manager/` y ejecuta módulos ES directamente.
 
-Cobertura actual (16 archivos, 82 pruebas):
+Cobertura actual (16 archivos, 88 pruebas):
 
 - **Cliente HTTP**: JSON válido, red, JSON inválido, error HTTP y capacidad TK
   deshabilitada.
@@ -94,8 +94,9 @@ Cobertura actual (16 archivos, 82 pruebas):
 - **Acciones**: selección tras recarga, descarte de respuestas obsoletas, busy,
   normalización de prioridad y mutación confirmada con recarga fallida.
 - **SSE** (`server/api.test.js`, `state/workspace.test.js`): canal de eventos para
-  mutaciones confirmadas de tareas y etiquetas, recarga del workspace y cierre del
-  `EventSource`.
+  mutaciones HTTP confirmadas y cambios externos del CLI `tk`, recarga del
+  workspace, aviso informativo de cambios externos, ausencia de duplicación de
+  mutaciones propias y cierre del `EventSource`.
 - **Foco de diálogos** (`components/dialog-focus.test.js`): entrar guardando el
   origen, devolver el foco al cerrar, no devolverlo a un elemento que ya no está
   en la página, filtrar los elementos no visibles y envolver el tabulador en los
@@ -172,6 +173,8 @@ Para una sesión local:
 ### Matriz funcional mínima
 
 - Carga inicial, recarga y aviso cuando `tk` no está disponible.
+- Cambiar una tarea con `tk` en otra terminal o agente y comprobar que el listado
+  se actualiza sin refrescar manualmente y que aparece el aviso informativo.
 - Selección, expansión, búsqueda y filtros combinados.
 - Cambio de prioridad y estado; cierre de tarea.
 - Cierre rechazado por subtareas abiertas.

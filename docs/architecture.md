@@ -116,9 +116,17 @@ tampoco permite escapar del directorio.
 | `data/task-manager.db` | Catálogo de etiquetas: nombre, descripción, color | Este servidor |
 
 `events.js` mantiene las conexiones SSE activas y publica `workspace.changed`
-con `{ resource: 'tasks' | 'tags' }` después de mutaciones HTTP confirmadas.
-No observa escrituras externas del CLI `tk`; `EventSource` se encarga de reintentar
-la conexión del cliente.
+después de mutaciones HTTP confirmadas y de cambios externos detectados en la
+base de tareas. Cada evento incluye `resource` (`tasks` o `tags`) y `source`
+(`http` o `external`). El servidor vigila `tacks.db` y sus sidecars `-wal`/`-shm` con polling de
+`fs.watchFile`, agrupa las escrituras de SQLite con un debounce y descarta la
+firma que acaba de producir una mutación HTTP propia para no duplicarla.
+Cada navegador se identifica en el EventSource y en sus mutaciones HTTP para
+que el originador conserve su confirmación local y los demás reciban el aviso
+compartido. `EventSource` se encarga de reintentar la conexión del cliente; los
+eventos externos recargan el workspace incluso durante la carga inicial y todos
+los eventos remotos muestran, en la esquina inferior derecha, un aviso por cada
+tarea afectada con su ID, acción y título.
 
 Se mantienen separadas a propósito. `tk` no tiene concepto de color ni de
 descripción de etiqueta, y su base la administra un tercero: no conviene que
