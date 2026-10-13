@@ -15,7 +15,7 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const { contentTypeFor, sendJson } = require("./http");
-const { connectSse } = require("./events");
+const { connectSse, watchExternalTaskDatabase, stopExternalTaskWatch } = require("./events");
 const tk = require("./tk");
 const tasks = require("./tasks");
 const tags = require("./tags");
@@ -173,12 +173,17 @@ function startServer() {
     server.once("error", reject);
     server.listen(PORT, () => {
       const state = tk.status();
-      // El puerto real, que no es PORT cuando se pidio el 0.
-      const { port } = server.address();
-      console.log(`Gestor de tareas en http://localhost:${port}${APP_PAGE}`);
-      console.log(`  tareas: ${state.enabled ? state.dbPath : `DESHABILITADO (${state.reason})`}`);
-      console.log(`  etiquetas: ${tags.TAGS_DB_PATH}`);
-      resolve(port);
+      watchExternalTaskDatabase(state.enabled ? state.dbPath : null, tasks.getTaskSnapshot)
+        .then(() => {
+          server.once("close", stopExternalTaskWatch);
+          // El puerto real, que no es PORT cuando se pidio el 0.
+          const { port } = server.address();
+          console.log(`Gestor de tareas en http://localhost:${port}${APP_PAGE}`);
+          console.log(`  tareas: ${state.enabled ? state.dbPath : `DESHABILITADO (${state.reason})`}`);
+          console.log(`  etiquetas: ${tags.TAGS_DB_PATH}`);
+          resolve(port);
+        })
+        .catch(reject);
     });
   });
 }
