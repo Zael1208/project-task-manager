@@ -1,4 +1,5 @@
 import { createRequire } from 'node:module';
+import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -34,10 +35,10 @@ async function request(pathname, options = {}) {
   return { status: response.status, body };
 }
 
-function post(pathname, payload) {
+function post(pathname, payload, extraHeaders = {}) {
   return request(pathname, {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
+    headers: { 'content-type': 'application/json', ...extraHeaders },
     body: JSON.stringify(payload)
   });
 }
@@ -56,18 +57,24 @@ async function createTask(title, extra = {}) {
   return created.body.id;
 }
 
-async function readSseEvent(reader, eventName) {
+async function readSseEvent(reader, eventName, timeoutMs = 1500) {
   const decoder = new TextDecoder();
   let buffer = '';
-  for (;;) {
-    const { value, done } = await reader.read();
-    if (done) throw new Error(`El stream SSE terminó antes de ${eventName}.`);
-    buffer += decoder.decode(value, { stream: true });
-    const blocks = buffer.split('\n\n');
-    buffer = blocks.pop();
-    const block = blocks.find((candidate) => candidate.includes(`event: ${eventName}`));
-    if (block) return block;
-  }
+  const read = (async () => {
+    for (;;) {
+      const { value, done } = await reader.read();
+      if (done) throw new Error(`El stream SSE terminó antes de ${eventName}.`);
+      buffer += decoder.decode(value, { stream: true });
+      const blocks = buffer.split('\n\n');
+      buffer = blocks.pop();
+      const block = blocks.find((candidate) => candidate.includes(`event: ${eventName}`));
+      if (block) return block;
+    }
+  })();
+  return Promise.race([
+    read,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(`No llegó ${eventName} en ${timeoutMs} ms.`)), timeoutMs))
+  ]);
 }
 
 beforeAll(async () => {
@@ -129,26 +136,90 @@ describe('servidor: eventos', () => {
     expect(stream.headers.get('content-type')).toContain('text/event-stream');
 
     const reader = stream.body.getReader();
-    await createTask('Tarea SSE');
+    try {
+      await createTask('Tarea SSE');
 
-    const block = await readSseEvent(reader, 'workspace.changed');
-    const data = JSON.parse(block.split('\n').find((line) => line.startsWith('data: ')).slice(6));
-    expect(data).toEqual({ resource: 'tasks' });
-    await reader.cancel();
+      const block = await readSseEvent(reader, 'workspace.changed');
+      const data = JSON.parse(block.split('\n').find((line) => line.startsWith('data: ')).slice(6));
+      expect(data.resource).toBe('tasks');
+      expect(data.source).toBe('http');
+      expect(data.changes).toEqual([{ id: expect.any(String), action: 'creada', title: 'Tarea SSE' }]);
+    } finally {
+      await reader.cancel();
+    }
   });
 
   it('publica por SSE los cambios confirmados del catalogo de etiquetas', async () => {
     const stream = await fetch(`${baseUrl}/api/events`);
     expect(stream.status).toBe(200);
     const reader = stream.body.getReader();
+    try {
+      const created = await post('/api/tags', { name: 'SSE', description: '', color: 'blue' });
+      expect(created.status).toBe(201);
 
-    const created = await post('/api/tags', { name: 'SSE', description: '', color: 'blue' });
-    expect(created.status).toBe(201);
+      const block = await readSseEvent(reader, 'workspace.changed');
+      const data = JSON.parse(block.split('\n').find((line) => line.startsWith('data: ')).slice(6));
+      expect(data).toEqual({ resource: 'tags', source: 'http' });
+    } finally {
+      await reader.cancel();
+    }
+  });
 
-    const block = await readSseEvent(reader, 'workspace.changed');
-    const data = JSON.parse(block.split('\n').find((line) => line.startsWith('data: ')).slice(6));
-    expect(data).toEqual({ resource: 'tags' });
-    await reader.cancel();
+  it('propaga el navegador originador en las mutaciones HTTP', async () => {
+    const stream = await fetch(`${baseUrl}/api/events?clientId=remote-browser`);
+    expect(stream.status).toBe(200);
+    const reader = stream.body.getReader();
+
+    try {
+      const created = await post('/api/tk/create', { title: 'Tarea originada', priority: 2 }, { 'x-client-id': 'origin-browser' });
+      expect(created.status).toBe(200);
+
+      const block = await readSseEvent(reader, 'workspace.changed');
+      const data = JSON.parse(block.split('\n').find((line) => line.startsWith('data: ')).slice(6));
+      expect(data.originClientId).toBe('origin-browser');
+      expect(data.changes).toEqual([{ id: expect.any(String), action: 'creada', title: 'Tarea originada' }]);
+    } finally {
+      await reader.cancel();
+    }
+  });
+
+  it('publica por SSE los cambios externos hechos por tk', async () => {
+    const stream = await fetch(`${baseUrl}/api/events`);
+    expect(stream.status).toBe(200);
+    const reader = stream.body.getReader();
+
+    const cli = spawnSync(path.resolve('tk/tk'), ['--db', process.env.TACKS_DB, '--json', 'create', 'Tarea externa', '-p', '2'], {
+      encoding: 'utf8'
+    });
+    expect(cli.status).toBe(0);
+
+    try {
+      const block = await readSseEvent(reader, 'workspace.changed');
+      const data = JSON.parse(block.split('\n').find((line) => line.startsWith('data: ')).slice(6));
+      expect(data.resource).toBe('tasks');
+      expect(data.source).toBe('external');
+      expect(data.changes).toEqual([{ id: expect.any(String), action: 'creada', title: 'Tarea externa' }]);
+    } finally {
+      await reader.cancel();
+    }
+  });
+
+  it('no duplica como externo una mutación HTTP propia', async () => {
+    const stream = await fetch(`${baseUrl}/api/events`);
+    expect(stream.status).toBe(200);
+    const reader = stream.body.getReader();
+
+    try {
+      await createTask('Tarea interna');
+      const block = await readSseEvent(reader, 'workspace.changed');
+      const data = JSON.parse(block.split('\n').find((line) => line.startsWith('data: ')).slice(6));
+      expect(data.resource).toBe('tasks');
+      expect(data.source).toBe('http');
+      expect(data.changes).toEqual([{ id: expect.any(String), action: 'creada', title: 'Tarea interna' }]);
+      await expect(readSseEvent(reader, 'workspace.changed', 450)).rejects.toThrow('No llegó workspace.changed');
+    } finally {
+      await reader.cancel();
+    }
   });
 });
 
