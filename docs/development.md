@@ -22,7 +22,7 @@ server/                       Servidor Node: API y ficheros estáticos
   events.js                     Canal SSE y detección de cambios externos
 src/task-manager/             Fuente del frontend (Vue 3, Options API)
   api/tk-client.js              Única frontera fetch del frontend
-  notifications/                Adapter único de Toast Anchor Dark Studio
+  notifications/                Adapter único de Toast Anchor vendorizado
   state/                        Seis mixins sobre una sola instancia Vue
   components/                   Presentación y emisión de intenciones
   styles/                       tokens, layout, components, responsive
@@ -150,7 +150,10 @@ No se crean nuevos registros ODD en `odd/tasks/*.md`: el tablero operativo es tk
 - **Comentarios**: explican *por qué*, no *qué*. Los que documentan decisiones,
   procedencia o trampas de `tk` son valiosos y no deben borrarse.
 - **Sin dependencias de runtime**: si necesita una, justifíquelo en el PRD y en
-  [`architecture.md`](architecture.md). `node:sqlite`, `node:http` y
+  [`architecture.md`](architecture.md). Las librerías de terceros del frontend se
+  vendorizan en `public/vendor/` con su licencia y se importan desde ahí —Vue como
+  global, Toast Anchor dentro del bundle—, de modo que `package.json` no declara
+  dependencias de ejecución. `node:sqlite`, `node:http` y
   `node:child_process` cubren lo que el proyecto necesita.
 - **Nada de red saliente.** El producto es local.
 - **Los artefactos no se editan a mano.** `npm run build` los regenera.
@@ -193,7 +196,7 @@ que recorrerlos a mano. Están en `tests/server/`, fuera del árbol del frontend
 
 ## Evidencia
 
-La suite automatizada contiene 16 archivos y 88 pruebas. El build reproduce los
+La suite automatizada contiene 19 archivos y 95 pruebas. El build reproduce los
 artefactos con hash idéntico a la línea base de la extracción.
 
 No hay log de CI, ni pruebas de navegador, ni cobertura automatizada del

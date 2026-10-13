@@ -267,8 +267,10 @@ ramas principales son:
 Los diálogos de alta y etiquetas reciben borradores inmutables desde la raíz y
 emiten copias actualizadas. `TagPickerField` implementa el contrato estándar
 `modelValue` / `update:modelValue`. `OverflowMenu` es una hoja sin conocimiento
-de dominio. `notifications/toast-anchor.js` es el adapter único de Toast Anchor:
-los componentes no importan la librería directamente.
+de dominio. `notifications/toast-anchor.js` es el adapter único de Toast Anchor,
+que vive vendorizado en `public/vendor/toast-anchor.mjs`: los componentes no
+importan la librería directamente y `package.json` no declara dependencias de
+ejecución (RNF-01).
 
 ### Diálogos modales
 

@@ -83,7 +83,7 @@ data/                    Base del catálogo de etiquetas
 src/task-manager/        Fuente del frontend (Vue 3, Options API, esbuild)
 src/shared/tasks/        Modelo de tarea compartido y utilidades de presentación
 public/task-manager/     Página mantenida a mano y artefactos generados
-public/vendor/           Vue 3.5.41, vendorizado como global
+public/vendor/           Librerías de terceros (Vue 3.5.41 y Toast Anchor 1.0.9)
 tests/task-manager/      Suite de Vitest
 ```
 
@@ -134,6 +134,9 @@ del ciclo de vida de una base que administra un tercero.
   `npm run build`. No se editan a mano: el siguiente build los sobrescribe.
 - `public/vendor/vue.global.prod.js` aporta `globalThis.Vue` antes del bundle, así
   que Vue no entra en el empaquetado.
+- `public/vendor/toast-anchor.mjs` es Toast Anchor 1.0.9 vendorizado con su
+  licencia: esbuild lo incluye dentro de `app-vue.js`, así que `package.json` no
+  declara dependencias de ejecución (RNF-01).
 
 ## Sobre `tk`
 
@@ -180,7 +183,7 @@ git status --short
 
 El build produce `app-vue.js` y `app-vue.css` de forma reproducible. La suite
 cubre el cliente HTTP, el mapper, el árbol, las acciones de estado, el foco de los
-diálogos y la integración del servidor (16 archivos, 88 pruebas).
+diálogos y la integración del servidor (19 archivos, 95 pruebas).
 
 Las de servidor levantan una instancia real sobre una base desechable, así que no
 tocan tus datos. Al probar mutaciones a mano, usa también una copia: `tk` **no

@@ -26,7 +26,7 @@ Las pruebas unitarias no necesitan servidor ni escriben en ninguna base de datos
 La comprobación manual contra el servidor sí opera sobre la base TK configurada:
 use una copia desechable cuando pruebe mutaciones.
 
-La suite contiene 16 archivos y 88 pruebas. La de `dialog-focus.test.js` cubre el
+La suite contiene 19 archivos y 95 pruebas. La de `dialog-focus.test.js` cubre el
 algoritmo de foco de los diálogos, no el montaje de Vue.
 
 ## Mapa del módulo
@@ -60,6 +60,9 @@ colaboran mediante `this`.
   versionados.
 - `public/vendor/vue.global.prod.js` aporta `globalThis.Vue`; Vue no entra en el
   bundle de esbuild.
+- `public/vendor/toast-anchor.mjs` es Toast Anchor 1.0.9 vendorizado con su
+  licencia; esbuild lo incluye en el bundle, así que el proyecto no declara
+  dependencias npm de ejecución (RNF-01).
 
 No edite los artefactos generados. Ejecute `npm run build` y revise que sus
 cambios correspondan a los cambios de fuente.

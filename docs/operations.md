@@ -81,9 +81,9 @@ componentes y responsive.
 
 ## Pruebas automatizadas
 
-La suite vive en `tests/task-manager/` y ejecuta módulos ES directamente.
+La suite vive en `tests/` y ejecuta módulos ES directamente.
 
-Cobertura actual (16 archivos, 88 pruebas):
+Cobertura actual (19 archivos, 95 pruebas):
 
 - **Cliente HTTP**: JSON válido, red, JSON inválido, error HTTP y capacidad TK
   deshabilitada.
@@ -110,11 +110,15 @@ Cobertura actual (16 archivos, 88 pruebas):
   el contrato `modelValue` del selector —incluido que no muta el array que
   recibe— y el foco de los diálogos: que entre al abrirse, envuelva con el
   tabulador y vuelva al cerrarse.
-- **Servidor** (`tests/server/api.test.js`, 13 pruebas de integración): levanta el
+- **Servidor** (`tests/server/api.test.js`, 16 pruebas de integración): levanta el
   servidor de verdad en un puerto libre y sobre una base vacía que `tk` crea sola,
   y recorre el arranque, los estáticos, el bloqueo de rutas, la validación de
   prioridad, el ciclo completo de una tarea, el cruce de `blocked`, el guardián de
   cierre, la coherencia de `close_reason` y la cascada del catálogo de etiquetas.
+- **Guardias del repositorio** (`tests/odd/tk-safe.test.js`,
+  `tests/project/dependencies.test.js`): la escritura en `tk` rechaza estado de Git
+  en notas y comentarios, y `package.json` no declara dependencias de ejecución ni
+  rangos en las de desarrollo (RNF-01).
 
 [`tests/task-manager/helpers/workspace-fixture.js`](../tests/task-manager/helpers/workspace-fixture.js)
 ensambla los mismos mixins en un objeto JavaScript, sin montar Vue ni DOM. Es el
