@@ -38,6 +38,10 @@ El estado de Git no se copia en tk. No se editan las bases SQLite con SQL para
 cambiar tareas: la base de tacks pertenece al binario y se modifica únicamente
 mediante su CLI.
 
+El ciclo correcto empieza en tk: se crea o selecciona la tarea antes de explorar
+o modificar archivos, se marca `in_progress`, se mantienen `notes` y comentarios
+durante el trabajo, y se cierra inmediatamente tras verificar el resultado.
+
 No se crean nuevos registros ODD en archivos Markdown. La base es local y no se
 sincroniza automáticamente entre Windows y WSL; no se levantan dos instancias
 escribiendo sobre la misma base.

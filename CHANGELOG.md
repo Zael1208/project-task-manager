@@ -15,6 +15,10 @@ Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PA
 - **Catálogo inicial de etiquetas adoptado**: `data/task-manager.db` usa el
   nombre elocuente del proyecto y contiene las etiquetas necesarias para el flujo
   ODD, con verificación de las asociaciones de las tareas mediante la API.
+- **Flujo correcto de tk**: antes de explorar o modificar archivos se crea o
+  selecciona la tarea, se marca `in_progress`, se actualizan relevo y evidencias
+  durante el trabajo, y se cierra después de verificar el resultado. El flujo no
+  depende de Engram para conocer el estado.
 - **Delimitación del proyecto para herramientas** (`jsconfig.json`): fija el
   alcance en `src/`, `server/` y `tests/` para que el servidor de lenguaje
   resuelva referencias en todo el repositorio y no solo en los ficheros abiertos.

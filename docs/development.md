@@ -62,10 +62,14 @@ El tablero operativo se consulta desde la raíz con la base explícita:
 ./tk/tk --db tk/.tacks/tacks.db --json list --tag ODD
 ```
 
-Al comenzar un frente, se actualiza su estado y `notes`. Las decisiones y las
-evidencias se añaden como comentarios. Los ADRs de [`decisions/`](decisions/)
-son la fuente durable de las decisiones; tk solo conserva el enlace y el estado
-operativo. No se registran ramas, hashes ni commits en tk.
+El flujo empieza siempre en tk: antes de explorar o modificar archivos se crea o
+selecciona la tarea y se marca `in_progress`. Después se actualiza `notes` cuando
+cambia el relevo, se añaden comentarios con decisiones, bloqueos y evidencias, y
+se cierra inmediatamente después de verificar el resultado. Los ADRs de
+[`decisions/`](decisions/) son la
+fuente durable de las decisiones; tk conserva el estado operativo y sus enlaces.
+No se registran ramas, hashes ni commits en tk. Engram es memoria auxiliar, no el
+relevo normativo del proyecto.
 
 No se crean nuevos registros ODD en `odd/tasks/*.md`: el tablero operativo es tk.
 

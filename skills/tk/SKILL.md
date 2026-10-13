@@ -76,6 +76,21 @@ los requisitos del producto en `PRD.md`.
 No se crean nuevos registros ODD en `odd/tasks/*.md`. Los documentos Markdown
 anteriores, si existieran, serían historia congelada, no el tablero actual.
 
+## Ritmo de actualización
+
+La tarea debe existir y reflejar el estado real mientras se trabaja, no solo al
+final:
+
+1. Crear o seleccionar la tarea tk antes de explorar o modificar archivos.
+2. Marcarla `in_progress` antes de ejecutar la unidad de trabajo.
+3. Actualizar `notes` cuando cambie el relevo o el siguiente paso.
+4. Añadir comentarios cuando aparezcan decisiones, bloqueos o evidencias.
+5. Cerrar la tarea inmediatamente después de observar su resultado y sus
+   verificaciones.
+
+Engram puede conservar contexto adicional, pero el relevo operativo debe quedar
+en tk para que el proyecto no dependa de la memoria de una sesión.
+
 ## Trampas verificadas de tk 0.2.4
 
 - La primera subtarea etiqueta automáticamente el padre como `epic`.

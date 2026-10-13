@@ -59,9 +59,12 @@ recibe un único tipo principal (`docs`, `feat`, `fix`, `refactor`, `test`, `sty
 ./tk/tk --db tk/.tacks/tacks.db --json list --tag ODD
 ```
 
-`notes` es el relevo actual; los comentarios conservan peticiones, decisiones y
-evidencias. El estado de Git se consulta con Git y no se copia en tk. No se crean
-nuevos registros ODD en archivos Markdown.
+El ciclo correcto empieza siempre por crear o seleccionar la tarea tk, antes de
+explorar o modificar archivos, y marcarla `in_progress`. Después es obligatorio
+actualizar `notes` cuando cambie el relevo, añadir comentarios con decisiones y
+evidencias, y cerrarla inmediatamente después de verificar el resultado. El
+estado de Git se consulta con Git y no se copia en tk. No se crean nuevos
+registros ODD en archivos Markdown.
 
 ## Mapa
 
