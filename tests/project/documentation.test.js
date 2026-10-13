@@ -36,6 +36,7 @@ const DOCUMENTADOS = [
 ];
 
 const RECUENTOS = /(?<![\d.,])\d+\s*(?:pruebas|ficheros|archivos|tareas|comentarios|campos|filas|l[ií]neas|lineas|endpoints|rutas)\b/i;
+const RATIOS = /\b\d{1,3}\/\d{1,3}\b(?![\/\d])/;
 const MEDIDAS = /\b\d+(?:[.,]\d+)?\s*(?:B|KB|MB)\b/;
 const HASHES = /\b(?:sha256|sha1|md5)\s*[:=]\s*[0-9a-f]{8,}|\b[0-9a-f]{16,}\b/i;
 const FECHAS = /\b\d{2}\/\d{2}\/\d{4}\b|\b\d{4}-\d{2}-\d{2}\b/;
@@ -75,7 +76,7 @@ describe('documentación: documentos normativos sin estado ni medidas', () => {
       const encontrados = lineasDe(documento)
         .filter((l) => !l.enBloque)
         .flatMap((l) => [
-          ...[RECUENTOS, MEDIDAS, HASHES, FECHAS]
+          ...[RECUENTOS, RATIOS, MEDIDAS, HASHES, FECHAS]
             .filter((patron) => patron.test(l.texto))
             .map((patron) => `${documento}:${l.numero} [${patron.source.slice(0, 40)}]`)
         ]);
