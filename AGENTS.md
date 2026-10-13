@@ -29,7 +29,7 @@ Contrato completo: `CONTRATO_FLUJO_GIT_VERSIONADO.md`.
 
 | Comando | Qué hace | Nota |
 |---|---|---|
-| `npm test` | suite de vitest (96 pruebas, 19 ficheros) | bajo el sandbox de DSH necesita permiso ampliado: vitest lanza workers con tuberías y falla con `EPERM` en `spawn` |
+| `npm test` | suite de vitest (99 pruebas, 19 ficheros) | bajo el sandbox de DSH necesita permiso ampliado: vitest lanza workers con tuberías y falla con `EPERM` en `spawn` |
 | `npm run build` | esbuild → `public/task-manager/app-vue.js` y `.css` | los artefactos están **versionados**: si el build los cambia, se versionan con el cambio |
 | `npm run server` | servidor local en el 8890 | `npm run dev` lo arranca con `--watch` |
 
@@ -63,9 +63,12 @@ El ciclo correcto empieza siempre por crear o seleccionar la tarea tk, antes de
 explorar o modificar archivos, y marcarla `in_progress`. Después es obligatorio
 actualizar `notes` cuando cambie el relevo, añadir comentarios con decisiones y
 evidencias, y cerrarla inmediatamente después de verificar el resultado. El
-estado de Git se consulta con Git y no se copia en tk. Para escribir en tk se usa
-`npm run odd:tk -- ...`; la guardia rechaza hashes, ramas y operaciones de Git en
-notas, comentarios y descripciones. No se crean nuevos
+estado de Git se consulta con Git y no se copia en tk; el estado del proceso de
+revisión tampoco, porque vive en el almacén del revisor. El tablero registra el
+trabajo y su evidencia funcional, no el ciclo de vida de Git ni el de la
+revisión. Para escribir en tk se usa
+`npm run odd:tk -- ...`; la guardia rechaza ese estado en títulos, notas,
+comentarios y descripciones. No se crean nuevos
 registros ODD en archivos Markdown.
 
 ## Mapa

@@ -34,9 +34,18 @@ El trabajo operativo del proyecto vive en tk. Todo frente ODD lleva la etiqueta
 desde comentarios de tk. `notes` conserva el relevo actual y los comentarios
 conservan peticiones y evidencias.
 
-El estado de Git no se copia en tk. No se editan las bases SQLite con SQL para
-cambiar tareas: la base de tacks pertenece al binario y se modifica únicamente
-mediante su CLI.
+El estado de Git no se copia en tk, y el del proceso de revisión tampoco:
+identificadores de revisión, códigos de parada, presupuestos y dictámenes se
+consultan donde viven, no aquí. El tablero registra el trabajo y su evidencia
+funcional. La guardia de escritura de `../scripts/odd-tk.cjs` rechaza ese estado
+en títulos, notas, comentarios y descripciones.
+
+No se editan las bases SQLite con SQL para cambiar tareas: la base de tacks
+pertenece al binario y se modifica únicamente mediante su CLI. Un saneado puntual
+de los campos de texto, como el que retiró el estado de revisión y los residuos
+de Git, se hace sobre una copia, con copia de seguridad previa y el diff revisado
+campo a campo, y nunca toca el estado, las relaciones ni las prioridades de las
+tareas.
 
 El ciclo correcto empieza en tk: se crea o selecciona la tarea antes de explorar
 o modificar archivos, se marca `in_progress`, se mantienen `notes` y comentarios

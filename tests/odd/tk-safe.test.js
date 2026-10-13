@@ -30,4 +30,31 @@ describe('guardia de escritura ODD para tk', () => {
     });
     expect(validateCommand('comment', ['tk-1', 'sha256:0123456789abcdef'])).toMatchObject({ ok: false });
   });
+
+  it('rechaza estado del proceso de revisión', () => {
+    const prohibidos = [
+      'RDD pendiente sobre la unidad',
+      'lineage review-91d73a1cfa9d28c1',
+      'bloqueado por lens_context_budget_exceeded',
+      'estado correction_required con lentes capturadas',
+      'veredicto final del proveedor',
+      'cabe en el presupuesto de contexto nativo',
+      'dividir el cambio en candidatos menores'
+    ];
+
+    for (const texto of prohibidos) {
+      expect(findForbiddenMetadata([texto]), texto).not.toEqual([]);
+    }
+  });
+
+  it('permite describir el trabajo sin hablar del proceso de revisión', () => {
+    expect(validateCommand('comment', [
+      'tk-1',
+      'El cambio se divide en unidades menores; suite 19/96 y comprobación del repositorio correctas.'
+    ])).toEqual({ ok: true, message: '' });
+  });
+
+  it('revisa también el título de una tarea nueva', () => {
+    expect(textValuesForCommand('create', ['RDD pendiente', '-p', '1', '-d', 'Trabajo normal'])).toContain('RDD pendiente');
+  });
 });

@@ -83,7 +83,7 @@ componentes y responsive.
 
 La suite vive en `tests/` y ejecuta módulos ES directamente.
 
-Cobertura actual (19 archivos, 96 pruebas):
+Cobertura actual (19 archivos, 99 pruebas):
 
 - **Cliente HTTP**: JSON válido, red, JSON inválido, error HTTP y capacidad TK
   deshabilitada.
@@ -116,8 +116,10 @@ Cobertura actual (19 archivos, 96 pruebas):
   prioridad, el ciclo completo de una tarea, el cruce de `blocked`, el guardián de
   cierre, la coherencia de `close_reason` y la cascada del catálogo de etiquetas.
 - **Guardias del repositorio** (`tests/odd/tk-safe.test.js`,
-  `tests/project/dependencies.test.js`): la escritura en `tk` rechaza estado de Git
-  en notas y comentarios; `package.json` no declara dependencias de ejecución en
+  `tests/project/dependencies.test.js`): la escritura en `tk` rechaza el estado de
+  Git y el del proceso de revisión —hashes, ramas, identificadores de revisión,
+  códigos de parada, presupuestos y dictámenes— en títulos, notas y comentarios;
+  `package.json` no declara dependencias de ejecución en
   ninguna de sus secciones (RNF-01), ni rangos en las de desarrollo; y el fichero
   vendorizado de Toast Anchor expone la API que usa el adaptador.
 

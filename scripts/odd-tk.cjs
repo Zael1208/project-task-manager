@@ -10,12 +10,22 @@ const TK_BIN = process.platform === "win32" ? path.join(PROJECT_ROOT, "tk", "tk.
 const MUTATING_COMMANDS = new Set(["create", "update", "close", "comment"]);
 
 const FORBIDDEN_METADATA = [
+  // Estado de Git: vive en Git.
   /\bsha256:[0-9a-f]{16,64}\b/i,
   /\b(?:commit|branch|head)\b/i,
   /\bgit\s+(?:status|diff|log|show|switch|checkout)\b/i,
   /\b(?:push|merge)\b/i,
   /(?:árbol|tree)\s+(?:limpio|sucio|clean|dirty)/i,
-  /\bsin\s+(?:push|merge)\b/i
+  /\bsin\s+(?:push|merge)\b/i,
+  // Estado del proceso de revisión: vive en el almacén del revisor.
+  /\brdd\b/i,
+  /\blineage\b|review-[0-9a-f]{4,}/i,
+  /lens_context_budget\w*/i,
+  /correction_required|captured_lens|verdict|veredicto/i,
+  /presupuesto\s+(?:de\s+contexto|nativo)/i,
+  /\bcandidat\w+/i,
+  // Residuos de la limpieza anterior de estado de Git.
+  /unidad de trabajo registrada|sin unidad de trabajo/i
 ];
 
 function findForbiddenMetadata(values) {
@@ -29,17 +39,27 @@ function findForbiddenMetadata(values) {
   return [...new Set(findings)];
 }
 
+// El título de una tarea y el cuerpo de un comentario son posicionales, no
+// opciones: si no se miran, el estado prohibido entra por ellos.
+const OPTIONS_WITH_VALUE = [
+  "--notes", "-c", "--comment", "-d", "--description", "--title",
+  "-p", "--priority", "-t", "--tags", "--parent", "--assignee",
+  "--add-tags", "--remove-tags", "--status"
+];
+const TEXT_OPTIONS = ["--notes", "-c", "--comment", "-d", "--description", "--title"];
+
 function textValuesForCommand(command, args) {
   if (!MUTATING_COMMANDS.has(command)) return [];
   const values = [];
   for (let index = 0; index < args.length; index += 1) {
     const argument = args[index];
-    if (["--notes", "-c", "--comment", "-d", "--description"].includes(argument)) {
-      if (args[index + 1]) values.push(args[index + 1]);
+    if (OPTIONS_WITH_VALUE.includes(argument)) {
+      if (TEXT_OPTIONS.includes(argument) && args[index + 1]) values.push(args[index + 1]);
       index += 1;
+      continue;
     }
+    if (!argument.startsWith("-")) values.push(argument);
   }
-  if (["create", "comment"].includes(command) && args.at(-1) && !args.at(-1).startsWith("-")) values.push(args.at(-1));
   return values;
 }
 
@@ -48,7 +68,7 @@ function validateCommand(command, args) {
   if (findings.length) {
     return {
       ok: false,
-      message: `tk write rejected: Git state is not allowed in tk text (${findings.join(", ")}).`
+      message: `tk write rejected: repository or review state is not allowed in tk text (${findings.join(", ")}).`
     };
   }
   return { ok: true, message: "" };
