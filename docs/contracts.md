@@ -139,7 +139,8 @@ copian arrays de etiquetas.
 
 ## Cliente HTTP
 
-Todos los métodos usan JSON y rutas relativas al mismo origen. 19 endpoints.
+Todos los métodos usan JSON y rutas relativas al mismo origen. Hay 19 endpoints
+HTTP JSON y un canal SSE (`/api/events`) documentado abajo.
 
 | Método del cliente | HTTP | Ruta | Cuerpo |
 |---|---|---|---|
@@ -155,6 +156,21 @@ Todos los métodos usan JSON y rutas relativas al mismo origen. 19 endpoints.
 | `createTag(tag)` | POST | `/api/tags` | `TagDraft` |
 | `updateTag(name, tag)` | PUT | `/api/tags/:name` | `TagDraft` |
 | `deleteTag(name)` | DELETE | `/api/tags/:name` | Ninguno |
+
+### Eventos SSE
+
+La interfaz abre `EventSource('/api/events')`. El servidor mantiene la conexión
+abierta y publica el evento `workspace.changed` después de cada mutación HTTP
+confirmada por esta aplicación:
+
+```text
+event: workspace.changed
+data: {"resource":"tasks"|"tags"}
+```
+
+El cliente vuelve a consultar `/api/tk/list` y `/api/tags` cuando recibe el evento.
+No se observan cambios externos realizados directamente con el CLI `tk` y la
+reconexión la gestiona el comportamiento nativo de `EventSource`.
 
 Endpoints adicionales que la interfaz todavía no consume, disponibles para
 paneles y futuras vistas:
@@ -241,10 +257,9 @@ todos los controles que consultan `busy(key)`.
 | `TaskRow` | Una tarea enriquecida y funciones visuales | Selección, expansión, campo y menú |
 | `TaskInspector` | `taskInspectorProps`, cinco `v-model` y borradores | Un evento `action` más actualizaciones de modelos |
 | `NewTaskDialog` | Borrador, tareas, etiquetas y busy | `update-draft`, `submit`, `close` |
-| `TagManagerDrawer` | Catálogo, formulario, confirmación y busy | Intenciones CRUD y copias del borrador |
+| `TagManagerDrawer` | Catálogo, formulario y busy | Intenciones CRUD y copias del borrador |
 | `TagPickerField` | `modelValue`, catálogo y colores | `update:modelValue` con un array nuevo |
 | `OverflowMenu` | Apertura e items | `toggle` y `select(item.id)` |
-| `Toast` | Mensaje | Ninguna |
 
 `TaskList` es un intermediario: no cambia los argumentos de `TaskRow`, salvo
 que reemite los eventos de varios argumentos de forma explícita.

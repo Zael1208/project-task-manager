@@ -75,7 +75,7 @@ escriben el mismo `this`.
 | Mixin | Propiedad principal | Colabora con |
 |---|---|---|
 | `workspace-data.js` | Estado inicial y fábricas de borradores | Base de todos |
-| `ui.js` | Errores, busy, toast, menús, teclado y etiquetas visuales | Todos los casos de uso |
+| `ui.js` | Errores, notificaciones, busy, menús, teclado y etiquetas visuales | Todos los casos de uso |
 | `task-tree.js` | Mapeo jerárquico, filtros, selección y props del listado | Datos, UI y etiquetas |
 | `task-actions.js` | Carga, detalle y mutaciones de tareas | API, mapper, UI y borradores |
 | `tag-actions.js` | Catálogo y CRUD de etiquetas | Mutación común, árbol y UI |
@@ -86,8 +86,9 @@ pero la colaboración real se resuelve sobre la instancia combinada. Antes de
 renombrar un método o dato hay que buscar su uso en todos los mixins y en
 `app-shell.js`.
 
-El ciclo de vida raíz registra `Escape`, lanza `reloadWorkspace()` al montar y
-retira el listener al desmontar.
+El ciclo de vida raíz registra `Escape`, abre `EventSource('/api/events')` y lanza
+`reloadWorkspace()` al montar. Al desmontar cierra el EventSource y retira el
+listener.
 
 ## Servidor
 
@@ -100,7 +101,8 @@ retira el listener al desmontar.
 Antes de enrutar se comprueba si `tk` está disponible; si no lo está, cualquier
 ruta `/api/tk/*` o `/api/tags*` responde 404 con el mensaje exacto que el cliente
 reconoce como capacidad no disponible. La interfaz se sigue sirviendo, para que
-el usuario vea el aviso y no una página rota.
+el usuario vea el aviso y no una página rota. `GET /api/events` es la excepción:
+abre el canal SSE del proceso HTTP y no necesita consultar `tk` al conectarse.
 
 Los ficheros estáticos se resuelven contra `public/` comprobando la ruta
 resuelta y, si el archivo existe, también su ruta real: así un enlace simbólico
@@ -112,6 +114,11 @@ tampoco permite escapar del directorio.
 |---|---|---|
 | `tk/.tacks/tacks.db` | Tareas, dependencias, comentarios | El binario `tk` |
 | `data/task-manager.db` | Catálogo de etiquetas: nombre, descripción, color | Este servidor |
+
+`events.js` mantiene las conexiones SSE activas y publica `workspace.changed`
+con `{ resource: 'tasks' | 'tags' }` después de mutaciones HTTP confirmadas.
+No observa escrituras externas del CLI `tk`; `EventSource` se encarga de reintentar
+la conexión del cliente.
 
 Se mantienen separadas a propósito. `tk` no tiene concepto de color ni de
 descripción de etiqueta, y su base la administra un tercero: no conviene que
@@ -159,7 +166,8 @@ se lee `tacks.db` por otra vía, ahí estará. La API es la que no lo propaga.
 6. Normaliza todas las tareas con `mapTask()`.
 7. Conserva `preferredId` si sigue existiendo; en otro caso selecciona la
    primera tarea o deja la selección vacía.
-8. Expande los padres presentes y carga el detalle de la selección.
+8. Conserva los padres expandidos y colapsados que siguen presentes, y carga el
+   detalle de la selección.
 9. Solo la petición vigente puede retirar `loading` y `refreshing`.
 
 Durante una recarga se mantienen visibles los últimos datos confirmados. La
@@ -188,8 +196,8 @@ Todas las escrituras de tareas y etiquetas pasan por
 
 ```text
 comprobar busy -> marcar busy -> ejecutar escritura
-  -> recargar workspace -> confirmar toast o explicar recarga fallida
-  -> retirar busy
+  -> servidor publica workspace.changed -> recargar workspace
+  -> confirmar notificación o explicar recarga fallida -> retirar busy
 ```
 
 La mutación no aplica cambios optimistas. La API confirma primero y la UI vuelve
@@ -215,7 +223,8 @@ correspondiente. No serializan operaciones con claves diferentes.
 búsqueda normalizada. `visibleTasks` reconstruye el recorrido padre-hijo:
 
 - sin filtros solo visita descendientes de padres expandidos;
-- con cualquier filtro visita todos los descendientes y agrega solo las tareas
+- con cualquier filtro visita descendientes para encontrar coincidencias, salvo
+  los padres que el usuario ha colapsado explícitamente, y agrega solo las tareas
   que cumplen el filtro;
 - una tarea padre que no cumple el filtro no se agrega automáticamente por
   tener un hijo coincidente.
@@ -249,8 +258,9 @@ ramas principales son:
 
 Los diálogos de alta y etiquetas reciben borradores inmutables desde la raíz y
 emiten copias actualizadas. `TagPickerField` implementa el contrato estándar
-`modelValue` / `update:modelValue`. `OverflowMenu` y `Toast` son hojas sin
-conocimiento de dominio.
+`modelValue` / `update:modelValue`. `OverflowMenu` es una hoja sin conocimiento
+de dominio. `notifications/toast-anchor.js` es el adapter único de Toast Anchor:
+los componentes no importan la librería directamente.
 
 ### Diálogos modales
 

@@ -19,8 +19,10 @@ server/                       Servidor Node: API y ficheros estáticos
   tags.js                       Handlers de /api/tags* y base de etiquetas
   tk.js                         Única frontera con el CLI tk
   http.js                       Utilidades HTTP compartidas
+  events.js                     Canal SSE y difusión de cambios confirmados
 src/task-manager/             Fuente del frontend (Vue 3, Options API)
   api/tk-client.js              Única frontera fetch del frontend
+  notifications/                Adapter único de Toast Anchor Dark Studio
   state/                        Seis mixins sobre una sola instancia Vue
   components/                   Presentación y emisión de intenciones
   styles/                       tokens, layout, components, responsive

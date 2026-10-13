@@ -83,7 +83,7 @@ componentes y responsive.
 
 La suite vive en `tests/task-manager/` y ejecuta módulos ES directamente.
 
-Cobertura actual (12 archivos, 77 pruebas):
+Cobertura actual (16 archivos, 82 pruebas):
 
 - **Cliente HTTP**: JSON válido, red, JSON inválido, error HTTP y capacidad TK
   deshabilitada.
@@ -93,6 +93,9 @@ Cobertura actual (12 archivos, 77 pruebas):
   jerarquías cíclicas, que si no desaparecerían del listado.
 - **Acciones**: selección tras recarga, descarte de respuestas obsoletas, busy,
   normalización de prioridad y mutación confirmada con recarga fallida.
+- **SSE** (`server/api.test.js`, `state/workspace.test.js`): canal de eventos para
+  mutaciones confirmadas de tareas y etiquetas, recarga del workspace y cierre del
+  `EventSource`.
 - **Foco de diálogos** (`components/dialog-focus.test.js`): entrar guardando el
   origen, devolver el foco al cerrar, no devolverlo a un elemento que ya no está
   en la página, filtrar los elementos no visibles y envolver el tabulador en los
@@ -100,13 +103,13 @@ Cobertura actual (12 archivos, 77 pruebas):
 - **Estado de la interfaz** (`state/ui.test.js`) y **despacho del inspector**
   (`state/inspector.test.js`): el diccionario busy no acumula claves y una acción
   desconocida avisa en vez de no hacer nada.
-- **Componentes** (`tests/task-manager/components/`, 30 pruebas): **montan Vue de
+- **Componentes** (`tests/task-manager/components/`): **montan Vue de
   verdad** sobre jsdom y comprueban el sobre `action` llegando a su destino, los
   cinco `v-model` del inspector, los eventos de intención del gestor de etiquetas,
   el contrato `modelValue` del selector —incluido que no muta el array que
   recibe— y el foco de los diálogos: que entre al abrirse, envuelva con el
   tabulador y vuelva al cerrarse.
-- **Servidor** (`tests/server/api.test.js`, 11 pruebas de integración): levanta el
+- **Servidor** (`tests/server/api.test.js`, 13 pruebas de integración): levanta el
   servidor de verdad en un puerto libre y sobre una base vacía que `tk` crea sola,
   y recorre el arranque, los estáticos, el bloqueo de rutas, la validación de
   prioridad, el ciclo completo de una tarea, el cruce de `blocked`, el guardián de

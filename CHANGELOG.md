@@ -12,6 +12,11 @@ Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PA
 - **Flujo ODD operativo en tk**: el trabajo entre sesiones se registra en la base
   local de tk con la etiqueta `ODD`; los ADRs en `docs/decisions/` son la fuente
   durable de las decisiones y no se crean nuevos registros ODD en Markdown.
+- **Actualización local mediante SSE**: el servidor publica `workspace.changed`
+  después de mutaciones HTTP confirmadas y la interfaz recarga tareas y etiquetas
+  mediante `EventSource`, sin observar cambios externos del CLI `tk`.
+- **Notificaciones y confirmaciones Dark Studio**: la interfaz adopta Toast Anchor
+  para éxitos, errores y confirmaciones, con `toast.modal()` para eliminar etiquetas.
 - **Catálogo inicial de etiquetas adoptado**: `data/task-manager.db` usa el
   nombre elocuente del proyecto y contiene las etiquetas necesarias para el flujo
   ODD, con verificación de las asociaciones de las tareas mediante la API.
@@ -42,6 +47,9 @@ Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PA
 
 ### Cambiado
 
+- **Árbol y selector de tareas**: el plegado explícito se conserva en todas las
+  pestañas y recargas, y los botones de filtros, expansión, etiquetas y gestión de
+  etiquetas exponen tooltips `title` coherentes.
 - **La página sirve el build de producción de Vue** (`vue.global.prod.js`) en vez
   del de desarrollo: la carga útil pasa de 591 KB a 166 KB y desaparecen los avisos
   de desarrollo. El build de desarrollo se conserva en `public/vendor/` para

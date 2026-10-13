@@ -126,8 +126,9 @@ Queda explícitamente **fuera del alcance** de este PRD:
   local con Node. El escritorio queda como evolución posterior no comprometida.
 - **NO-5** — Sincronización, multiusuario, cuentas, permisos o acceso remoto. El
   producto es local y de un solo usuario.
-- **NO-6** — Editor colaborativo o en tiempo real. La recarga se hace por
-  consulta, no por websockets.
+- **NO-6** — Editor colaborativo o en tiempo real. La recarga de datos sigue
+  haciéndose por consulta; una señal SSE local solo dispara esa consulta después
+  de mutaciones HTTP confirmadas y no observa cambios externos del CLI `tk`.
 - **NO-7** — Resolver los riesgos heredados TM-R1 a TM-R7 **durante la extracción**
   (sección 16). Se documentan y se planifican, no se mezclan con el traslado. Una
   vez cerrada la extracción sí se han abordado los dos de prioridad alta, TM-R1 y

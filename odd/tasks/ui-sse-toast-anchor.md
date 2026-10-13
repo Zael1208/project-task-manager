@@ -1,6 +1,6 @@
 # ODD: UI, SSE y Toast Anchor
 Objetivo: corregir el plegado, añadir tooltips, actualizar mediante SSE y adoptar Toast Anchor para notificaciones y confirmaciones.
-Rama: `feature/ui-sse-toast-anchor` · Estrategia: `ask-on-risk` · Runner: `npm test`
+Rama: `feature/ui-sse-toast-anchor` · Estrategia: `feature-branch-chain` · Runner: `npm test`
 
 ## Specs
 
@@ -13,8 +13,8 @@ Rama: `feature/ui-sse-toast-anchor` · Estrategia: `ask-on-risk` · Runner: `npm
 
 - **T1** — S1-S2 · inline · done · commit `f2187b8`. Corregir plegado en todas las pestañas y añadir `title` a los botones del selector; pruebas de estado y componentes en GREEN.
 - **T2** — S3 · inline · done · commit `503a04c`. Diseñar e implementar SSE en server y cliente; probar stream, eventos y recarga segura. La reconexión queda a cargo del comportamiento nativo de `EventSource`.
-- **T3** — S4 · inline · done · commit pendiente de registrar. Integrar Toast Anchor con tema Dark Studio para toasts y confirmaciones; probar variantes y cancelación.
-- **T4** — S1-S4 · inline · pending · commit pendiente. Actualizar documentación, CHANGELOG y artefactos de build; ejecutar suite, build y verificación final.
+- **T3** — S4 · inline · done · commit `574e604`. Integrar Toast Anchor con tema Dark Studio para toasts y confirmaciones; probar variantes y cancelación.
+- **T4** — S1-S4 · inline · done · commit pendiente de registrar. Actualizar documentación, CHANGELOG y artefactos de build; ejecutar suite, build y verificación final.
 
 ## Log
 
@@ -33,4 +33,6 @@ Rama: `feature/ui-sse-toast-anchor` · Estrategia: `ask-on-risk` · Runner: `npm
 - **L5** — El usuario decidió: “Solo cambios de esta aplicación”. SSE emitirá eventos después de mutaciones HTTP confirmadas por este servidor y no observará cambios externos del CLI `tk` en esta unidad.
 - **L6** — T1 RED observado con `npx vitest run tests/task-manager/state/task-tree.test.js tests/task-manager/state/task-actions.test.js`: fallaron el plegado filtrado y la conservación de un colapso tras recarga. Tras añadir `collapsedIds`, respetar el estado explícito y añadir tooltips, GREEN observado con `npx vitest run tests/task-manager/components/task-filters.test.js tests/task-manager/state/task-tree.test.js tests/task-manager/state/task-actions.test.js`: 3 ficheros, 15 pruebas correctas. Commit: `f2187b8`.
 - **L7** — T2 RED observado con `npx vitest run tests/server/api.test.js tests/task-manager/state/workspace.test.js`: `/api/events` devolvía 404 y no existía la conexión EventSource. GREEN observado después con 2 ficheros y 14 pruebas correctas: el stream publica `workspace.changed` para tareas y etiquetas, y el cliente recarga y cierra el EventSource correctamente. La selección y las respuestas obsoletas siguen protegidas por `reloadRequestSequence`. Commit: `503a04c`.
-- **L8** — T3 RED observado porque no existía el adapter Toast Anchor. GREEN observado con `npx vitest run tests/task-manager/notifications/toast-anchor.test.js tests/task-manager/components/tag-manager-drawer.test.js tests/task-manager/state/tag-actions.test.js tests/task-manager/state/ui.test.js tests/task-manager/state/task-actions.test.js`: 5 ficheros, 21 pruebas correctas. `npm run build` también terminó correctamente; la confirmación local y su CSS fueron retirados.
+- **L8** — T3 RED observado porque no existía el adapter Toast Anchor. GREEN observado con `npx vitest run tests/task-manager/notifications/toast-anchor.test.js tests/task-manager/components/tag-manager-drawer.test.js tests/task-manager/state/tag-actions.test.js tests/task-manager/state/ui.test.js tests/task-manager/state/task-actions.test.js`: 5 ficheros, 21 pruebas correctas. `npm run build` también terminó correctamente; la confirmación local y su CSS fueron retirados. Commit: `574e604`.
+- **L9** — Para el acumulado superior a 400 líneas, el usuario eligió `feature-branch-chain`: mantener los commits como una cadena revisable en `feature/ui-sse-toast-anchor`; no hacer merge ni push.
+- **L10** — T4 documental verificado: `npm test` terminó con 16 ficheros y 82 pruebas correctas; `npm run build` regeneró correctamente los artefactos públicos; `git diff --check` y los diagnósticos VS Code no reportaron errores. Documentación actualizada en CHANGELOG.md, PRD.md, docs/architecture.md, docs/contracts.md, docs/development.md y docs/operations.md.
