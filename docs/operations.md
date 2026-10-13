@@ -83,7 +83,7 @@ componentes y responsive.
 
 La suite vive en `tests/` y ejecuta módulos ES directamente.
 
-Cobertura actual (19 archivos, 95 pruebas):
+Cobertura actual (19 archivos, 96 pruebas):
 
 - **Cliente HTTP**: JSON válido, red, JSON inválido, error HTTP y capacidad TK
   deshabilitada.
@@ -117,8 +117,9 @@ Cobertura actual (19 archivos, 95 pruebas):
   cierre, la coherencia de `close_reason` y la cascada del catálogo de etiquetas.
 - **Guardias del repositorio** (`tests/odd/tk-safe.test.js`,
   `tests/project/dependencies.test.js`): la escritura en `tk` rechaza estado de Git
-  en notas y comentarios, y `package.json` no declara dependencias de ejecución ni
-  rangos en las de desarrollo (RNF-01).
+  en notas y comentarios; `package.json` no declara dependencias de ejecución en
+  ninguna de sus secciones (RNF-01), ni rangos en las de desarrollo; y el fichero
+  vendorizado de Toast Anchor expone la API que usa el adaptador.
 
 [`tests/task-manager/helpers/workspace-fixture.js`](../tests/task-manager/helpers/workspace-fixture.js)
 ensambla los mismos mixins en un objeto JavaScript, sin montar Vue ni DOM. Es el

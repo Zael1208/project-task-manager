@@ -29,7 +29,7 @@ Contrato completo: `CONTRATO_FLUJO_GIT_VERSIONADO.md`.
 
 | Comando | Qué hace | Nota |
 |---|---|---|
-| `npm test` | suite de vitest (95 pruebas, 19 ficheros) | bajo el sandbox de DSH necesita permiso ampliado: vitest lanza workers con tuberías y falla con `EPERM` en `spawn` |
+| `npm test` | suite de vitest (96 pruebas, 19 ficheros) | bajo el sandbox de DSH necesita permiso ampliado: vitest lanza workers con tuberías y falla con `EPERM` en `spawn` |
 | `npm run build` | esbuild → `public/task-manager/app-vue.js` y `.css` | los artefactos están **versionados**: si el build los cambia, se versionan con el cambio |
 | `npm run server` | servidor local en el 8890 | `npm run dev` lo arranca con `--watch` |
 

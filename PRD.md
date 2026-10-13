@@ -571,7 +571,7 @@ comportamiento se puede cambiar sin tocar código.
 | Lectura end-to-end | Verificada | Desde `tk/`, `tk.exe --json list -a` devuelve 30 tareas (15 abiertas o en curso, 15 cerradas) |
 | Build del frontend | Verificado | `npm run build` → `app-vue.js` (74.258 B) y `app-vue.css` (44.103 B) con **hash idéntico** a los artefactos del origen |
 | Línea base vigente de artefactos | Registrada | `app-vue.js` (78.845 B) `AFDA142F…4524`; `app-vue.css` (44.103 B) `7A0D1A69…F38B7`, sin cambios porque no se ha tocado ningún estilo. Sustituye a la línea base de la extracción: el frontend ya ha divergido a propósito. |
-| Suite de pruebas | Verificada | `vitest run` → 19 archivos, 95 pruebas, todas en verde |
+| Suite de pruebas | Verificada | `vitest run` → 19 archivos, 96 pruebas, todas en verde |
 | Foco de los diálogos (TM-R11) | Verificado | Algoritmo cubierto por 10 pruebas; el cableado de Vue se verificó en navegador el 19/09/2026: el foco entra, el tabulador no se escapa y vuelve al control de origen. Sin prueba que lo proteja de una regresión (TM-R4). |
 | Validación de prioridad (QA-2, D-13) | Verificada | Rechazados con 400: 5, −1, 99, 4, «abc» y 1,5. Aceptados 0, 1, 2 y 3. `update` con 7, rechazado. |
 | Coherencia de `close_reason` (QA-3, D-14) | Verificada | Tarea cerrada y reabierta: la API devuelve `null` en la respuesta, en `show` y en `list`, mientras `tk` conserva `done` en la base. |
@@ -579,7 +579,7 @@ comportamiento se puede cambiar sin tocar código.
 | Sin regresión en el backlog real | Verificado | 30 tareas, 23 etiquetas y los mismos conteos por estado que antes de los cambios. |
 | TM-R1 y TM-R2 (QA-7) | Verificados | Una prueba por riesgo en `task-actions.test.js`. **Ambas se comprobó que fallan sin el arreglo**: con el código anterior, 2 fallos; con el arreglo, todas en verde. |
 | TM-R3, TM-R5, TM-R6 y TM-R7 | Verificados | Cinco pruebas nuevas. **Se comprobó que fallan sin los arreglos**: 5 fallos con el código anterior. |
-| TM-R8 | Verificado | Las pruebas de integración levantan el servidor real en un puerto libre y sobre una base desechable. La suite completa pasa: 19 archivos, 95 pruebas. |
+| TM-R8 | Verificado | Las pruebas de integración levantan el servidor real en un puerto libre y sobre una base desechable. La suite completa pasa: 19 archivos, 96 pruebas. |
 | Servidor (F6) | Verificado | 19 endpoints ejercitados: 8 de lectura de tareas, 6 de escritura, 5 de etiquetas. Incluye creación, edición con diff de etiquetas, comentario, dependencia, retirada de dependencia, reparentado, promoción a raíz, reclamación y cierre. |
 | Estado "blocked" cruzado (RF-11) | Verificado | Con un bloqueante abierto, `/api/tk/list` devuelve la tarea como `blocked` aunque `tk` la guarde como `open`; al retirarlo vuelve a su estado real. |
 | Guardián de cierre (RN-05) | Verificado | Cerrar una tarea con hijas abiertas devuelve el error de `tk` y **no** se reintenta con `--force`; la tarea permanece abierta. |
@@ -646,7 +646,7 @@ sobre el proyecto antiguo, fuera del alcance de este PRD.
 ### 15.2 Técnicos
 
 - [ ] **CA-13** `package.json` no declara ninguna dependencia de runtime.
-- [ ] **CA-14** `npm test` pasa: 19 archivos, 95 pruebas.
+- [ ] **CA-14** `npm test` pasa: 19 archivos, 96 pruebas.
 - [ ] **CA-15** `npm run build` regenera los artefactos sin diferencias inesperadas.
 - [ ] **CA-16** No hay ningún `fetch(` fuera de `api/tk-client.js`.
 - [ ] **CA-17** El proyecto no tiene acoplamiento de ejecución con el anfitrión: ninguna variable de entorno, ruta ni módulo de ChatVoiceAgent participa en el arranque. Se verifican solo las menciones en código y comentarios; las de la documentación se resuelven en F9.
