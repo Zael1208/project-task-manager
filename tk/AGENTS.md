@@ -19,9 +19,9 @@ Los comandos se ejecutan desde la raíz y llevan siempre salida JSON y base
 explícita:
 
 ```bash
-./tk/tk --db tk/.tacks/tacks.db --json stats
-./tk/tk --db tk/.tacks/tacks.db --json ready --limit 1
-./tk/tk --db tk/.tacks/tacks.db --json list --tag ODD
+npm run odd:tk -- stats
+npm run odd:tk -- ready --limit 1
+npm run odd:tk -- list --tag ODD
 ```
 
 La interfaz del gestor se arranca desde la raíz con `npm run server` y queda en

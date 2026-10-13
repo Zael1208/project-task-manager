@@ -19,12 +19,13 @@ al PRD, a la documentación estable ni a Engram.
 | Catálogo de etiquetas | `data/task-manager.db` — no se versiona |
 | Vista | `npm run server`, en el puerto 8890 |
 
-Se invoca siempre con `--json` y `--db` explícito:
+Las consultas y escrituras pasan por la guardia `odd:tk`, que conserva `--json` y
+`--db` explícito y rechaza estado de Git en textos de tk:
 
 ```bash
-./tk/tk --db tk/.tacks/tacks.db --json stats
-./tk/tk --db tk/.tacks/tacks.db --json ready --limit 1
-./tk/tk --db tk/.tacks/tacks.db --json list --tag ODD
+npm run odd:tk -- stats
+npm run odd:tk -- ready --limit 1
+npm run odd:tk -- list --tag ODD
 ```
 
 ## Etiquetas
@@ -46,12 +47,8 @@ también `epic`. Cada tarea recibe además un único tipo principal:
 Ejemplos:
 
 ```bash
-./tk/tk --db tk/.tacks/tacks.db --json create \
-  -t ODD,epic,chore \
-  "Nombre del frente"
-./tk/tk --db tk/.tacks/tacks.db --json create \
-  -t ODD,docs --parent tk-XXXX \
-  "Nombre de la subtarea"
+npm run odd:tk -- create -t ODD,epic,chore "Nombre del frente"
+npm run odd:tk -- create -t ODD,docs --parent tk-XXXX "Nombre de la subtarea"
 ```
 
 ## Qué se registra

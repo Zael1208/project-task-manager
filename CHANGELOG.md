@@ -27,6 +27,9 @@ Las versiones se publican desde `main` con una etiqueta anotada `vMAJOR.MINOR.PA
   selecciona la tarea, se marca `in_progress`, se actualizan relevo y evidencias
   durante el trabajo, y se cierra después de verificar el resultado. El flujo no
   depende de Engram para conocer el estado.
+- **Guardia de escritura ODD para tk**: `npm run odd:tk` centraliza las escrituras
+  y rechaza hashes, ramas y operaciones de Git en notas, comentarios y
+  descripciones; las consultas Git permanecen fuera del tablero operativo.
 - **Delimitación del proyecto para herramientas** (`jsconfig.json`): fija el
   alcance en `src/`, `server/` y `tests/` para que el servidor de lenguaje
   resuelva referencias en todo el repositorio y no solo en los ficheros abiertos.

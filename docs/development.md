@@ -49,7 +49,7 @@ Lectura recomendada, en este orden:
    para cargas y escrituras del frontend.
 7. [`known-risks.md`](known-risks.md) antes de ampliar comportamiento.
 8. [`operations.md`](operations.md) antes de entregar.
-9. `./tk/tk --db tk/.tacks/tacks.db --json stats` y `ready --limit 1` para conocer el trabajo ODD actual.
+9. `npm run odd:tk -- stats` y `npm run odd:tk -- ready --limit 1` para conocer el trabajo ODD actual.
 
 Con esa secuencia se comprende el núcleo sin leer primero las plantillas largas
 ni el CSS.
@@ -59,9 +59,9 @@ ni el CSS.
 El tablero operativo se consulta desde la raíz con la base explícita:
 
 ```bash
-./tk/tk --db tk/.tacks/tacks.db --json stats
-./tk/tk --db tk/.tacks/tacks.db --json ready --limit 1
-./tk/tk --db tk/.tacks/tacks.db --json list --tag ODD
+npm run odd:tk -- stats
+npm run odd:tk -- ready --limit 1
+npm run odd:tk -- list --tag ODD
 ```
 
 El flujo empieza siempre en tk: antes de explorar o modificar archivos se crea o
@@ -70,10 +70,20 @@ cambia el relevo, se añaden comentarios con decisiones, bloqueos y evidencias, 
 se cierra inmediatamente después de verificar el resultado. Los ADRs de
 [`decisions/`](decisions/) son la
 fuente durable de las decisiones; tk conserva el estado operativo y sus enlaces.
-No se registran ramas, hashes ni commits en tk. Engram es memoria auxiliar, no el
+No se registran ramas, hashes ni commits en tk. Las escrituras pasan por
+`npm run odd:tk -- ...`, que rechaza estado de Git en textos. Engram es memoria auxiliar, no el
 relevo normativo del proyecto.
 
 No se crean nuevos registros ODD en `odd/tasks/*.md`: el tablero operativo es tk.
+
+### Guardas de proceso
+
+- Las escrituras en tk pasan por `npm run odd:tk -- ...`; la guardia rechaza
+  hashes, ramas y operaciones de Git en textos operativos.
+- El estado de Git se verifica únicamente con Git y solo se comunica en el
+  informe de cierre, no se copia en tk.
+- RDD es una revisión acotada: un bloqueo de contexto o un coste desproporcionado
+  detiene la revisión y requiere una decisión explícita antes de reintentarla.
 
 ## Cómo realizar un cambio
 

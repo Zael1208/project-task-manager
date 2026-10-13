@@ -54,16 +54,18 @@ recibe un único tipo principal (`docs`, `feat`, `fix`, `refactor`, `test`, `sty
 `improvement` o `chore`).
 
 ```bash
-./tk/tk --db tk/.tacks/tacks.db --json stats
-./tk/tk --db tk/.tacks/tacks.db --json ready --limit 1
-./tk/tk --db tk/.tacks/tacks.db --json list --tag ODD
+npm run odd:tk -- stats
+npm run odd:tk -- ready --limit 1
+npm run odd:tk -- list --tag ODD
 ```
 
 El ciclo correcto empieza siempre por crear o seleccionar la tarea tk, antes de
 explorar o modificar archivos, y marcarla `in_progress`. Después es obligatorio
 actualizar `notes` cuando cambie el relevo, añadir comentarios con decisiones y
 evidencias, y cerrarla inmediatamente después de verificar el resultado. El
-estado de Git se consulta con Git y no se copia en tk. No se crean nuevos
+estado de Git se consulta con Git y no se copia en tk. Para escribir en tk se usa
+`npm run odd:tk -- ...`; la guardia rechaza hashes, ramas y operaciones de Git en
+notas, comentarios y descripciones. No se crean nuevos
 registros ODD en archivos Markdown.
 
 ## Mapa

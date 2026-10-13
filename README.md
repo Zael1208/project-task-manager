@@ -26,9 +26,9 @@ Proyecto en construcci√≥n. Los requisitos, el alcance y el estado funcional est√
 Para consultar el trabajo ODD actual:
 
 ```bash
-./tk/tk --db tk/.tacks/tacks.db --json stats
-./tk/tk --db tk/.tacks/tacks.db --json ready --limit 1
-./tk/tk --db tk/.tacks/tacks.db --json list --tag ODD
+npm run odd:tk -- stats
+npm run odd:tk -- ready --limit 1
+npm run odd:tk -- list --tag ODD
 ```
 
 Las tareas ODD llevan la etiqueta `ODD`; las decisiones durables se documentan
