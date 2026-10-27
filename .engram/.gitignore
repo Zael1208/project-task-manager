@@ -2,3 +2,4 @@
 # Ignore everything in .engram/ except this file itself, so transient
 *
 !.gitignore
+!config.json

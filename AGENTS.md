@@ -1,86 +1,58 @@
-# PROJECT-TASK-MANAGER — reglas del repositorio
+# AGENTS.md
 
-Reglas que deben valer **en cada turno** dentro de este repositorio. Esto es un
-**router**: el detalle canónico vive en los documentos enlazados y no se copia aquí.
-
-## Flujo de trabajo (contrato vinculante)
-
-Contratos completos: `CONTRATO_FLUJO_GIT_VERSIONADO.md` (Git, CHANGELOG y
-versionado) y `CONTRATO_DOCUMENTACION.md` (qué escribe cada documento y dónde vive
-cada dato).
-
-- **Rama antes de tocar ficheros.** `main` es estable; cada tarea va en una rama
-  `feature/`, `fix/`, `docs/` o `refactor/`. **No se trabaja directamente en `main`.**
-- **Commits pequeños, por intención, en inglés** (`tipo: descripción breve`).
-- **Verificar antes de integrar**: pruebas, compilación, `git status` limpio y
-  `CHANGELOG.md` al día. Se integra con `git merge --no-ff`.
-- **El push y las etiquetas son del usuario.** No hacer `push`.
-- **No crear una etiqueta por tanda de cambios**: lo nuevo se acumula en
-  `[Sin publicar]` del `CHANGELOG.md`.
-- Al terminar, informe breve en el formato de §14 del contrato (rama, cambios,
-  pruebas, commits, integración, CHANGELOG, etiqueta, estado del árbol, no verificado).
-
-- El trabajo ODD operativo se registra en `tk` con la etiqueta `ODD`; las decisiones durables se documentan en `docs/decisions/`.
-
-## Idioma
-
-- Código, comentarios, documentación, `CHANGELOG.md` e interfaz: **español de España**.
-- Mensajes de commit y etiquetas anotadas: **inglés**.
+Gestor de tareas local: servidor Node sin framework que sirve una interfaz Vue 3
+y delega las tareas en el CLI de terceros `tk` (tacks). Todo el texto del repo
+y de los mensajes está en español.
 
 ## Comandos
 
-| Comando | Qué hace | Nota |
-|---|---|---|
-| `npm test` | suite de vitest (`tests/`), con las guardias de dependencias, de tk y de documentación | bajo el sandbox de DSH necesita permiso ampliado: vitest lanza workers con tuberías y falla con `EPERM` en `spawn` |
-| `npm run build` | esbuild → `public/task-manager/app-vue.js` y `.css` | los artefactos están **versionados**: si el build los cambia, se versionan con el cambio |
-| `npm run server` | servidor local en el 8890 | `npm run dev` lo arranca con `--watch` |
-
-## Lo que es petición explícita y no se recorta
-
-Cuando se aplique un criterio de minimalismo —Ponytail u otro— esto **no** está
-sujeto a la tijera:
-
-- **La suite de pruebas** (`vitest` + `jsdom`, con `// @vitest-environment jsdom` en
-  los ficheros de componentes). La lógica nueva añade pruebas **a esa suite**.
-- **El PRD** (`PRD.md`): requisitos RF/RNF y el reparto de módulos del servidor
-  (`server/tk.js`, `server/tasks.js`, `server/tags.js`, `server/http.js`).
-- **La seguridad**: validación en fronteras de confianza, como el control de
-  recorrido de rutas de RF-03 en `server/index.js`.
-- **La documentación pedida** en `docs/`.
-
-## ODD en tk
-
-El tablero operativo del proyecto vive en `tk/.tacks/tacks.db`, que no se versiona.
-Todo frente ODD lleva la etiqueta `ODD`; una épica lleva además `epic` y cada tarea
-recibe un único tipo principal (`docs`, `feat`, `fix`, `refactor`, `test`, `style`,
-`improvement` o `chore`).
-
 ```bash
-npm run odd:tk -- stats
-npm run odd:tk -- ready --limit 1
-npm run odd:tk -- list --tag ODD
+npm ci                      # instalar (no hay node_modules inicial)
+npm run server              # servidor en http://localhost:8890/task-manager/app-vue.html
+npm run dev                 # igual, con --watch
+npm run odd:tk -- stats     # ÚNICA vía válida para invocar el CLI tk
 ```
 
-El ciclo correcto empieza siempre por crear o seleccionar la tarea tk, antes de
-explorar o modificar archivos, y marcarla `in_progress`. Después es obligatorio
-actualizar `notes` cuando cambie el relevo, añadir comentarios con decisiones y
-evidencias, y cerrarla inmediatamente después de verificar el resultado. El
-estado de Git se consulta con Git y no se copia en tk; el estado del proceso de
-revisión tampoco, porque vive en el almacén del revisor. El tablero registra el
-trabajo y su evidencia funcional, no el ciclo de vida de Git ni el de la
-revisión. Para escribir en tk se usa
-`npm run odd:tk -- ...`; la guardia rechaza ese estado en títulos, notas,
-comentarios y descripciones. No se crean nuevos
-registros ODD en archivos Markdown.
+- Puerto por defecto 8890; para otra instancia: `$env:PORT=8891; npm run server`.
+  `PORT=0` elige puerto libre (lo usan las pruebas de integración).
+- **`npm test`, `npm run build` y `npm run docs:check` fallan hoy**: este checkout
+  no contiene `src/` ni `tests/`, a los que esas scripts apuntan. El bundle ya
+  construido está en `public/task-manager/app-vue.js`; no lo regeneres ni lo toques
+  a mano.
 
-El tablero registra **trabajo**: una tarea o una parte de épica. Las **acciones**
-—integrar, retirar una rama, comprobar un cierre— no son tareas y no reciben una
-fila propia: se ven en Git y, como mucho, se anotan como comentario de la tarea a
-la que pertenecen.
+## Estructura
 
-## Mapa
+- `server/index.js` — punto de entrada; rutas en `EXACT_ROUTES`/`PREFIX_ROUTES`.
+- `server/tk.js` — única frontera con el binario `tk/tk.exe`. Envuelve siempre
+  `--db <ruta>` explícito y timeout de 5s.
+- `server/tasks.js` — handlers de `/api/tk/*`. Contrato que no se rompe: los
+  errores de tk se devuelven **HTTP 200 con `{ error }`**, no 4xx/5xx.
+- `server/tags.js` — catálogo de etiquetas en SQLite propio `data/task-manager.db`
+  (vía `node:sqlite`). Es lo único que no depende de tk.
+- `server/events.js` — SSE; los cambios externos de tk se detectan mirando su fichero.
+- `public/` — interfaz y Vue vendorizado. `/` redirige a `/task-manager/app-vue.html`.
 
-`PRD.md` (requisitos, alcance y criterios de aceptación) · `CONTRATO_DOCUMENTACION.md` (dónde vive cada dato) · `tk/.tacks/tacks.db`
-(estado operativo ODD, no versionado) · `docs/architecture.md` · `docs/contracts.md` ·
-`docs/operations.md` · `docs/development.md` · `docs/known-risks.md` · `docs/decisions/` ·
-`CONTRATO_FLUJO_GIT_VERSIONADO.md` · `CHANGELOG.md` · `README.md`
+## Reglas duras
+
+- No editar con SQL ninguna base SQLite de tareas (`tk/.tacks/tacks.db` pertenece
+  al binario): solo por su CLI. `data/task-manager.db` sí es nuestro.
+- Toda llamada a tk pasa por `npm run odd:tk -- ...` con salida JSON y `--db`
+  explícito. Esa guardia (`scripts/odd-tk.cjs`) rechaza texto con estado de Git o
+  de revisión en títulos/notas/comentarios: si tu comando sale con código 64, es
+  el texto el que sobra, no la guardia.
+- Ciclo de trabajo en tk: crear/seleccionar la tarea antes de tocar archivos,
+  `in_progress`, notas durante, cerrar tras verificar. Detalles y trampas del CLI
+  0.2.4 en `skills/tk/SKILL.md`; reglas de la carpeta binaria en `tk/AGENTS.md`.
+- Sin `src/` no hay frontend que desarrollar: si toca cambiar la interfaz, se
+  reconstruye antes el árbol de origen.
+
+## Política de Git, Ramas y Worktrees
+
+- **Épica (`epic`)**: Se desarrolla en un `git worktree` dedicado (ej. `.worktrees/<epic-id>-<slug>/` o ruta externa) para aislar cambios complejos sin contaminar el `main-tree`.
+- **Subtarea de Épica**: Se trabaja en una rama dedicada dentro del worktree de la épica (`feature/<epic-id>/<subtask-id>-<slug>`).
+- **Commits autónomos en worktree**: El agente tiene autonomía para hacer commits en la rama del worktree tras completar y verificar hitos o pasos.
+- **Tarea Single (no épica ni subtarea)**: Se trabaja en una rama creada desde el `main-tree` (`fix/<task-id>-<slug>`, `chore/<task-id>-<slug>`).
+- **Propuesta de commit en Tarea Single**: El agente propone el mensaje de commit y resumen de cambios, pero **NUNCA ejecuta el commit sin aprobación humana previa**.
+- **Prohibido merge de worktree a main-tree sin aprobación humana**.
+- **Prohibido comitear en ramas del main-tree sin aprobación humana**.
+- **Gitflow**: Aplicar ramas `main`, `develop`, `feature/*`, `fix/*`, `chore/*`, `hotfix/*` según corresponda.
